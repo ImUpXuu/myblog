@@ -73,7 +73,10 @@ const bannerOffset =
 ---
 
 <!DOCTYPE html>
-<html lang={siteLang} class="bg-[var(--page-bg)] transition text-[14px] md:text-[16px]"
+<html
+	lang={siteLang}
+	class="bg-[var(--page-bg)] transition text-[14px] md:text-[16px]"
+	style="background-image:url('https://f.xxu6.top/2427/in.jpg');background-position:center;background-repeat:no-repeat;background-size:cover;background-attachment:fixed;"
 	  data-overlayscrollbars-initialize
 >
 	<head>
@@ -101,6 +104,9 @@ const bannerOffset =
 
 		<meta name="viewport" content="width=device-width" />
 		<meta name="generator" content={Astro.generator} />
+		<link rel="dns-prefetch" href="//f.xxu6.top" />
+		<link rel="preconnect" href="https://f.xxu6.top" crossorigin />
+		<link rel="preload" as="image" href="https://f.xxu6.top/2427/in.jpg" />
 		{favicons.map(favicon => (
 			<link rel="icon"
 				  href={favicon.src.startsWith('/') ? url(favicon.src) : favicon.src}
@@ -170,13 +176,6 @@ const bannerOffset =
 	'banner-height-home': `${BANNER_HEIGHT_HOME}vh`,
 	'banner-height': `${BANNER_HEIGHT}vh`,
 }}>
-html {
-	background-image: url("https://f.xxu6.top/2427/in.jpg");
-	background-position: center;
-	background-repeat: no-repeat;
-	background-size: cover;
-	background-attachment: fixed;
-}
 @tailwind components;
 @layer components {
 	.enable-banner.is-home #banner-wrapper {
