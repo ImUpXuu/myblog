@@ -1,9 +1,7 @@
 # About
-This is the demo site for [Fuwari](https://github.com/saicaca/fuwari).
 
-::github{repo="saicaca/fuwari"}
+Hello, I am UpXuu (旭).
 
-> ### Sources of images used in this site
-> - [Unsplash](https://unsplash.com/)
-> - [星と少女](https://www.pixiv.net/artworks/108916539) by [Stella](https://www.pixiv.net/users/93273965)
-> - [Rabbit - v1.4 Showcase](https://civitai.com/posts/586908) by [Rabbit_YourMajesty](https://civitai.com/user/Rabbit_YourMajesty)
+Welcome to my blog! Here I share my thoughts, coding journey, and life experiences.
+
+> "路，谓之“Up”。以“Xuu”为名，逐光而上 ⊹꙳ ˶˙ᵕ˙˶ ⊹꙳"
