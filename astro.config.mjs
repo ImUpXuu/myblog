@@ -1,3 +1,7 @@
+import robots from "astro-robots-txt";
+import compress from "@playform/compress";
+import partytown from "@astrojs/partytown";
+import { BaseSchema } from "@astrolib/seo";
 import sitemap from "@astrojs/sitemap";
 import svelte from "@astrojs/svelte";
 import tailwind from "@astrojs/tailwind";
@@ -99,8 +103,27 @@ export default defineConfig({
 				showCopyToClipboardButton: false,
 			}
 		}),
-        svelte(),
+		partytown({
+			config: {
+				forward: ["dataLayer.push"],
+			},
+		}),
+		svelte(),
 		sitemap(),
+		robots(),
+		compress({
+			CSS: true,
+			HTML: true,
+			HTMLOptions: {
+				removalThreshold: 1024,
+			},
+			Image: true,
+			ImageOptions: {
+				quality: 80,
+				compressionLevel: "auto",
+			},
+			SVG: true,
+		}),
 	],
 	markdown: {
 		remarkPlugins: [
