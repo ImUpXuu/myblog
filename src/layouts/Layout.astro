@@ -19,7 +19,6 @@ import { defaultFavicons } from "../constants/icon";
 import type { Favicon } from "../types/config";
 import { pathsEqual, url } from "../utils/url-utils";
 import "katex/dist/katex.css";
-import { Seo } from "astro-seo";
 
 interface Props {
 	title?: string;
@@ -81,19 +80,6 @@ const bannerOffset =
 	  data-overlayscrollbars-initialize
 >
 	<head>
-		<Seo
-			title={pageTitle}
-			description={description || pageTitle}
-			openGraph={{
-				type: setOGTypeArticle ? "article" : "website",
-				locale: "zh_CN",
-				url: Astro.url,
-				siteName: siteConfig.title,
-			}}
-			twitter={{
-				cardType: "summary_large_image",
-			}}
-		/>
 
 		<title>{pageTitle}</title>
 

@@ -1,4 +1,3 @@
-import seo from "astro-seo";
 import sitemap from "@astrojs/sitemap";
 import svelte from "@astrojs/svelte";
 import tailwind from "@astrojs/tailwind";
@@ -102,21 +101,6 @@ export default defineConfig({
 		}),
         svelte(),
 		sitemap(),
-		seo({
-			title: "UpXuu 旭's Blog",
-			description: "逐光而上",
-			openGraph: {
-				type: "website",
-				locale: "zh_CN",
-				url: "https://upxuu.com/",
-				siteName: "UpXuu 旭's Blog",
-			},
-			twitter: {
-				handle: "@handle",
-				site: "@site",
-				cardType: "summary_large_image",
-			},
-		}),
 	],
 	markdown: {
 		remarkPlugins: [
