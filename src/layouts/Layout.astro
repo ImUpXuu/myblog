@@ -19,7 +19,6 @@ import { defaultFavicons } from "../constants/icon";
 import type { Favicon } from "../types/config";
 import { pathsEqual, url } from "../utils/url-utils";
 import "katex/dist/katex.css";
-import { Schema } from "@astrolib/seo";
 
 interface Props {
 	title?: string;
@@ -105,15 +104,6 @@ const bannerOffset =
 
 		<meta name="viewport" content="width=device-width" />
 		<meta name="generator" content={Astro.generator} />
-		
-		<!-- Schema.org structured data -->
-		<Schema
-			type="WebSite"
-			name={siteConfig.title}
-			description={siteConfig.subtitle}
-			url={Astro.site?.href}
-		/>
-		
 		<link rel="dns-prefetch" href="//f.xxu6.top" />
 		<link rel="preconnect" href="https://f.xxu6.top" crossorigin />
 		<link rel="preload" as="image" href="https://f.xxu6.top/2427/in.jpg" />

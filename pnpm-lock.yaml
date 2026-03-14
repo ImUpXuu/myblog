@@ -26,9 +26,6 @@ importers:
       '@astrojs/tailwind':
         specifier: ^6.0.2
         version: 6.0.2(astro@5.13.10(@types/node@25.0.3)(jiti@1.21.7)(lightningcss@1.32.0)(rollup@2.79.2)(sass@1.80.4)(stylus@0.64.0)(terser@5.46.0)(typescript@5.9.3)(yaml@2.8.2))(tailwindcss@3.4.19(yaml@2.8.2))
-      '@astrolib/seo':
-        specifier: 1.0.0-beta.8
-        version: 1.0.0-beta.8(astro@5.13.10(@types/node@25.0.3)(jiti@1.21.7)(lightningcss@1.32.0)(rollup@2.79.2)(sass@1.80.4)(stylus@0.64.0)(terser@5.46.0)(typescript@5.9.3)(yaml@2.8.2))
       '@expressive-code/core':
         specifier: ^0.41.4
         version: 0.41.4
@@ -263,11 +260,6 @@ packages:
 
   '@astrojs/yaml2ts@0.2.2':
     resolution: {integrity: sha512-GOfvSr5Nqy2z5XiwqTouBBpy5FyI6DEe+/g/Mk5am9SjILN1S5fOEvYK0GuWHg98yS/dobP4m8qyqw/URW35fQ==}
-
-  '@astrolib/seo@1.0.0-beta.8':
-    resolution: {integrity: sha512-SpNycspjcjnz6um4Vph0k+SAKgUib7/8qJRCaaahJD1UfLuXKK7E+bmKbnv8QPBTRPZkQW6zFVaZRl5VvnyDfg==}
-    peerDependencies:
-      astro: ^1.2.1 || ^2.0.0 || ^3.0.0-beta.0 || ^3.0.0 || ^4.0.0 || ^5.0.0-beta.0 || ^5.0.0
 
   '@babel/code-frame@7.27.1':
     resolution: {integrity: sha512-cjQ7ZlQ0Mv3b47hABuTevyTuYN4i+loJKGeV9flcCgIK37cCXRh+L1bd3iBHlynerhQ7BhCkn2BPbQUL+rGqFg==}
@@ -5918,10 +5910,6 @@ snapshots:
   '@astrojs/yaml2ts@0.2.2':
     dependencies:
       yaml: 2.8.2
-
-  '@astrolib/seo@1.0.0-beta.8(astro@5.13.10(@types/node@25.0.3)(jiti@1.21.7)(lightningcss@1.32.0)(rollup@2.79.2)(sass@1.80.4)(stylus@0.64.0)(terser@5.46.0)(typescript@5.9.3)(yaml@2.8.2))':
-    dependencies:
-      astro: 5.13.10(@types/node@25.0.3)(jiti@1.21.7)(lightningcss@1.32.0)(rollup@2.79.2)(sass@1.80.4)(stylus@0.64.0)(terser@5.46.0)(typescript@5.9.3)(yaml@2.8.2)
 
   '@babel/code-frame@7.27.1':
     dependencies:

@@ -1,7 +1,6 @@
 import robots from "astro-robots-txt";
 import compress from "@playform/compress";
 import partytown from "@astrojs/partytown";
-import { BaseSchema } from "@astrolib/seo";
 import sitemap from "@astrojs/sitemap";
 import svelte from "@astrojs/svelte";
 import tailwind from "@astrojs/tailwind";
