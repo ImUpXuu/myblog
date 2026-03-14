@@ -1,3 +1,4 @@
+import { remarkMermaid } from "./src/plugins/remark-mermaid.js";
 import robots from "astro-robots-txt";
 import compress from "@playform/compress";
 import partytown from "@astrojs/partytown";
@@ -133,6 +134,7 @@ export default defineConfig({
 			remarkDirective,
 			remarkSectionize,
 			parseDirectiveNode,
+			remarkMermaid,
 		],
 		rehypePlugins: [
 			rehypeKatex,
