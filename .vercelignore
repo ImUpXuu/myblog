@@ -1,0 +1,3 @@
+# 忽略 public 目录中的图片文件
+public/images/*
+public/images/images/*
