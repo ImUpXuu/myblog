@@ -1,5 +1,7 @@
 ---
+title: "Extalk - 下一代边缘计算评论系统 🚀"
 published: 2026-03-14 17:44:00
+category: "技术"
 ---
 
 # Extalk - 下一代边缘计算评论系统 🚀
@@ -209,13 +211,13 @@ flowchart TD
     subgraph Worker["☁️ Cloudflare Workers"]
         D --> D1[🔒 1. CORS 域名验证]
         D1 --> D2[🔍 2. 查询评论数据 3 次查询 优化 40%]
-      
+    
         subgraph Queries["📊 查询优化"]
             D2 --> Q1[📌 查询① 根评论<br/>部分索引]
             D2 --> Q2[📌 查询② 回复<br/>IN 子查询]
             D2 --> Q3[📌 查询③ 计数 + 统计<br/>CROSS JOIN 合并]
         end
-      
+    
         Q1 --> Q3
         Q2 --> Q3
         Q3 --> D3[📦 3. 合并数据返回 JSON]
@@ -252,14 +254,14 @@ flowchart TD
         E1 --> E2[⚙️ 2. 获取管理员配置]
         E2 --> E3[🌍 3. 获取 IP 和地理位置]
         E3 --> E4[💾 4. 插入评论到数据库]
-      
+    
         E4 --> Trigger[⚡ 触发器自动执行]
-      
+    
         subgraph TriggerBox["🔧 trg_comment_count_insert"]
             Trigger --> T1[📊 UPDATE comment_counts]
             T1 --> T2[🔢 root_count = root_count + 1]
         end
-      
+    
         T2 --> E5[✅ 5. 返回成功响应]
     end
   
@@ -476,14 +478,14 @@ export default {
             commentsDiv.id = 'extalk-comments';
             commentsDiv.style.cssText = 'margin-top: 60px; padding-top: 40px; border-top: 1px solid var(--vp-c-divider); max-width: 1152px; margin: 0 auto; padding: 40px 24px;';
             commentsDiv.innerHTML = '<h2 style="font-size: 1.5rem; margin-bottom: 20px;">💬 评论</h2><div id="extalk-comments-inner" style="margin-top: 20px;"></div>';
-          
+        
             const vpContent = document.getElementById('VPContent');
             if (vpContent) {
               const footer = vpContent.querySelector('.VPFooter');
               if (footer) {
                 footer.parentNode.insertBefore(commentsDiv, footer);
               }
-            
+          
               const script = document.createElement('script');
               script.src = 'https://comment.upxuu.com/sdk.js';
               script.async = true;
@@ -515,7 +517,7 @@ export default {
             commentsDiv.id = 'extalk-comments'
             const vpDoc = document.querySelector('.vp-doc')
             if (vpDoc) vpDoc.appendChild(commentsDiv)
-          
+        
             const script = document.createElement('script')
             script.src = 'https://comment.upxuu.com/sdk.js'
             document.body.appendChild(script)
