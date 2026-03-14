@@ -19,7 +19,6 @@ category: "技术"
 - 🎭 **三种加载模式** - 分页/无限滚动/加载更多
 
 > 📜 **开源协议**：本项目采用 [CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/) 协议，允许自由使用、修改和分享，但**禁止商业用途**。
->
 
 <div align="center">
 
@@ -37,7 +36,6 @@ category: "技术"
 </div>
 
 ---
-
 
 ## 📖 目录
 
@@ -476,14 +474,14 @@ export default {
             commentsDiv.id = 'extalk-comments';
             commentsDiv.style.cssText = 'margin-top: 60px; padding-top: 40px; border-top: 1px solid var(--vp-c-divider); max-width: 1152px; margin: 0 auto; padding: 40px 24px;';
             commentsDiv.innerHTML = '<h2 style="font-size: 1.5rem; margin-bottom: 20px;">💬 评论</h2><div id="extalk-comments-inner" style="margin-top: 20px;"></div>';
-      
+    
             const vpContent = document.getElementById('VPContent');
             if (vpContent) {
               const footer = vpContent.querySelector('.VPFooter');
               if (footer) {
                 footer.parentNode.insertBefore(commentsDiv, footer);
               }
-        
+      
               const script = document.createElement('script');
               script.src = 'https://comment.upxuu.com/sdk.js';
               script.async = true;
@@ -515,7 +513,7 @@ export default {
             commentsDiv.id = 'extalk-comments'
             const vpDoc = document.querySelector('.vp-doc')
             if (vpDoc) vpDoc.appendChild(commentsDiv)
-      
+    
             const script = document.createElement('script')
             script.src = 'https://comment.upxuu.com/sdk.js'
             document.body.appendChild(script)
@@ -794,7 +792,7 @@ npm run dev
 
 ## 📄 开源协议
 
-本项目基于 **MIT License** 开源。
+本项目基于 [CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/)开源。
 
 ---
 
