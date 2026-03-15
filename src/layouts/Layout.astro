@@ -6,13 +6,9 @@ import "@fontsource/roboto/700.css";
 import ConfigCarrier from "@components/ConfigCarrier.astro";
 import { profileConfig, siteConfig } from "@/config";
 import {
-	AUTO_MODE,
 	BANNER_HEIGHT,
 	BANNER_HEIGHT_EXTEND,
 	BANNER_HEIGHT_HOME,
-	DARK_MODE,
-	DEFAULT_THEME,
-	LIGHT_MODE,
 	PAGE_WIDTH,
 } from "../constants/constants";
 import { defaultFavicons } from "../constants/icon";
@@ -116,23 +112,9 @@ const bannerOffset =
 		))}
 
 		<!-- Set the theme before the page is rendered to avoid a flash -->
-		<script is:inline define:vars={{DEFAULT_THEME, LIGHT_MODE, DARK_MODE, AUTO_MODE, BANNER_HEIGHT_EXTEND, PAGE_WIDTH, configHue}}>
-			// Load the theme from local storage
-			const theme = localStorage.getItem('theme') || DEFAULT_THEME;
-			switch (theme) {
-				case LIGHT_MODE:
-					document.documentElement.classList.remove('dark');
-					break
-				case DARK_MODE:
-					document.documentElement.classList.add('dark');
-					break
-				case AUTO_MODE:
-					if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
-						document.documentElement.classList.add('dark');
-					} else {
-						document.documentElement.classList.remove('dark');
-					}
-			}
+		<script is:inline define:vars={{BANNER_HEIGHT_EXTEND, PAGE_WIDTH, configHue}}>
+			// Always use light mode
+			document.documentElement.classList.remove('dark');
 
 			// Load the hue from local storage
 			const hue = localStorage.getItem('hue') || configHue;
@@ -290,8 +272,7 @@ setClickOutsideToClose("search-panel", ["search-panel", "search-bar", "search-sw
 
 
 function loadTheme() {
-	const theme = getStoredTheme()
-	setTheme(theme)
+	// Always use light mode, do nothing
 }
 
 function loadHue() {
