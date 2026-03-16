@@ -23,13 +23,24 @@ A static blog template built with [Astro](https://astro.build).
 
 - [x] Built with [Astro](https://astro.build) and [Tailwind CSS](https://tailwindcss.com)
 - [x] Smooth animations and page transitions
-- [x] Light / dark mode
+- [x] Light / dark mode (default to light mode only)
 - [x] Customizable theme colors & banner
 - [x] Responsive design
 - [x] Search functionality with [Pagefind](https://pagefind.app/)
 - [x] [Markdown extended features](https://github.com/saicaca/fuwari?tab=readme-ov-file#-markdown-extended-syntax)
 - [x] Table of contents
 - [x] RSS feed
+
+## 🎨 Theme Configuration
+
+To change the default theme mode, edit `src/constants/constants.ts`:
+
+```typescript
+export const DEFAULT_THEME = LIGHT_MODE; // Options: LIGHT_MODE, DARK_MODE
+```
+
+- `LIGHT_MODE`: Always use light mode (default)
+- `DARK_MODE`: Always use dark mode
 
 ## 🚀 Getting Started
 

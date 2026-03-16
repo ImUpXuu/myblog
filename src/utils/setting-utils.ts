@@ -27,9 +27,15 @@ export function setHue(hue: number): void {
 	r.style.setProperty("--hue", String(hue));
 }
 
-export function applyThemeToDocument(_theme: LIGHT_DARK_MODE) {
-	// Always use light mode
-	document.documentElement.classList.remove("dark");
+export function applyThemeToDocument(theme: LIGHT_DARK_MODE) {
+	switch (theme) {
+		case LIGHT_MODE:
+			document.documentElement.classList.remove("dark");
+			break;
+		case DARK_MODE:
+			document.documentElement.classList.add("dark");
+			break;
+	}
 
 	// Set the theme for Expressive Code
 	document.documentElement.setAttribute(
@@ -38,12 +44,11 @@ export function applyThemeToDocument(_theme: LIGHT_DARK_MODE) {
 	);
 }
 
-export function setTheme(_theme: LIGHT_DARK_MODE): void {
-	// Always use light mode, do nothing
-	localStorage.setItem("theme", LIGHT_MODE);
-	applyThemeToDocument(LIGHT_MODE);
+export function setTheme(theme: LIGHT_DARK_MODE): void {
+	localStorage.setItem("theme", theme);
+	applyThemeToDocument(theme);
 }
 
 export function getStoredTheme(): LIGHT_DARK_MODE {
-	return LIGHT_MODE;
+	return (localStorage.getItem("theme") as LIGHT_DARK_MODE) || DEFAULT_THEME;
 }

@@ -12,14 +12,15 @@ rainbow-dark = linear-gradient(to right, oklch(0.70 0.10 0), oklch(0.70 0.10 30)
   --radius-large 1rem
   --content-delay 150ms
 
-/* Define variables - light mode only */
+/* An util to define variables that vary with light and dark mode */
 define(vars)
   :root
     for key, value in vars
-      if typeof(value) == 'string'
-        {key}: value
-      else
-        {key}: value[0]
+      {key}: value[0]
+  :root.dark
+    for key, value in vars
+      if length(value) > 1
+        {key}: value[1]
 
 define({
   --primary: oklch(0.70 0.14 var(--hue)) oklch(0.75 0.14 var(--hue))
