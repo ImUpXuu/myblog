@@ -1,6 +1,26 @@
 {
   "redirects": [
     {
+      "source": "/posts/:path*",
+      "destination": "/posts/:path*",
+      "permanent": false
+    },
+    {
+      "source": "/about",
+      "destination": "/about",
+      "permanent": false
+    },
+    {
+      "source": "/archive",
+      "destination": "/archive",
+      "permanent": false
+    },
+    {
+      "source": "/rss.xml",
+      "destination": "/rss.xml",
+      "permanent": false
+    },
+    {
       "source": "/:slug",
       "destination": "/posts/:slug",
       "permanent": true

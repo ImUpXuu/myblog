@@ -1,38 +1,25 @@
 # Redirects from old WordPress URLs to new Fuwari structure
 
-# Specific post redirects (if needed for high-traffic posts)
-# /old-url  /posts/new-url  301
+# IMPORTANT: Redirects are processed in order. 
+# Existing files shadow redirects unless forced with '!'
+# We need to exclude sitemap and special paths first
 
-# General catch-all for root-level posts
-# If a user visits /my-post, redirect them to /posts/my-post
-# Note: This might conflict with other root pages like /about, /archive, so we should be careful.
-# But since Fuwari's other pages are static, we can try this rule at the end.
+# Exclude sitemap files (must come before the catch-all redirect)
+/sitemap-index.xml  /sitemap-index.xml  200
+/posts/sitemap-index.xml  /posts/sitemap-index.xml  200
+/sitemap.xml  /sitemap.xml  200
+/posts/sitemap.xml  /posts/sitemap.xml  200
+
+# Exclude static assets
+/assets/*  /assets/:splat  200
+/images/*  /images/:splat  200
+/fonts/*  /fonts/:splat  200
+
+# Exclude static pages that exist at root
+/about  /about  200
+/archive  /archive  200
+/rss.xml  /rss.xml  200
 
 # Redirect root-level article URLs to /posts/
-# This assumes your old WordPress structure was just /article-slug
-# We can't easily distinguish between a 404 and a valid old post in a static redirect file without listing them all.
-# However, if we know for sure that all old posts are now under /posts/, we can try to redirect.
-
-# Strategy:
-# Since we can't wildcard match "everything that isn't an existing page", 
-# the best SEO practice for migration is to explicitly list the old URLs.
-# But for a quick fix, if you visit /some-slug and it's not found, maybe we can redirect to /posts/some-slug?
-# Netlify doesn't support "redirect on 404" easily in that way (it supports custom 404 pages).
-
-# Let's try a splat redirect for non-existing files?
-# No, that's dangerous.
-
-# BETTER APPROACH:
-# If you visit /:slug and it doesn't exist, try /posts/:slug
-# /*  /posts/:splat  301!
-# The '!' means "force", which we DON'T want. We only want to redirect if the content doesn't exist at root.
-# Netlify processes redirects in order. Existing files shadow redirects unless forced.
-# So:
+# This catches old WordPress URLs like /my-post and redirects to /posts/my-post
 /*  /posts/:splat  301
-
-# Wait, if I do /* -> /posts/:splat, then /about -> /posts/about (404).
-# Because /about exists, it should be served?
-# Netlify documentation says: "If a file exists at the path, it is served, unless the redirect is forced (!)."
-# So `/* /posts/:splat 301` should work for pages that DON'T exist at root (like your old articles).
-
-# Let's test this.
