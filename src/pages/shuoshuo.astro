@@ -1,25 +1,16 @@
 ---
 import MainGridLayout from "../layouts/MainGridLayout.astro";
-import I18nKey from "../i18n/i18nKey";
-import { i18n } from "../i18n/translation";
 ---
 
 <MainGridLayout title="碎碎念" description="upxuu 的碎碎念">
+    <script slot="head" src="https://comment.upxuu.com/sdk.js" defer></script>
     <div class="flex w-full rounded-[var(--radius-large)] overflow-hidden relative min-h-32">
         <div class="card-base z-10 px-9 py-6 relative w-full">
             <h3 class="text-2xl font-bold mb-4">upxuu 的碎碎念</h3>
             <h4 class="text-xl mb-6">那年的那些往事</h4>
             
-            <!-- 评论 SDK 挂载位置 -->
-            <div id="comment-sdk-container" class="comment-sdk-wrapper">
-                <!-- 评论 SDK 将在这里渲染 -->
-            </div>
+            <!-- 评论 SDK 挂载容器 -->
+            <div id="extalk-comments"></div>
         </div>
     </div>
 </MainGridLayout>
-
-<style>
-.comment-sdk-wrapper {
-    min-height: 200px;
-}
-</style>
