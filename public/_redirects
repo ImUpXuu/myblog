@@ -18,6 +18,7 @@
 # Exclude static pages that exist at root
 /about  /about  200
 /archive  /archive  200
+/shuoshuo  /shuoshuo  200
 /rss.xml  /rss.xml  200
 
 # Redirect root-level article URLs to /posts/
