@@ -28,12 +28,16 @@ async function fetchPostStats() {
     const apiUrl = 'https://comment.upxuu.com';
     const postCards = document.querySelectorAll('[data-post-url]');
     
+    console.log('Found', postCards.length, 'post cards');
+    
     for (const card of postCards) {
         const pageUrl = card.getAttribute('data-post-url');
         if (!pageUrl) continue;
         
         try {
             const response = await fetch(`${apiUrl}/comments?url=${encodeURIComponent(pageUrl)}`);
+            console.log('Fetching stats for', pageUrl, 'Status:', response.status);
+            
             if (response.ok) {
                 const data = await response.json();
                 
@@ -53,6 +57,10 @@ async function fetchPostStats() {
     }
 }
 
-// 页面加载时获取统计数据
-fetchPostStats();
+// 等待 DOM 加载完成后获取统计数据
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', fetchPostStats);
+} else {
+    fetchPostStats();
+}
 </script>
