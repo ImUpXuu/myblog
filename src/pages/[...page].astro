@@ -63,10 +63,11 @@ if (document.readyState === 'loading') {
     fetchPostStats();
 }
 
-// Swup 页面切换后重新获取统计数据
+// Swup 页面切换后重新获取统计数据 - 使用 content:replaced hook
 if (window.swup) {
-    window.swup.hooks.on('page:view', () => {
-        fetchPostStats();
+    window.swup.hooks.on('content:replaced', () => {
+        console.log('Swup content replaced, fetching homepage stats...');
+        setTimeout(fetchPostStats, 100);
     });
 }
 </script>
