@@ -158,14 +158,14 @@ const jsonLd = {
 
 </MainGridLayout>
 
-<script data-swup-reload-script>
+<script>
 // 获取页面访问量和点赞数
 async function fetchPostStats() {
     const pageUrl = window.location.pathname;
     const apiUrl = 'https://comment.upxuu.com';
     
     try {
-        const response = await fetch(`${apiUrl}/comments?url=${encodeURIComponent(pageUrl)}`);
+        const response = await fetch(`${apiUrl}/page-stats?url=${encodeURIComponent(pageUrl)}`);
         if (response.ok) {
             const data = await response.json();
             const viewsElement = document.getElementById('post-views');
@@ -175,7 +175,7 @@ async function fetchPostStats() {
                 viewsElement.textContent = data.views || 0;
             }
             if (likesElement) {
-                likesElement.textContent = data.page_likes || 0;
+                likesElement.textContent = data.likes || 0;
             }
         }
     } catch (error) {
@@ -184,5 +184,16 @@ async function fetchPostStats() {
 }
 
 // 页面加载时获取统计数据
-fetchPostStats();
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', fetchPostStats);
+} else {
+    fetchPostStats();
+}
+
+// Swup 页面切换后重新获取统计数据
+if (window.swup) {
+    window.swup.hooks.on('page:view', () => {
+        fetchPostStats();
+    });
+}
 </script>
