@@ -69,6 +69,21 @@ const jsonLd = {
                         {remarkPluginFrontmatter.minutes} {" " + i18n(remarkPluginFrontmatter.minutes === 1 ? I18nKey.minuteCount : I18nKey.minutesCount)}
                     </div>
                 </div>
+                <!-- 访问量和点赞数 -->
+                <div class="flex flex-row items-center gap-4">
+                    <div class="flex flex-row items-center">
+                        <div class="transition h-6 w-6 rounded-md bg-black/5 dark:bg-white/10 text-black/50 dark:text-white/50 flex items-center justify-center mr-2">
+                            <Icon name="material-symbols:visibility-outline-rounded"></Icon>
+                        </div>
+                        <div class="text-sm"><span id="post-views">-</span></div>
+                    </div>
+                    <div class="flex flex-row items-center">
+                        <div class="transition h-6 w-6 rounded-md bg-black/5 dark:bg-white/10 text-black/50 dark:text-white/50 flex items-center justify-center mr-2">
+                            <Icon name="material-symbols:favorite-outline-rounded"></Icon>
+                        </div>
+                        <div class="text-sm"><span id="post-likes">-</span></div>
+                    </div>
+                </div>
             </div>
 
             <!-- title -->
@@ -142,3 +157,32 @@ const jsonLd = {
     </div>
 
 </MainGridLayout>
+
+<script>
+// 获取页面访问量和点赞数
+async function fetchPostStats() {
+    const pageUrl = window.location.pathname;
+    const apiUrl = 'https://comment.upxuu.com';
+    
+    try {
+        const response = await fetch(`${apiUrl}/comments?url=${encodeURIComponent(pageUrl)}`);
+        if (response.ok) {
+            const data = await response.json();
+            const viewsElement = document.getElementById('post-views');
+            const likesElement = document.getElementById('post-likes');
+            
+            if (viewsElement) {
+                viewsElement.textContent = data.views || 0;
+            }
+            if (likesElement) {
+                likesElement.textContent = data.page_likes || 0;
+            }
+        }
+    } catch (error) {
+        console.error('Failed to fetch post stats:', error);
+    }
+}
+
+// 页面加载时获取统计数据
+fetchPostStats();
+</script>
