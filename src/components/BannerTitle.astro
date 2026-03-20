@@ -4,10 +4,14 @@
 
 <div class="banner-title-container">
     <h1 class="banner-main-title">
-        <span class="typing-text" data-text="UpXuu's Blog"></span>
+        <span class="typing-wrapper">
+            <span class="typing-text" id="title-typing"></span><span class="cursor" id="title-cursor">|</span>
+        </span>
     </h1>
     <h2 class="banner-subtitle">
-        <span class="typing-text" data-text="Life, Study and... upxu and you"></span>
+        <span class="typing-wrapper">
+            <span class="typing-text" id="subtitle-typing"></span><span class="cursor" id="subtitle-cursor">|</span>
+        </span>
     </h2>
 </div>
 
@@ -30,7 +34,11 @@
     color: #ffffff;
     text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.6);
     margin: 0;
-    display: inline-block;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 1.2em;
+    line-height: 1.3;
 }
 
 .banner-subtitle {
@@ -39,25 +47,30 @@
     color: #ffffff;
     text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.6);
     margin-top: 0.5rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 1.2em;
+    line-height: 1.3;
+}
+
+.typing-wrapper {
     display: inline-block;
+    position: relative;
+    max-width: 100%;
 }
 
 .typing-text {
+    display: inline;
+    word-break: break-word;
+}
+
+.cursor {
     display: inline-block;
-    position: relative;
-}
-
-.typing-text::after {
-    content: '|';
-    position: absolute;
-    right: -8px;
     color: #ffffff;
+    font-weight: 300;
     animation: blink 1s step-end infinite;
-}
-
-.typing-text.typing-complete::after {
-    animation: none;
-    opacity: 0;
+    margin-left: 2px;
 }
 
 @keyframes blink {
@@ -69,35 +82,66 @@
     }
 }
 
-/* 移动端优化 */
+/* 移动端优化 - 使用 vh 单位确保在可视区域内 */
 @media (max-width: 768px) {
     .banner-title-container {
-        top: 45%;
         padding: 0 15px;
+        top: 40vh;
+        transform: translate(-50%, 0);
     }
     
     .banner-main-title {
-        font-size: clamp(1.5rem, 8vw, 2.5rem);
+        font-size: clamp(1.5rem, 7vw, 2.5rem);
     }
     
     .banner-subtitle {
-        font-size: clamp(0.9rem, 4vw, 1.2rem);
-        margin-top: 0.3rem;
+        font-size: clamp(0.9rem, 4vw, 1.1rem);
+        margin-top: 0.5rem;
     }
 }
 
+/* 小屏幕进一步优化 */
 @media (max-width: 480px) {
     .banner-title-container {
-        top: 40%;
+        top: 35vh;
+    }
+    
+    .banner-main-title {
+        font-size: clamp(1.3rem, 8vw, 2rem);
+    }
+    
+    .banner-subtitle {
+        font-size: clamp(0.8rem, 5vw, 1rem);
+    }
+}
+
+/* 超小屏幕 */
+@media (max-width: 360px) {
+    .banner-title-container {
+        top: 30vh;
+        padding: 0 10px;
+    }
+    
+    .banner-main-title {
+        font-size: clamp(1.2rem, 9vw, 1.8rem);
+    }
+    
+    .banner-subtitle {
+        font-size: clamp(0.75rem, 5vw, 0.9rem);
     }
 }
 </style>
 
 <script>
-// 打字机效果
-function typeWriter(element, text, speed = 100, callback?) {
-    let i = 0;
+// 打字机效果函数
+function typeWriter(elementId, cursorId, text, speed = 100, callback?) {
+    const element = document.getElementById(elementId);
+    const cursor = document.getElementById(cursorId);
+    
+    if (!element || !cursor) return;
+    
     element.textContent = '';
+    let i = 0;
     
     const type = () => {
         if (i < text.length) {
@@ -112,42 +156,51 @@ function typeWriter(element, text, speed = 100, callback?) {
     type();
 }
 
-// 初始化
-function init() {
-    const elements = document.querySelectorAll('.typing-text');
-    if (elements.length < 2) return;
+// 初始化动画
+function initAnimation() {
+    const titleText = "UpXuu's Blog";
+    const subtitleText = "Life, Study and... upxu and you";
     
-    const titleEl = elements[0];
-    const subtitleEl = elements[1];
-    const titleText = titleEl.getAttribute('data-text') || '';
-    const subtitleText = subtitleEl.getAttribute('data-text') || '';
+    // 先隐藏光标
+    const cursors = document.querySelectorAll('.cursor');
+    cursors.forEach(cursor => {
+        cursor.style.opacity = '0';
+    });
     
-    // 标题动画
+    // 延迟后开始标题动画
     setTimeout(() => {
-        typeWriter(titleEl, titleText, 150, () => {
-            titleEl.classList.add('typing-complete');
-            
-            // 副标题动画
+        // 显示标题光标
+        const titleCursor = document.getElementById('title-cursor');
+        if (titleCursor) {
+            titleCursor.style.opacity = '1';
+        }
+        
+        typeWriter('title-typing', 'title-cursor', titleText, 150, () => {
+            // 标题完成后，延迟开始副标题
             setTimeout(() => {
-                typeWriter(subtitleEl, subtitleText, 150, () => {
-                    subtitleEl.classList.add('typing-complete');
-                });
+                // 显示副标题光标
+                const subtitleCursor = document.getElementById('subtitle-cursor');
+                if (subtitleCursor) {
+                    subtitleCursor.style.opacity = '1';
+                }
+                
+                typeWriter('subtitle-typing', 'subtitle-cursor', subtitleText, 150);
             }, 500);
         });
     }, 500);
 }
 
-// DOM 加载完成
+// 页面加载时执行
 if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', init);
+    document.addEventListener('DOMContentLoaded', initAnimation);
 } else {
-    init();
+    initAnimation();
 }
 
-// Swup 支持
+// Swup 页面切换后重新执行动画
 if (window.swup) {
     window.swup.hooks.on('page:view', () => {
-        init();
+        initAnimation();
     });
 }
 </script>
