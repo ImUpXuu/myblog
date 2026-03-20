@@ -4,12 +4,14 @@
 
 <div class="banner-title-container">
     <h1 class="banner-main-title">
-        <span class="typing-text" data-text="UpXuu's Blog"></span>
-        <span class="cursor">|</span>
+        <span class="typing-wrapper">
+            <span class="typing-text" id="title-typing"></span><span class="cursor" id="title-cursor">|</span>
+        </span>
     </h1>
     <h2 class="banner-subtitle">
-        <span class="typing-text" data-text="Life, Study and... upxu and you"></span>
-        <span class="cursor">|</span>
+        <span class="typing-wrapper">
+            <span class="typing-text" id="subtitle-typing"></span><span class="cursor" id="subtitle-cursor">|</span>
+        </span>
     </h2>
 </div>
 
@@ -23,40 +25,47 @@
     z-index: 10;
     width: 100%;
     padding: 0 20px;
+    box-sizing: border-box;
 }
 
 .banner-main-title {
-    font-size: clamp(2.5rem, 8vw, 5rem);
+    font-size: clamp(2rem, 6vw, 4rem);
     font-weight: 700;
     color: #ffffff;
     text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.6);
     margin: 0;
-    min-height: 1.2em;
     display: flex;
     justify-content: center;
     align-items: center;
+    min-height: 1.2em;
 }
 
 .banner-subtitle {
-    font-size: clamp(1.2rem, 4vw, 2rem);
+    font-size: clamp(1rem, 3vw, 1.5rem);
     font-weight: 400;
     color: #ffffff;
     text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.6);
-    margin-top: 1rem;
-    min-height: 1.2em;
+    margin-top: 0.5rem;
     display: flex;
     justify-content: center;
     align-items: center;
+    min-height: 1.2em;
 }
 
-.typing-text::after {
-    content: '';
+.typing-wrapper {
+    display: inline-block;
+    position: relative;
+}
+
+.typing-text {
+    display: inline;
 }
 
 .cursor {
     display: inline-block;
     color: #ffffff;
-    animation: blink 1s infinite;
+    font-weight: 300;
+    animation: blink 1s step-end infinite;
     margin-left: 2px;
 }
 
@@ -69,91 +78,100 @@
     }
 }
 
-/* 打字机效果动画 */
-@keyframes typing {
-    from {
-        width: 0;
-    }
-    to {
-        width: 100%;
-    }
-}
-
-.typing-text {
-    display: inline-block;
-    overflow: hidden;
-    white-space: nowrap;
-    animation: typing 3.5s steps(40, end);
-    max-width: 100%;
-}
-
-.banner-subtitle .typing-text {
-    animation-delay: 4s;
-    animation-duration: 4s;
-}
-
 /* 移动端优化 */
 @media (max-width: 768px) {
     .banner-title-container {
         padding: 0 15px;
+        top: 45%;
     }
     
-    .typing-text {
-        animation-duration: 2.5s;
+    .banner-main-title {
+        font-size: clamp(1.5rem, 8vw, 2.5rem);
     }
     
-    .banner-subtitle .typing-text {
-        animation-delay: 3s;
-        animation-duration: 3s;
+    .banner-subtitle {
+        font-size: clamp(0.9rem, 4vw, 1.2rem);
+        margin-top: 0.3rem;
+    }
+}
+
+/* 小屏幕进一步优化 */
+@media (max-width: 480px) {
+    .banner-title-container {
+        top: 40%;
     }
 }
 </style>
 
 <script>
-// 打字机效果
-document.addEventListener('DOMContentLoaded', () => {
-    const typingTexts = document.querySelectorAll('.typing-text');
+// 打字机效果函数
+function typeWriter(elementId, cursorId, text, speed = 100, callback?) {
+    const element = document.getElementById(elementId);
+    const cursor = document.getElementById(cursorId);
     
-    typingTexts.forEach((element) => {
-        const text = element.getAttribute('data-text');
-        element.textContent = '';
-        let i = 0;
-        
-        const typeWriter = () => {
-            if (i < text.length) {
-                element.textContent += text.charAt(i);
-                i++;
-                setTimeout(typeWriter, 100);
-            }
-        };
-        
-        // 延迟开始动画
-        const delay = element.closest('.banner-subtitle') ? 4000 : 500;
-        setTimeout(typeWriter, delay);
+    if (!element || !cursor) return;
+    
+    element.textContent = '';
+    let i = 0;
+    
+    const type = () => {
+        if (i < text.length) {
+            element.textContent += text.charAt(i);
+            i++;
+            setTimeout(type, speed);
+        } else if (callback) {
+            callback();
+        }
+    };
+    
+    type();
+}
+
+// 初始化动画
+function initAnimation() {
+    const titleText = "UpXuu's Blog";
+    const subtitleText = "Life, Study and... upxu and you";
+    
+    // 先隐藏光标
+    const cursors = document.querySelectorAll('.cursor');
+    cursors.forEach(cursor => {
+        cursor.style.opacity = '0';
     });
-});
+    
+    // 延迟后开始标题动画
+    setTimeout(() => {
+        // 显示标题光标
+        const titleCursor = document.getElementById('title-cursor');
+        if (titleCursor) {
+            titleCursor.style.opacity = '1';
+        }
+        
+        typeWriter('title-typing', 'title-cursor', titleText, 150, () => {
+            // 标题完成后，延迟开始副标题
+            setTimeout(() => {
+                // 显示副标题光标
+                const subtitleCursor = document.getElementById('subtitle-cursor');
+                if (subtitleCursor) {
+                    subtitleCursor.style.opacity = '1';
+                }
+                
+                typeWriter('subtitle-typing', 'subtitle-cursor', subtitleText, 150);
+            }, 500);
+        });
+    }, 500);
+}
+
+// 页面加载时执行
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initAnimation);
+} else {
+    initAnimation();
+}
 
 // Swup 页面切换后重新执行动画
 if (window.swup) {
     window.swup.hooks.on('page:view', () => {
-        const typingTexts = document.querySelectorAll('.typing-text');
-        
-        typingTexts.forEach((element) => {
-            const text = element.getAttribute('data-text');
-            element.textContent = '';
-            let i = 0;
-            
-            const typeWriter = () => {
-                if (i < text.length) {
-                    element.textContent += text.charAt(i);
-                    i++;
-                    setTimeout(typeWriter, 100);
-                }
-            };
-            
-            const delay = element.closest('.banner-subtitle') ? 4000 : 500;
-            setTimeout(typeWriter, delay);
-        });
+        initAnimation();
     });
 }
 </script>
