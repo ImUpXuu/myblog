@@ -1,0 +1,159 @@
+---
+// 打字机效果的 Banner 标题组件
+---
+
+<div class="banner-title-container">
+    <h1 class="banner-main-title">
+        <span class="typing-text" data-text="UpXuu's Blog"></span>
+        <span class="cursor">|</span>
+    </h1>
+    <h2 class="banner-subtitle">
+        <span class="typing-text" data-text="Life, Study and... upxu and you"></span>
+        <span class="cursor">|</span>
+    </h2>
+</div>
+
+<style>
+.banner-title-container {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+    z-index: 10;
+    width: 100%;
+    padding: 0 20px;
+}
+
+.banner-main-title {
+    font-size: clamp(2.5rem, 8vw, 5rem);
+    font-weight: 700;
+    color: #ffffff;
+    text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.6);
+    margin: 0;
+    min-height: 1.2em;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.banner-subtitle {
+    font-size: clamp(1.2rem, 4vw, 2rem);
+    font-weight: 400;
+    color: #ffffff;
+    text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.6);
+    margin-top: 1rem;
+    min-height: 1.2em;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.typing-text::after {
+    content: '';
+}
+
+.cursor {
+    display: inline-block;
+    color: #ffffff;
+    animation: blink 1s infinite;
+    margin-left: 2px;
+}
+
+@keyframes blink {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0;
+    }
+}
+
+/* 打字机效果动画 */
+@keyframes typing {
+    from {
+        width: 0;
+    }
+    to {
+        width: 100%;
+    }
+}
+
+.typing-text {
+    display: inline-block;
+    overflow: hidden;
+    white-space: nowrap;
+    animation: typing 3.5s steps(40, end);
+    max-width: 100%;
+}
+
+.banner-subtitle .typing-text {
+    animation-delay: 4s;
+    animation-duration: 4s;
+}
+
+/* 移动端优化 */
+@media (max-width: 768px) {
+    .banner-title-container {
+        padding: 0 15px;
+    }
+    
+    .typing-text {
+        animation-duration: 2.5s;
+    }
+    
+    .banner-subtitle .typing-text {
+        animation-delay: 3s;
+        animation-duration: 3s;
+    }
+}
+</style>
+
+<script>
+// 打字机效果
+document.addEventListener('DOMContentLoaded', () => {
+    const typingTexts = document.querySelectorAll('.typing-text');
+    
+    typingTexts.forEach((element) => {
+        const text = element.getAttribute('data-text');
+        element.textContent = '';
+        let i = 0;
+        
+        const typeWriter = () => {
+            if (i < text.length) {
+                element.textContent += text.charAt(i);
+                i++;
+                setTimeout(typeWriter, 100);
+            }
+        };
+        
+        // 延迟开始动画
+        const delay = element.closest('.banner-subtitle') ? 4000 : 500;
+        setTimeout(typeWriter, delay);
+    });
+});
+
+// Swup 页面切换后重新执行动画
+if (window.swup) {
+    window.swup.hooks.on('page:view', () => {
+        const typingTexts = document.querySelectorAll('.typing-text');
+        
+        typingTexts.forEach((element) => {
+            const text = element.getAttribute('data-text');
+            element.textContent = '';
+            let i = 0;
+            
+            const typeWriter = () => {
+                if (i < text.length) {
+                    element.textContent += text.charAt(i);
+                    i++;
+                    setTimeout(typeWriter, 100);
+                }
+            };
+            
+            const delay = element.closest('.banner-subtitle') ? 4000 : 500;
+            setTimeout(typeWriter, delay);
+        });
+    });
+}
+</script>
