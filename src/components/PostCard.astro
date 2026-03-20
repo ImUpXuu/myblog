@@ -73,6 +73,17 @@ const { remarkPluginFrontmatter } = await entry.render();
             <div>
                 {remarkPluginFrontmatter.minutes} {" " + i18n(remarkPluginFrontmatter.minutes === 1 ? I18nKey.minuteCount : I18nKey.minutesCount)}
             </div>
+            <!-- 访问量和点赞数 -->
+            <div class="flex gap-3" data-post-url={url}>
+                <div class="flex items-center gap-1">
+                    <Icon name="material-symbols:visibility-outline-rounded" class="text-base"></Icon>
+                    <span class="post-views">-</span>
+                </div>
+                <div class="flex items-center gap-1">
+                    <Icon name="material-symbols:favorite-outline-rounded" class="text-base"></Icon>
+                    <span class="post-likes">-</span>
+                </div>
+            </div>
         </div>
 
     </div>

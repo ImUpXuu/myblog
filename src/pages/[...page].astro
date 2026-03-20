@@ -21,3 +21,38 @@ const len = page.data.length;
     <PostPage page={page}></PostPage>
     <Pagination class="mx-auto onload-animation" page={page} style={`animation-delay: calc(var(--content-delay) + ${(len)*50}ms)`}></Pagination>
 </MainGridLayout>
+
+<script>
+// 批量获取首页文章的访问量和点赞数
+async function fetchPostStats() {
+    const apiUrl = 'https://comment.upxuu.com';
+    const postCards = document.querySelectorAll('[data-post-url]');
+    
+    for (const card of postCards) {
+        const pageUrl = card.getAttribute('data-post-url');
+        if (!pageUrl) continue;
+        
+        try {
+            const response = await fetch(`${apiUrl}/comments?url=${encodeURIComponent(pageUrl)}`);
+            if (response.ok) {
+                const data = await response.json();
+                
+                const viewsEl = card.querySelector('.post-views');
+                const likesEl = card.querySelector('.post-likes');
+                
+                if (viewsEl) {
+                    viewsEl.textContent = data.views || 0;
+                }
+                if (likesEl) {
+                    likesEl.textContent = data.page_likes || 0;
+                }
+            }
+        } catch (error) {
+            console.error('Failed to fetch stats for', pageUrl, error);
+        }
+    }
+}
+
+// 页面加载时获取统计数据
+fetchPostStats();
+</script>
