@@ -189,11 +189,7 @@ let currentSubtitleIndex = 0;
 let isRunning = false;
 
 async function initAnimation() {
-    if (isRunning) {
-        cancelSleep();
-        isRunning = false;
-        await new Promise(r => setTimeout(r, 50));
-    }
+    if (isRunning) return;
     isRunning = true;
 
     const titleText = "UpXuu's Blog";
@@ -210,10 +206,8 @@ async function initAnimation() {
     if (titleCursor) titleCursor.style.opacity = '1';
 
     await typeWriter(titleElement, titleText, 150);
-    if (!isRunning) return;
 
     await sleep(500);
-    if (!isRunning) return;
 
     const subtitleCursor = document.getElementById('subtitle-cursor');
     if (subtitleCursor) subtitleCursor.style.opacity = '1';
@@ -221,14 +215,9 @@ async function initAnimation() {
     while (isRunning) {
         const currentText = subtitles[currentSubtitleIndex];
         await typeWriter(subtitleElement, currentText, 100);
-        if (!isRunning) return;
 
         await sleep(2000);
-        if (!isRunning) return;
-
         await deleteWriter(subtitleElement, 50);
-        if (!isRunning) return;
-
         await sleep(300);
         currentSubtitleIndex = (currentSubtitleIndex + 1) % subtitles.length;
     }
@@ -243,12 +232,5 @@ if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', initAnimation);
 } else {
     initAnimation();
-}
-
-if (window.swup) {
-    window.swup.hooks.on('page:view', () => {
-        stopAnimation();
-        setTimeout(initAnimation, 200);
-    });
 }
 </script>
