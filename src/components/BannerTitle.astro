@@ -1,5 +1,5 @@
 ---
-// 打字机效果的 Banner 标题组件
+// 纯CSS实现的 Banner 打字机效果
 ---
 
 <div class="banner-title-container">
@@ -9,9 +9,12 @@
         </span>
     </h1>
     <h2 class="banner-subtitle">
-        <span class="typing-wrapper">
-            <span class="typing-text" id="subtitle-typing"></span><span class="cursor" id="subtitle-cursor">|</span>
-        </span>
+        <div class="subtitle-rotator">
+            <span class="subtitle-text" data-text="HI I am UpXuu">HI I am UpXuu</span>
+            <span class="subtitle-text" data-text="upxu and you...">upxu and you...</span>
+            <span class="subtitle-text" data-text="Life, coding...">Life, coding...</span>
+        </div>
+        <span class="cursor">|</span>
     </h2>
 </div>
 
@@ -64,18 +67,31 @@ body:not(.lg\:is-home) .banner-title-container {
     align-items: center;
     min-height: 1.2em;
     line-height: 1.3;
+    gap: 4px;
 }
 
 .typing-wrapper {
     display: inline-block;
     position: relative;
-    max-width: 100%;
 }
 
 .typing-text {
     display: inline;
-    white-space: pre-wrap;
-    word-break: break-word;
+    overflow: hidden;
+    white-space: nowrap;
+    border-right: 3px solid #ffffff;
+    animation: typing 2s steps(13, end), blink-caret 0.75s step-end infinite;
+    max-width: 0;
+}
+
+@keyframes typing {
+    from { max-width: 0; }
+    to { max-width: 12ch; }
+}
+
+@keyframes blink-caret {
+    from, to { border-color: transparent; }
+    50% { border-color: #ffffff; }
 }
 
 .cursor {
@@ -83,142 +99,98 @@ body:not(.lg\:is-home) .banner-title-container {
     color: #ffffff;
     font-weight: 300;
     animation: blink 1s step-end infinite;
-    margin-left: 2px;
 }
 
 @keyframes blink {
-    0%, 100% {
-        opacity: 1;
-    }
-    50% {
-        opacity: 0;
-    }
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0; }
 }
 
-/* 移动端优化 - 使用 vh 单位确保在可视区域内 */
+/* 副标题轮播 */
+.subtitle-rotator {
+    position: relative;
+    display: inline-flex;
+    overflow: hidden;
+    height: 1.4em;
+    width: 18ch;
+}
+
+.subtitle-text {
+    position: absolute;
+    white-space: nowrap;
+    opacity: 0;
+    transform: translateY(100%);
+    animation: rotateSubtitles 9s ease-in-out infinite;
+}
+
+.subtitle-text:nth-child(1) { animation-delay: 0s; }
+.subtitle-text:nth-child(2) { animation-delay: 3s; }
+.subtitle-text:nth-child(3) { animation-delay: 6s; }
+
+@keyframes rotateSubtitles {
+    0% { opacity: 0; transform: translateY(100%); }
+    5% { opacity: 1; transform: translateY(0); }
+    30% { opacity: 1; transform: translateY(0); }
+    35% { opacity: 0; transform: translateY(-100%); }
+    100% { opacity: 0; transform: translateY(-100%); }
+}
+
+/* 移动端优化 */
 @media (max-width: 768px) {
     .banner-title-container {
         padding: 0 15px;
         top: 45vh;
         transform: translate(-50%, 0);
     }
-    
+
     .banner-main-title {
         font-size: clamp(1.8rem, 8vw, 3rem);
     }
-    
+
     .banner-subtitle {
         font-size: clamp(1rem, 5vw, 1.3rem);
         margin-top: 0.8rem;
     }
+
+    .typing-text {
+        animation: typing-mobile 2s steps(13, end), blink-caret 0.75s step-end infinite;
+        max-width: 0;
+    }
+
+    @keyframes typing-mobile {
+        from { max-width: 0; }
+        to { max-width: 12ch; }
+    }
 }
 
-/* 小屏幕进一步优化 */
 @media (max-width: 480px) {
     .banner-title-container {
         top: 42vh;
     }
-    
+
     .banner-main-title {
         font-size: clamp(1.6rem, 9vw, 2.5rem);
     }
-    
+
     .banner-subtitle {
         font-size: clamp(0.95rem, 6vw, 1.2rem);
         margin-top: 0.7rem;
     }
 }
 
-/* 超小屏幕 */
 @media (max-width: 360px) {
     .banner-title-container {
         top: 40vh;
         padding: 0 12px;
     }
-    
+
     .banner-main-title {
         font-size: clamp(1.5rem, 10vw, 2.2rem);
     }
-    
+
     .banner-subtitle {
         font-size: clamp(0.9rem, 7vw, 1.1rem);
         margin-top: 0.6rem;
     }
 }
 </style>
-
-<script>
-let _controller = null;
-let initialized = false;
-
-function sleep(ms) {
-    return new Promise(resolve => {
-        _controller = { resolve };
-        setTimeout(resolve, ms);
-    });
-}
-
-async function typeWriter(element, text, speed = 100) {
-    element.textContent = '';
-    for (let i = 0; i < text.length; i++) {
-        element.textContent += text.charAt(i);
-        await sleep(speed);
-    }
-}
-
-async function deleteWriter(element, speed = 50) {
-    while (element.textContent.length > 0) {
-        element.textContent = element.textContent.slice(0, -1);
-        await sleep(speed);
-    }
-}
-
-const subtitles = [
-    "HI I am UpXuu",
-    "upxu and you...",
-    "Life, coding and everything"
-];
-
-let currentSubtitleIndex = 0;
-
-async function initAnimation() {
-    if (initialized) return;
-    initialized = true;
-
-    const titleText = "UpXuu's Blog";
-
-    const cursors = document.querySelectorAll('.cursor');
-    cursors.forEach(cursor => cursor.style.opacity = '0');
-
-    const titleElement = document.getElementById('title-typing');
-    const subtitleElement = document.getElementById('subtitle-typing');
-    if (!titleElement || !subtitleElement) return;
-
-    titleElement.textContent = '';
-    subtitleElement.textContent = '';
-
-    const titleCursor = document.getElementById('title-cursor');
-    if (titleCursor) titleCursor.style.opacity = '1';
-
-    await typeWriter(titleElement, titleText, 150);
-    await sleep(500);
-
-    const subtitleCursor = document.getElementById('subtitle-cursor');
-    if (subtitleCursor) subtitleCursor.style.opacity = '1';
-
-    while (true) {
-        const currentText = subtitles[currentSubtitleIndex];
-        await typeWriter(subtitleElement, currentText, 100);
-        await sleep(2000);
-        await deleteWriter(subtitleElement, 50);
-        await sleep(300);
-        currentSubtitleIndex = (currentSubtitleIndex + 1) % subtitles.length;
-    }
-}
-
-if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', initAnimation);
-} else {
-    initAnimation();
-}
-</script>
