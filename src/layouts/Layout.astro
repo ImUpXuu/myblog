@@ -72,6 +72,20 @@ const bannerOffset =
 	bannerOffsetByPosition[siteConfig.banner.position || "center"];
 ---
 
+<style is:global>
+	@font-face {
+		font-family: 'CustomFont';
+		src: url('https://f.upxuu.com/myblog/img/font.ttf') format('truetype');
+		font-weight: normal;
+		font-style: normal;
+		font-display: swap;
+	}
+
+	html, body {
+		font-family: 'CustomFont', 'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+	}
+</style>
+
 <!DOCTYPE html>
 <html
 	lang={siteLang}
