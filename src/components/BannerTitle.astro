@@ -59,15 +59,21 @@ body:not(.lg\:is-home) .banner-title-container {
     justify-content: center;
     align-items: center;
     gap: 4px;
+    position: relative;
+    min-height: 1.4em;
 }
 
 /* 副标题打字机效果 */
 .subtitle-text {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
     display: inline-block;
     overflow: hidden;
     white-space: nowrap;
     border-right: 2px solid #ffffff;
     margin: 0;
+    opacity: 0;
     animation: subtitleTyping 12s infinite;
     max-width: 0;
 }
@@ -91,15 +97,15 @@ body:not(.lg\:is-home) .banner-title-container {
     }
 }
 
-.subtitle-item:nth-child(1) {
+.subtitle-text:nth-child(1) {
     animation-delay: 0s;
 }
 
-.subtitle-item:nth-child(2) {
+.subtitle-text:nth-child(2) {
     animation-delay: 4s;
 }
 
-.subtitle-item:nth-child(3) {
+.subtitle-text:nth-child(3) {
     animation-delay: 8s;
 }
 
