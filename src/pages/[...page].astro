@@ -48,48 +48,31 @@ const jsonLd = isFirstPage ? {
 
 <script>
 // 批量获取首页文章的访问量和点赞数
-async function fetchPostStats() {
+function fetchHomepageStats() {
     const apiUrl = 'https://comment.upxuu.com';
     const postCards = document.querySelectorAll('[data-post-url]');
-    
+
     for (const card of postCards) {
         const pageUrl = card.getAttribute('data-post-url');
         if (!pageUrl) continue;
-        
-        try {
-            const response = await fetch(`${apiUrl}/page-stats?url=${encodeURIComponent(pageUrl)}`);
-            
-            if (response.ok) {
-                const data = await response.json();
-                
+
+        fetch(`${apiUrl}/page-stats?url=${encodeURIComponent(pageUrl)}`)
+            .then(res => res.ok ? res.json() : null)
+            .then(data => {
+                if (!data) return;
                 const viewsEl = card.querySelector('.post-views');
                 const likesEl = card.querySelector('.post-likes');
-                
-                if (viewsEl) {
-                    viewsEl.textContent = data.views || 0;
-                }
-                if (likesEl) {
-                    likesEl.textContent = data.likes || 0;
-                }
-            }
-        } catch (error) {
-            console.error('Failed to fetch stats for', pageUrl, error);
-        }
+                if (viewsEl) viewsEl.textContent = data.views || 0;
+                if (likesEl) likesEl.textContent = data.likes || 0;
+            })
+            .catch(() => {});
     }
 }
 
 // 等待 DOM 加载完成后获取统计数据
 if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', fetchPostStats);
+    document.addEventListener('DOMContentLoaded', fetchHomepageStats);
 } else {
-    fetchPostStats();
-}
-
-// Swup 页面切换后重新获取统计数据
-if (window.swup) {
-    window.swup.hooks.on('page:view', () => {
-        console.log('Swup page view, fetching homepage stats...');
-        setTimeout(fetchPostStats, 300);
-    });
+    fetchHomepageStats();
 }
 </script>

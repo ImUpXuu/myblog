@@ -382,6 +382,27 @@ function init() {
 /* Load settings when entering the site */
 init();
 
+function fetchPageStats() {
+    const pageUrl = window.location.pathname;
+    const apiUrl = 'https://comment.upxuu.com';
+
+    const viewsEl = document.getElementById('post-views') || document.querySelector('.post-views');
+    const likesEl = document.getElementById('post-likes') || document.querySelector('.post-likes');
+
+    if (!viewsEl && !likesEl) return;
+
+    fetch(`${apiUrl}/page-stats?url=${encodeURIComponent(pageUrl)}`)
+        .then(res => res.ok ? res.json() : null)
+        .then(data => {
+            if (!data) return;
+            if (viewsEl) viewsEl.textContent = data.views || 0;
+            if (likesEl) likesEl.textContent = data.likes || 0;
+        })
+        .catch(() => {});
+}
+
+(window as any).fetchPageStats = fetchPageStats;
+
 const setup = () => {
 	// TODO: temp solution to change the height of the banner
 /*
@@ -440,6 +461,8 @@ const setup = () => {
 		if (heightExtend) {
 			heightExtend.classList.remove('hidden')
 		}
+		// fetch page stats (views and likes)
+		fetchPageStats();
 	});
 	window.swup.hooks.on('visit:end', (_visit: {to: {url: string}}) => {
 		setTimeout(() => {
