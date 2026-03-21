@@ -1,18 +1,15 @@
 ---
-// 纯CSS实现的 Banner 打字机效果
 ---
 
 <div class="banner-title-container">
     <h1 class="banner-main-title">
-        <span class="typing-wrapper">
-            <span class="typing-text" id="title-typing"></span><span class="cursor" id="title-cursor">|</span>
-        </span>
+        <span class="typing-text">UpXuu's Blog</span><span class="cursor">|</span>
     </h1>
     <h2 class="banner-subtitle">
         <div class="subtitle-rotator">
-            <span class="subtitle-text" data-text="HI I am UpXuu">HI I am UpXuu</span>
-            <span class="subtitle-text" data-text="upxu and you...">upxu and you...</span>
-            <span class="subtitle-text" data-text="Life, coding...">Life, coding...</span>
+            <span class="subtitle-item">HI I am UpXuu</span>
+            <span class="subtitle-item">upxu and you...</span>
+            <span class="subtitle-item">Life, coding...</span>
         </div>
         <span class="cursor">|</span>
     </h2>
@@ -49,11 +46,7 @@ body:not(.lg\:is-home) .banner-title-container {
     color: #ffffff;
     text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.6);
     margin: 0;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    min-height: 1.2em;
-    line-height: 1.3;
+    display: inline-block;
 }
 
 .banner-subtitle {
@@ -65,22 +58,17 @@ body:not(.lg\:is-home) .banner-title-container {
     display: flex;
     justify-content: center;
     align-items: center;
-    min-height: 1.2em;
-    line-height: 1.3;
     gap: 4px;
 }
 
-.typing-wrapper {
-    display: inline-block;
-    position: relative;
-}
-
+/* 打字机效果 */
 .typing-text {
-    display: inline;
+    display: inline-block;
     overflow: hidden;
-    white-space: nowrap;
     border-right: 3px solid #ffffff;
-    animation: typing 2.5s steps(14, end), blink-caret 0.75s step-end infinite;
+    white-space: nowrap;
+    margin: 0;
+    animation: typing 2.5s steps(14, end) forwards, blink 0.75s step-end infinite;
     max-width: 0;
 }
 
@@ -89,77 +77,89 @@ body:not(.lg\:is-home) .banner-title-container {
     to { max-width: 14ch; }
 }
 
-@keyframes blink-caret {
+@keyframes blink {
     from, to { border-color: transparent; }
     50% { border-color: #ffffff; }
 }
 
-.cursor {
-    display: inline-block;
-    color: #ffffff;
-    font-weight: 300;
-    animation: blink 1s step-end infinite;
-}
-
-@keyframes blink {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0; }
-}
-
 /* 副标题轮播 */
 .subtitle-rotator {
+    display: inline-block;
     position: relative;
-    display: inline-flex;
-    overflow: hidden;
     height: 1.4em;
+    overflow: hidden;
     width: 18ch;
 }
 
-.subtitle-text {
+.subtitle-item {
     position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
     white-space: nowrap;
     opacity: 0;
-    transform: translateY(100%);
-    animation: rotateSubtitles 9s ease-in-out infinite;
+    animation: subtitleCycle 9s infinite;
 }
 
-.subtitle-text:nth-child(1) { animation-delay: 0s; }
-.subtitle-text:nth-child(2) { animation-delay: 3s; }
-.subtitle-text:nth-child(3) { animation-delay: 6s; }
+.subtitle-item:nth-child(1) {
+    animation-delay: 0s;
+}
 
-@keyframes rotateSubtitles {
-    0% { opacity: 0; transform: translateY(100%); }
-    5% { opacity: 1; transform: translateY(0); }
-    30% { opacity: 1; transform: translateY(0); }
-    35% { opacity: 0; transform: translateY(-100%); }
-    100% { opacity: 0; transform: translateY(-100%); }
+.subtitle-item:nth-child(2) {
+    animation-delay: 3s;
+}
+
+.subtitle-item:nth-child(3) {
+    animation-delay: 6s;
+}
+
+@keyframes subtitleCycle {
+    0%, 5% {
+        opacity: 0;
+        transform: translateX(-50%) translateY(100%);
+    }
+    10%, 30% {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+    }
+    35%, 40% {
+        opacity: 0;
+        transform: translateX(-50%) translateY(-100%);
+    }
+    100% {
+        opacity: 0;
+        transform: translateX(-50%) translateY(-100%);
+    }
+}
+
+/* 光标闪烁 */
+.cursor {
+    display: inline-block;
+    color: #ffffff;
+    animation: cursorBlink 1s step-end infinite;
+}
+
+@keyframes cursorBlink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0; }
 }
 
 /* 移动端优化 */
 @media (max-width: 768px) {
     .banner-title-container {
-        padding: 0 15px;
         top: 45vh;
-        transform: translate(-50%, 0);
     }
 
     .banner-main-title {
         font-size: clamp(1.8rem, 8vw, 3rem);
     }
 
-    .banner-subtitle {
-        font-size: clamp(1rem, 5vw, 1.3rem);
-        margin-top: 0.8rem;
-    }
-
     .typing-text {
-        animation: typing-mobile 2s steps(13, end), blink-caret 0.75s step-end infinite;
-        max-width: 0;
+        animation: typing-mobile 2.5s steps(14, end) forwards, blink 0.75s step-end infinite;
     }
 
     @keyframes typing-mobile {
         from { max-width: 0; }
-        to { max-width: 12ch; }
+        to { max-width: 14ch; }
     }
 }
 
@@ -174,7 +174,6 @@ body:not(.lg\:is-home) .banner-title-container {
 
     .banner-subtitle {
         font-size: clamp(0.95rem, 6vw, 1.2rem);
-        margin-top: 0.7rem;
     }
 }
 
@@ -190,7 +189,6 @@ body:not(.lg\:is-home) .banner-title-container {
 
     .banner-subtitle {
         font-size: clamp(0.9rem, 7vw, 1.1rem);
-        margin-top: 0.6rem;
     }
 }
 </style>
