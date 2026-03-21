@@ -6,6 +6,7 @@ import Mermaid from "@components/Mermaid.astro";
 import I18nKey from "@i18n/i18nKey";
 import { i18n } from "@i18n/translation";
 import MainGridLayout from "@layouts/MainGridLayout.astro";
+import BannerTitle from "../../components/BannerTitle.astro";
 import { getSortedPosts } from "@utils/content-utils";
 import { getDir, getPostUrlBySlug } from "@utils/url-utils";
 import { Icon } from "astro-icon/components";
@@ -47,6 +48,7 @@ const jsonLd = {
 };
 ---
 <MainGridLayout banner={entry.data.image} title={entry.data.title} description={entry.data.description} lang={entry.data.lang} setOGTypeArticle={true} headings={headings}>
+    <BannerTitle slot="banner-title"></BannerTitle>
     <script is:inline slot="head" type="application/ld+json" set:html={JSON.stringify(jsonLd)}></script>
     <script slot="head" src="https://comment.upxuu.com/sdk.js" defer></script>
     <div class="flex w-full rounded-[var(--radius-large)] overflow-hidden relative mb-4">
