@@ -149,6 +149,7 @@ body:not(.lg\:is-home) .banner-title-container {
 
 <script>
 let animationTimeouts = [];
+let isRunning = false;
 
 function clearAllAnimations() {
     animationTimeouts.forEach(timeout => clearTimeout(timeout));
@@ -166,8 +167,6 @@ async function typeWriter(element, text, speed = 100) {
     element.textContent = '';
     for (let i = 0; i < text.length; i++) {
         element.textContent += text.charAt(i);
-        const timeout = setTimeout(() => {}, speed);
-        animationTimeouts.push(timeout);
         await sleep(speed);
     }
 }
@@ -188,6 +187,9 @@ const subtitles = [
 let currentSubtitleIndex = 0;
 
 async function initAnimation() {
+    if (isRunning) return;
+    isRunning = true;
+
     clearAllAnimations();
 
     const titleText = "UpXuu's Blog";
@@ -212,7 +214,7 @@ async function initAnimation() {
     const subtitleCursor = document.getElementById('subtitle-cursor');
     if (subtitleCursor) subtitleCursor.style.opacity = '1';
 
-    while (true) {
+    while (isRunning) {
         const currentText = subtitles[currentSubtitleIndex];
         await typeWriter(subtitleElement, currentText, 100);
         await sleep(2000);
@@ -220,6 +222,11 @@ async function initAnimation() {
         await sleep(300);
         currentSubtitleIndex = (currentSubtitleIndex + 1) % subtitles.length;
     }
+}
+
+function stopAnimation() {
+    isRunning = false;
+    clearAllAnimations();
 }
 
 if (document.readyState === 'loading') {
@@ -230,7 +237,8 @@ if (document.readyState === 'loading') {
 
 if (window.swup) {
     window.swup.hooks.on('page:view', () => {
-        initAnimation();
+        stopAnimation();
+        setTimeout(initAnimation, 100);
     });
 }
 </script>
