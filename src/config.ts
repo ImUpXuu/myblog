@@ -30,12 +30,23 @@ export const siteConfig: SiteConfig = {
 		depth: 2, // Maximum heading depth to show in the table, from 1 to 3
 	},
 	favicon: [
-		// Leave this array empty to use the default favicon
-		// {
-		//   src: '/favicon/icon.png',    // Path of the favicon, relative to the /public directory
-		//   theme: 'light',              // (Optional) Either 'light' or 'dark', set only if you have different favicons for light and dark mode
-		//   sizes: '32x32',              // (Optional) Size of the favicon, set only if you have favicons of different sizes
-		// }
+		// 使用自定义网站图标
+		{
+			src: 'https://www.upxuu.com/images/20260214145619.jpg',
+			sizes: '32x32',
+		},
+		{
+			src: 'https://www.upxuu.com/images/20260214145619.jpg',
+			sizes: '128x128',
+		},
+		{
+			src: 'https://www.upxuu.com/images/20260214145619.jpg',
+			sizes: '180x180',
+		},
+		{
+			src: 'https://www.upxuu.com/images/20260214145619.jpg',
+			sizes: '192x192',
+		},
 	],
 };
 
