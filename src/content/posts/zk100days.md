@@ -4,6 +4,7 @@ published: 2026-03-14 18:24:00
 image: "https://edit.upxuu.com/image/20260315214606_913.jpg"
 description: "地生中考将近，我做了一个100day的梦..."
 category: "学习"
+sticky: 10
 ---
 
 Hi!很高兴以这种特别的方式认识你（大概率知道我是谁）
