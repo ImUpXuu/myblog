@@ -28,6 +28,18 @@
     box-sizing: border-box;
 }
 
+body:not(.lg\:is-home) .banner-title-container {
+    top: 35vh;
+    transform: translate(-50%, 0);
+}
+
+@media (max-width: 768px) {
+    body:not(.lg\:is-home) .banner-title-container {
+        top: 45vh;
+        transform: translate(-50%, 0);
+    }
+}
+
 .banner-main-title {
     font-size: clamp(2rem, 6vw, 4rem);
     font-weight: 700;
@@ -137,62 +149,67 @@
 
 <script>
 // 打字机效果函数
+let animationTimeouts = [];
+
+function clearAllAnimations() {
+    animationTimeouts.forEach(timeout => clearTimeout(timeout));
+    animationTimeouts = [];
+}
+
 function typeWriter(elementId, cursorId, text, speed = 100, callback?) {
     const element = document.getElementById(elementId);
     const cursor = document.getElementById(cursorId);
-    
+
     if (!element || !cursor) return;
-    
+
     element.textContent = '';
     let i = 0;
-    
+
     const type = () => {
         if (i < text.length) {
             element.textContent += text.charAt(i);
             i++;
-            setTimeout(type, speed);
+            const timeout = setTimeout(type, speed);
+            animationTimeouts.push(timeout);
         } else if (callback) {
             callback();
         }
     };
-    
+
     type();
 }
 
 // 初始化动画
 function initAnimation() {
+    clearAllAnimations();
+
     const titleText = "UpXuu's Blog";
     const subtitleText = "Life, Study and... upxu and you";
-    
-    // 先隐藏光标
+
     const cursors = document.querySelectorAll('.cursor');
     cursors.forEach(cursor => {
         cursor.style.opacity = '0';
     });
-    
-    // 重置文字内容
+
     const titleElement = document.getElementById('title-typing');
     const subtitleElement = document.getElementById('subtitle-typing');
     if (titleElement) titleElement.textContent = '';
+    if (subtitleElement) titleElement.textContent = '';
     if (subtitleElement) subtitleElement.textContent = '';
-    
-    // 延迟后开始标题动画
+
     setTimeout(() => {
-        // 显示标题光标
         const titleCursor = document.getElementById('title-cursor');
         if (titleCursor) {
             titleCursor.style.opacity = '1';
         }
-        
+
         typeWriter('title-typing', 'title-cursor', titleText, 150, () => {
-            // 标题完成后，延迟开始副标题
             setTimeout(() => {
-                // 显示副标题光标
                 const subtitleCursor = document.getElementById('subtitle-cursor');
                 if (subtitleCursor) {
                     subtitleCursor.style.opacity = '1';
                 }
-                
+
                 typeWriter('subtitle-typing', 'subtitle-cursor', subtitleText, 150);
             }, 500);
         });
