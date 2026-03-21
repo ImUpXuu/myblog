@@ -148,107 +148,104 @@ body:not(.lg\:is-home) .banner-title-container {
 </style>
 
 <script>
-let _controller = null;
+let currentTimeouts = [];
+let shouldStop = false;
+
+function clearAll() {
+    currentTimeouts.forEach(t => clearTimeout(t));
+    currentTimeouts = [];
+}
+
+function addTimeout(fn, delay) {
+    const id = setTimeout(fn, delay);
+    currentTimeouts.push(id);
+    return id;
+}
 
 function sleep(ms) {
     return new Promise(resolve => {
-        _controller = { resolve, ms };
-        setTimeout(resolve, ms);
+        const id = setTimeout(resolve, ms);
+        currentTimeouts.push(id);
     });
 }
 
-function cancelSleep() {
-    if (_controller) {
-        clearTimeout(_controller.resolve);
-        _controller = null;
-    }
-}
-
-async function typeWriter(element, text, speed = 100) {
+async function typeWriter(element, text, speed) {
     element.textContent = '';
     for (let i = 0; i < text.length; i++) {
-        element.textContent += text.charAt(i);
+        if (shouldStop) return;
+        element.textContent += text.slice(0, i + 1);
         await sleep(speed);
     }
 }
 
-async function deleteWriter(element, speed = 50) {
+async function deleteText(element, speed) {
     while (element.textContent.length > 0) {
+        if (shouldStop) return;
         element.textContent = element.textContent.slice(0, -1);
         await sleep(speed);
     }
 }
 
-const subtitles = [
-    "HI I am UpXuu",
-    "upxu and you...",
-    "Life, coding and everything"
-];
+const subtitles = ["HI I am UpXuu", "upxu and you...", "Life, coding and everything"];
+let subtitleIndex = 0;
 
-let currentSubtitleIndex = 0;
-let isRunning = false;
-
-async function initAnimation() {
-    if (isRunning) {
-        cancelSleep();
-        isRunning = false;
-        await new Promise(r => setTimeout(r, 50));
-    }
-    isRunning = true;
-
-    const titleText = "UpXuu's Blog";
-
-    const cursors = document.querySelectorAll('.cursor');
-    cursors.forEach(cursor => cursor.style.opacity = '0');
-
-    const titleElement = document.getElementById('title-typing');
-    const subtitleElement = document.getElementById('subtitle-typing');
-    if (titleElement) titleElement.textContent = '';
-    if (subtitleElement) subtitleElement.textContent = '';
-
+async function runAnimation() {
+    const titleEl = document.getElementById('title-typing');
+    const subtitleEl = document.getElementById('subtitle-typing');
     const titleCursor = document.getElementById('title-cursor');
-    if (titleCursor) titleCursor.style.opacity = '1';
-
-    await typeWriter(titleElement, titleText, 150);
-    if (!isRunning) return;
-
-    await sleep(500);
-    if (!isRunning) return;
-
     const subtitleCursor = document.getElementById('subtitle-cursor');
-    if (subtitleCursor) subtitleCursor.style.opacity = '1';
 
-    while (isRunning) {
-        const currentText = subtitles[currentSubtitleIndex];
-        await typeWriter(subtitleElement, currentText, 100);
-        if (!isRunning) return;
+    if (!titleEl || !subtitleEl) return;
+
+    document.querySelectorAll('.cursor').forEach(c => c.style.opacity = '0');
+    titleEl.textContent = '';
+    subtitleEl.textContent = '';
+
+    titleCursor.style.opacity = '1';
+    await typeWriter(titleEl, "UpXuu's Blog", 150);
+
+    if (shouldStop) return;
+    await sleep(500);
+
+    subtitleCursor.style.opacity = '1';
+
+    while (!shouldStop) {
+        const text = subtitles[subtitleIndex];
+        await typeWriter(subtitleEl, text, 100);
+        if (shouldStop) return;
 
         await sleep(2000);
-        if (!isRunning) return;
+        if (shouldStop) return;
 
-        await deleteWriter(subtitleElement, 50);
-        if (!isRunning) return;
+        await deleteText(subtitleEl, 50);
+        if (shouldStop) return;
 
         await sleep(300);
-        currentSubtitleIndex = (currentSubtitleIndex + 1) % subtitles.length;
+        subtitleIndex = (subtitleIndex + 1) % subtitles.length;
     }
+}
+
+function startAnimation() {
+    shouldStop = false;
+    clearAll();
+    runAnimation();
 }
 
 function stopAnimation() {
-    isRunning = false;
-    cancelSleep();
+    shouldStop = true;
+    clearAll();
 }
 
 if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', initAnimation);
+    document.addEventListener('DOMContentLoaded', startAnimation);
 } else {
-    initAnimation();
+    startAnimation();
 }
 
 if (window.swup) {
     window.swup.hooks.on('page:view', () => {
         stopAnimation();
-        setTimeout(initAnimation, 200);
+        addTimeout(startAnimation, 300);
     });
 }
 </script>
