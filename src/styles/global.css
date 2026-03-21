@@ -1,0 +1,13 @@
+/* 注册自定义字体 - 使用外部 CDN 字体 */
+@font-face {
+  font-family: 'CustomFont';
+  src: url('https://f.upxuu.com/myblog/img/font.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* 应用自定义字体到全局 */
+html, body {
+  font-family: 'CustomFont', 'Roboto', sans-serif;
+}
