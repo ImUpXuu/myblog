@@ -6,6 +6,7 @@ import BannerTitle from "../components/BannerTitle.astro";
 import { PAGE_SIZE } from "../constants/constants";
 import MainGridLayout from "../layouts/MainGridLayout.astro";
 import { getSortedPosts } from "../utils/content-utils";
+import { siteConfig, profileConfig } from "../config";
 
 export const getStaticPaths = (async ({ paginate }) => {
 	const allBlogPosts = await getSortedPosts();
@@ -16,10 +17,31 @@ export const getStaticPaths = (async ({ paginate }) => {
 const { page } = Astro.props;
 
 const len = page.data.length;
+
+const isFirstPage = page.url.prev === undefined;
+
+const jsonLd = isFirstPage ? {
+	"@context": "https://schema.org",
+	"@type": "WebSite",
+	"@id": `${Astro.site}`,
+	name: siteConfig.title,
+	description: siteConfig.subtitle,
+	url: Astro.site,
+	publisher: {
+		"@type": "Person",
+		name: profileConfig.name,
+	},
+	author: {
+		"@type": "Person",
+		name: profileConfig.name,
+	},
+	inLanguage: siteConfig.lang.replace("_", "-"),
+} : null;
 ---
 
 <MainGridLayout>
     <BannerTitle slot="banner-title"></BannerTitle>
+    {jsonLd && <script is:inline slot="head" type="application/ld+json" set:html={JSON.stringify(jsonLd)}></script>}
     <PostPage page={page}></PostPage>
     <Pagination class="mx-auto onload-animation" page={page} style={`animation-delay: calc(var(--content-delay) + ${(len)*50}ms)`}></Pagination>
 </MainGridLayout>

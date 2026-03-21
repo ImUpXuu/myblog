@@ -5,6 +5,7 @@ import I18nKey from "../i18n/i18nKey";
 import { i18n } from "../i18n/translation";
 import BannerTitle from "../components/BannerTitle.astro";
 import MainGridLayout from "../layouts/MainGridLayout.astro";
+import { profileConfig, siteConfig } from "../config";
 
 const aboutPost = await getEntry("spec", "about");
 
@@ -13,9 +14,24 @@ if (!aboutPost) {
 }
 
 const { Content } = await render(aboutPost);
+
+const jsonLd = {
+	"@context": "https://schema.org",
+	"@type": "AboutPage",
+	"@id": `${Astro.site}about`,
+	name: i18n(I18nKey.about),
+	description: i18n(I18nKey.about),
+	url: `${Astro.site}about`,
+	author: {
+		"@type": "Person",
+		name: profileConfig.name,
+	},
+	inLanguage: siteConfig.lang.replace("_", "-"),
+};
 ---
 <MainGridLayout title={i18n(I18nKey.about)} description={i18n(I18nKey.about)}>
     <BannerTitle slot="banner-title"></BannerTitle>
+    <script is:inline slot="head" type="application/ld+json" set:html={JSON.stringify(jsonLd)}></script>
     <div class="flex w-full rounded-[var(--radius-large)] overflow-hidden relative min-h-32">
         <div class="card-base z-10 px-9 py-6 relative w-full ">
             <Markdown class="mt-2">

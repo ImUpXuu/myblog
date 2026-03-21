@@ -32,19 +32,33 @@ const { remarkPluginFrontmatter } = await entry.render();
 const jsonLd = {
 	"@context": "https://schema.org",
 	"@type": "BlogPosting",
+	"@id": `${Astro.site}${entry.slug}`,
 	headline: entry.data.title,
 	description: entry.data.description || entry.data.title,
-	keywords: entry.data.tags,
+	keywords: entry.data.tags?.join(", "),
 	author: {
 		"@type": "Person",
 		name: profileConfig.name,
 		url: Astro.site,
 	},
 	datePublished: formatDateToYYYYMMDD(entry.data.published),
+	dateModified: entry.data.updated ? formatDateToYYYYMMDD(entry.data.updated) : formatDateToYYYYMMDD(entry.data.published),
 	inLanguage: entry.data.lang
 		? entry.data.lang.replace("_", "-")
 		: siteConfig.lang.replace("_", "-"),
-	// TODO include cover image here
+	image: entry.data.image ? `${Astro.site}${entry.data.image}` : siteConfig.banner.src,
+	publisher: {
+		"@type": "Organization",
+		name: profileConfig.name,
+		logo: {
+			"@type": "ImageObject",
+			url: profileConfig.avatar ? `${Astro.site}${profileConfig.avatar}` : undefined
+		}
+	},
+	mainEntityOfPage: {
+		"@type": "WebPage",
+		"@id": `${Astro.site}${entry.slug}`
+	}
 };
 ---
 <MainGridLayout banner={entry.data.image} title={entry.data.title} description={entry.data.description} lang={entry.data.lang} setOGTypeArticle={true} headings={headings}>
