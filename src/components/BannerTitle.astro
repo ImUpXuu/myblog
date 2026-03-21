@@ -148,7 +148,6 @@ body:not(.lg\:is-home) .banner-title-container {
 </style>
 
 <script>
-// 打字机效果函数
 let animationTimeouts = [];
 
 function clearAllAnimations() {
@@ -156,35 +155,42 @@ function clearAllAnimations() {
     animationTimeouts = [];
 }
 
-function typeWriter(elementId, cursorId, text, speed = 100, callback?) {
-    const element = document.getElementById(elementId);
-    const cursor = document.getElementById(cursorId);
-
-    if (!element || !cursor) return;
-
-    element.textContent = '';
-    let i = 0;
-
-    const type = () => {
-        if (i < text.length) {
-            element.textContent += text.charAt(i);
-            i++;
-            const timeout = setTimeout(type, speed);
-            animationTimeouts.push(timeout);
-        } else if (callback) {
-            callback();
-        }
-    };
-
-    type();
+function sleep(ms) {
+    return new Promise(resolve => {
+        const timeout = setTimeout(resolve, ms);
+        animationTimeouts.push(timeout);
+    });
 }
 
-// 初始化动画
-function initAnimation() {
+async function typeWriter(element, text, speed = 100) {
+    element.textContent = '';
+    for (let i = 0; i < text.length; i++) {
+        element.textContent += text.charAt(i);
+        const timeout = setTimeout(() => {}, speed);
+        animationTimeouts.push(timeout);
+        await sleep(speed);
+    }
+}
+
+async function deleteWriter(element, speed = 50) {
+    while (element.textContent.length > 0) {
+        element.textContent = element.textContent.slice(0, -1);
+        await sleep(speed);
+    }
+}
+
+const subtitles = [
+    "HI I am UpXuu",
+    "upxu and you...",
+    "Life, coding and everything"
+];
+
+let currentSubtitleIndex = 0;
+
+async function initAnimation() {
     clearAllAnimations();
 
     const titleText = "UpXuu's Blog";
-    const subtitleText = "Life, Study and... upxu and you";
 
     const cursors = document.querySelectorAll('.cursor');
     cursors.forEach(cursor => {
@@ -194,36 +200,34 @@ function initAnimation() {
     const titleElement = document.getElementById('title-typing');
     const subtitleElement = document.getElementById('subtitle-typing');
     if (titleElement) titleElement.textContent = '';
-    if (subtitleElement) titleElement.textContent = '';
     if (subtitleElement) subtitleElement.textContent = '';
 
-    setTimeout(() => {
-        const titleCursor = document.getElementById('title-cursor');
-        if (titleCursor) {
-            titleCursor.style.opacity = '1';
-        }
+    const titleCursor = document.getElementById('title-cursor');
+    if (titleCursor) titleCursor.style.opacity = '1';
 
-        typeWriter('title-typing', 'title-cursor', titleText, 150, () => {
-            setTimeout(() => {
-                const subtitleCursor = document.getElementById('subtitle-cursor');
-                if (subtitleCursor) {
-                    subtitleCursor.style.opacity = '1';
-                }
+    await typeWriter(titleElement, titleText, 150);
 
-                typeWriter('subtitle-typing', 'subtitle-cursor', subtitleText, 150);
-            }, 500);
-        });
-    }, 500);
+    await sleep(500);
+
+    const subtitleCursor = document.getElementById('subtitle-cursor');
+    if (subtitleCursor) subtitleCursor.style.opacity = '1';
+
+    while (true) {
+        const currentText = subtitles[currentSubtitleIndex];
+        await typeWriter(subtitleElement, currentText, 100);
+        await sleep(2000);
+        await deleteWriter(subtitleElement, 50);
+        await sleep(300);
+        currentSubtitleIndex = (currentSubtitleIndex + 1) % subtitles.length;
+    }
 }
 
-// 页面加载时执行
 if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', initAnimation);
 } else {
     initAnimation();
 }
 
-// Swup 页面切换后重新执行动画
 if (window.swup) {
     window.swup.hooks.on('page:view', () => {
         initAnimation();
