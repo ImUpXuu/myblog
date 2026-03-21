@@ -123,6 +123,8 @@ export default defineConfig({
 				compressionLevel: "auto",
 			},
 			SVG: true,
+			// 排除外部资源
+			exclude: [/^https?:\/\//],
 		}),
 	],
 	markdown: {
