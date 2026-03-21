@@ -149,19 +149,13 @@ body:not(.lg\:is-home) .banner-title-container {
 
 <script>
 let _controller = null;
+let initialized = false;
 
 function sleep(ms) {
     return new Promise(resolve => {
-        _controller = { resolve, ms };
+        _controller = { resolve };
         setTimeout(resolve, ms);
     });
-}
-
-function cancelSleep() {
-    if (_controller) {
-        clearTimeout(_controller.resolve);
-        _controller = null;
-    }
 }
 
 async function typeWriter(element, text, speed = 100) {
@@ -186,11 +180,10 @@ const subtitles = [
 ];
 
 let currentSubtitleIndex = 0;
-let isRunning = false;
 
 async function initAnimation() {
-    if (isRunning) return;
-    isRunning = true;
+    if (initialized) return;
+    initialized = true;
 
     const titleText = "UpXuu's Blog";
 
@@ -199,33 +192,28 @@ async function initAnimation() {
 
     const titleElement = document.getElementById('title-typing');
     const subtitleElement = document.getElementById('subtitle-typing');
-    if (titleElement) titleElement.textContent = '';
-    if (subtitleElement) subtitleElement.textContent = '';
+    if (!titleElement || !subtitleElement) return;
+
+    titleElement.textContent = '';
+    subtitleElement.textContent = '';
 
     const titleCursor = document.getElementById('title-cursor');
     if (titleCursor) titleCursor.style.opacity = '1';
 
     await typeWriter(titleElement, titleText, 150);
-
     await sleep(500);
 
     const subtitleCursor = document.getElementById('subtitle-cursor');
     if (subtitleCursor) subtitleCursor.style.opacity = '1';
 
-    while (isRunning) {
+    while (true) {
         const currentText = subtitles[currentSubtitleIndex];
         await typeWriter(subtitleElement, currentText, 100);
-
         await sleep(2000);
         await deleteWriter(subtitleElement, 50);
         await sleep(300);
         currentSubtitleIndex = (currentSubtitleIndex + 1) % subtitles.length;
     }
-}
-
-function stopAnimation() {
-    isRunning = false;
-    cancelSleep();
 }
 
 if (document.readyState === 'loading') {
