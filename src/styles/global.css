@@ -1,7 +1,7 @@
 /* 注册自定义字体 - 使用外部 CDN 字体 */
 @font-face {
   font-family: 'CustomFont';
-  src: url('https://f.xxu6.top/2427/鸿雷小纸条青春体 HongLeiXiaozhitiao.ttf') format('truetype');
+  src: url('https://f.xxu6.top/2427/%E9%B8%BF%E9%9B%B7%E5%B0%8F%E7%BA%B8%E6%9D%A1%E9%9D%92%E6%98%A5%E4%BD%93HongLeiXiaozhitiao.ttf') format('truetype');
   font-weight: normal;
   font-style: normal;
   font-display: swap;
