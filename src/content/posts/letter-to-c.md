@@ -2,7 +2,7 @@
 title: "[震撼首发]我在课上给cui写了封信"
 published: 2026-03-22 20:06:00
 image: "http://edit.upxuu.com/image/20260322200940_356.jpg"
-description: "在英语课写给某人的letter🤫"
+description: "在英语课写给某人的letter🤫，震撼首发，建议严肃学习😠"
 tags: ["猎奇"]
 category: "随笔"
 ---
