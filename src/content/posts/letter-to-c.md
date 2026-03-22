@@ -7,7 +7,7 @@ category: "随笔"
 
 # 关于我在课上给cui写了封信这件事
 
-Dear Mr./Ms. Cui,
+Dear Mr./Ms. **cui**,
 
 I really want to thank you for being my math teacher. You always help me in many ways, not only in study but also in my life.
 
