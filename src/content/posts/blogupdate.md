@@ -1,12 +1,9 @@
 ---
-title: "博客近期更新记录"
-published: "2026-03-21T00:00:00.000Z"
-updated: "2026-03-21T00:00:00.000Z"
-description: "记录博客最近的改动，包括字体、评论系统、SEO 等"
-image: "https://f.xxu6.top/2427/in.jpg"
-category: "随笔"
-tags: ["博客", "更新"]
-draft: false
+title: Draft Example
+published: 2022-07-01
+tags: [Markdown, Blogging, Demo]
+category: Examples
+draft: true
 ---
 
 简单记录一下博客最近的一些改动。
