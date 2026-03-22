@@ -12,7 +12,8 @@
     "type-check": "tsc --noEmit --isolatedDeclarations",
     "new-post": "node scripts/new-post.js",
     "format": "biome format --write ./src",
-    "lint": "biome check --write ./src"
+    "lint": "biome check --write ./src",
+    "preinstall": "npx only-allow pnpm"
   },
   "dependencies": {
     "@astrojs/check": "^0.9.6",
@@ -42,6 +43,7 @@
     "katex": "^0.16.27",
     "markdown-it": "^14.1.0",
     "mdast-util-to-string": "^4.0.0",
+    "mermaid": "^11.13.0",
     "overlayscrollbars": "^2.12.0",
     "pagefind": "^1.4.0",
     "photoswipe": "^5.4.4",
@@ -73,5 +75,6 @@
     "@types/sanitize-html": "^2.16.0",
     "postcss-import": "^16.1.1",
     "postcss-nesting": "^13.0.2"
-  }
+  },
+  "packageManager": "pnpm@9.14.4"
 }

@@ -8,7 +8,7 @@ const { page } = Astro.props;
 let delay = 0;
 const interval = 50;
 ---
-<div class="transition flex flex-col mb-4 space-y-3 md:space-y-0 md:gap-3">
+<div class="transition flex flex-col mb-4 space-y-4 md:space-y-0 md:gap-4">
     {page.data.map((entry: CollectionEntry<"posts">) => (
         <PostCard
                 entry={entry}
