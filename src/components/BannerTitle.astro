@@ -95,22 +95,54 @@ body:not(.lg\:is-home) .banner-title-container {
     }
 }
 
-/* 烟花粒子效果 */
-.spark {
-    position: absolute;
-    pointer-events: none;
-    border-radius: 50%;
-    animation: spark-fade 0.6s ease-out forwards;
+/* 移动端优化 - 使用 vh 单位确保在可视区域内 */
+@media (max-width: 768px) {
+    .banner-title-container {
+        padding: 0 15px;
+        top: 45vh;
+        transform: translate(-50%, 0);
+    }
+    
+    .banner-main-title {
+        font-size: clamp(1.8rem, 8vw, 3rem);
+    }
+    
+    .banner-subtitle {
+        font-size: clamp(1rem, 5vw, 1.3rem);
+        margin-top: 0.8rem;
+    }
 }
 
-@keyframes spark-fade {
-    0% {
-        opacity: 1;
-        transform: translate(0, 0) scale(1);
+/* 小屏幕进一步优化 */
+@media (max-width: 480px) {
+    .banner-title-container {
+        top: 42vh;
     }
-    100% {
-        opacity: 0;
-        transform: translate(var(--tx), var(--ty)) scale(0);
+    
+    .banner-main-title {
+        font-size: clamp(1.6rem, 9vw, 2.5rem);
+    }
+    
+    .banner-subtitle {
+        font-size: clamp(0.95rem, 6vw, 1.2rem);
+        margin-top: 0.7rem;
+    }
+}
+
+/* 超小屏幕 */
+@media (max-width: 360px) {
+    .banner-title-container {
+        top: 40vh;
+        padding: 0 12px;
+    }
+    
+    .banner-main-title {
+        font-size: clamp(1.5rem, 10vw, 2.2rem);
+    }
+    
+    .banner-subtitle {
+        font-size: clamp(0.9rem, 7vw, 1.1rem);
+        margin-top: 0.6rem;
     }
 }
 </style>
@@ -133,44 +165,10 @@ function sleep(ms) {
     });
 }
 
-// 创建烟花效果
-function createSpark(x, y) {
-    const colors = ['#fff', '#ffd700', '#ff6b6b', '#4ecdc4', '#ffe66d'];
-    const sparkCount = 8;
-    
-    for (let i = 0; i < sparkCount; i++) {
-        const spark = document.createElement('span');
-        spark.className = 'spark';
-        spark.style.left = x + 'px';
-        spark.style.top = y + 'px';
-        spark.style.width = (Math.random() * 4 + 2) + 'px';
-        spark.style.height = spark.style.width;
-        spark.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
-        
-        const angle = (i / sparkCount) * Math.PI * 2;
-        const distance = Math.random() * 30 + 20;
-        spark.style.setProperty('--tx', Math.cos(angle) * distance + 'px');
-        spark.style.setProperty('--ty', Math.sin(angle) * distance + 'px');
-        
-        document.querySelector('.banner-title-container').appendChild(spark);
-        
-        setTimeout(() => spark.remove(), 600);
-    }
-}
-
-async function typeWriter(element, text, speed = 100, withSpark = false) {
+async function typeWriter(element, text, speed = 100) {
     element.textContent = '';
-    const rect = element.getBoundingClientRect();
-    const baseY = rect.top + rect.height / 2;
-    
     for (let i = 0; i < text.length; i++) {
         element.textContent += text.charAt(i);
-        
-        if (withSpark) {
-            const charX = rect.left + (i * 10);
-            createSpark(charX, baseY);
-        }
-        
         await sleep(speed);
     }
 }
@@ -207,26 +205,20 @@ async function initAnimation() {
     subtitleElement.textContent = '';
 
     const titleCursor = document.getElementById('title-cursor');
-    const subtitleCursor = document.getElementById('subtitle-cursor');
     if (titleCursor) titleCursor.style.opacity = '1';
+
+    await typeWriter(titleElement, titleText, 150);
+    await sleep(500);
+
+    const subtitleCursor = document.getElementById('subtitle-cursor');
     if (subtitleCursor) subtitleCursor.style.opacity = '1';
 
-    // 同时开始主标题和副标题的打字效果
-    await Promise.all([
-        typeWriter(titleElement, titleText, 150, true),
-        typeWriter(subtitleElement, subtitles[0], 150, true)
-    ]);
-    
-    await sleep(2000);
-    
-    // 开始副标题轮播
-    currentSubtitleIndex = 1;
     while (true) {
         const currentText = subtitles[currentSubtitleIndex];
+        await typeWriter(subtitleElement, currentText, 100);
+        await sleep(2000);
         await deleteWriter(subtitleElement, 50);
         await sleep(300);
-        await typeWriter(subtitleElement, currentText, 100, true);
-        await sleep(2000);
         currentSubtitleIndex = (currentSubtitleIndex + 1) % subtitles.length;
     }
 }
