@@ -9,7 +9,7 @@ category: "随笔"
 
 ## 字体
 
-全站字体换成了鸿雷小纸条青春体，通过 CDN 加载：
+全站字体换成了字体，通过 CDN 加载：
 
 ```notranslate
 https://f.xxu6.top/2427/font.ttf
@@ -19,7 +19,7 @@ https://f.xxu6.top/2427/font.ttf
 
 ## 评论系统
 
-接入了 Extalk 评论，部署在 Cloudflare 上。
+手搓了一个评论系统，部署在 Cloudflare 上。
 
 ### Extalk 是什么
 
