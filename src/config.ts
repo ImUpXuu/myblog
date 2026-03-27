@@ -70,7 +70,7 @@ export const navBarConfig: NavBarConfig = {
 
 export const profileConfig: ProfileConfig = {
 	avatar: "/images/20260214145619.jpg", // Relative to the /src directory. Relative to the /public directory if it starts with '/'
-	name: "Up Xuu 旭",
+	name: "UpXuu",
 	bio: "逐光而上",
 	links: [
 		{
