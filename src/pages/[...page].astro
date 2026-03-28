@@ -51,6 +51,7 @@ const jsonLd = isFirstPage ? {
 function fetchHomepageStats() {
     const umamiWebsiteId = 'cd983d6c-e011-489d-903f-4757ce41c14d';
     const umamiApiUrl = 'https://stats.upxuu.com';
+    const umamiApiKey = 'YOUR_API_KEY_HERE'; // TODO: 在 Umami 后台生成 API Key 并替换此处
     const postCards = document.querySelectorAll('[data-post-url]');
 
     for (const card of postCards) {
@@ -60,7 +61,11 @@ function fetchHomepageStats() {
         // 使用 Umami API 获取页面统计
         // API 文档：https://docs.umami.is/docs/api/website-stats
         // 使用 path 参数过滤特定 URL 的统计数据
-        fetch(`${umamiApiUrl}/api/websites/${umamiWebsiteId}/stats?path=${encodeURIComponent(pageUrl)}`)
+        fetch(`${umamiApiUrl}/api/websites/${umamiWebsiteId}/stats?path=${encodeURIComponent(pageUrl)}`, {
+            headers: {
+                'Authorization': `Bearer ${umamiApiKey}`
+            }
+        })
             .then(res => res.ok ? res.json() : null)
             .then(data => {
                 if (!data) return;
