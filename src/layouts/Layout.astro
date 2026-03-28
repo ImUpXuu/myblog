@@ -391,15 +391,16 @@ function fetchPageStats() {
 
     if (!viewsEl && !likesEl) return;
 
-    // 使用 Umami API 获取页面统计
-    fetch(`${umamiApiUrl}/api/websites/${umamiWebsiteId}/pages${encodeURIComponent(pageUrl)}/stats`)
+    // 使用 Umami API 获取页面统计（自部署版本）
+    // API 文档：https://umami.is/docs/api
+    fetch(`${umamiApiUrl}/api/website/${umamiWebsiteId}/stats?url=${encodeURIComponent(pageUrl)}`)
         .then(res => res.ok ? res.json() : null)
         .then(data => {
             if (!data) return;
-            // Umami 返回的数据格式：{ pageviews: [{ value: number }] }
-            const views = data.pageviews?.[0]?.value || 0;
+            // Umami 返回的数据格式：{ pageviews: [{ value: number }], uniques: { value: number }, ... }
+            const views = data.pageviews?.value || 0;
             if (viewsEl) viewsEl.textContent = views;
-            // Umami 不直接支持点赞，暂时隐藏点赞元素或使用 views 作为 fallback
+            // Umami 不直接支持点赞，使用浏览量作为 fallback
             if (likesEl) likesEl.textContent = views;
         })
         .catch(() => {});
