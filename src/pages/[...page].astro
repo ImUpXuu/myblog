@@ -57,14 +57,15 @@ function fetchHomepageStats() {
         const pageUrl = card.getAttribute('data-post-url');
         if (!pageUrl) continue;
 
-        // 使用 Umami API 获取页面统计（自部署版本）
-        // API 文档：https://umami.is/docs/api
-        fetch(`${umamiApiUrl}/api/website/${umamiWebsiteId}/stats?url=${encodeURIComponent(pageUrl)}`)
+        // 使用 Umami API 获取页面统计
+        // API 文档：https://docs.umami.is/docs/api/website-stats
+        // 使用 path 参数过滤特定 URL 的统计数据
+        fetch(`${umamiApiUrl}/api/websites/${umamiWebsiteId}/stats?path=${encodeURIComponent(pageUrl)}`)
             .then(res => res.ok ? res.json() : null)
             .then(data => {
                 if (!data) return;
-                // Umami 返回的数据格式：{ pageviews: [{ value: number }], uniques: { value: number }, ... }
-                const views = data.pageviews?.value || 0;
+                // Umami 返回的数据格式：{ pageviews: number, visitors: number, visits: number, ... }
+                const views = data.pageviews || 0;
                 const viewsEl = card.querySelector('.post-views');
                 const likesEl = card.querySelector('.post-likes');
                 if (viewsEl) viewsEl.textContent = views;
