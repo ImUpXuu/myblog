@@ -49,20 +49,34 @@ const jsonLd = isFirstPage ? {
 <script>
 // 批量获取首页文章的访问量和点赞数
 function fetchHomepageStats() {
-    const apiUrl = 'https://comment.upxuu.com';
+    const umamiProxyUrl = 'https://umami-proxy.upxuu.workers.dev'; // TODO: 替换为你的 Cloudflare Worker URL
+    const websiteId = 'cd983d6c-e011-489d-903f-4757ce41c14d';
+    const commentApiUrl = 'https://comment.upxuu.com';
     const postCards = document.querySelectorAll('[data-post-url]');
 
     for (const card of postCards) {
         const pageUrl = card.getAttribute('data-post-url');
         if (!pageUrl) continue;
 
-        fetch(`${apiUrl}/page-stats?url=${encodeURIComponent(pageUrl)}`)
+        // 使用 Umami API 获取浏览量（通过 Cloudflare Worker 中转）
+        fetch(`${umamiProxyUrl}/api/websites/${websiteId}/stats?path=${encodeURIComponent(pageUrl)}`)
+            .then(res => res.ok ? res.json() : null)
+            .then(umamiData => {
+                const views = umamiData?.pageviews || 0;
+                const viewsEl = card.querySelector('.post-views');
+                if (viewsEl) viewsEl.textContent = views;
+            })
+            .catch(() => {
+                const viewsEl = card.querySelector('.post-views');
+                if (viewsEl) viewsEl.textContent = '0';
+            });
+
+        // 点赞数继续使用 comment.upxuu.com
+        fetch(`${commentApiUrl}/page-stats?url=${encodeURIComponent(pageUrl)}`)
             .then(res => res.ok ? res.json() : null)
             .then(data => {
                 if (!data) return;
-                const viewsEl = card.querySelector('.post-views');
                 const likesEl = card.querySelector('.post-likes');
-                if (viewsEl) viewsEl.textContent = data.views || 0;
                 if (likesEl) likesEl.textContent = data.likes || 0;
             })
             .catch(() => {});
