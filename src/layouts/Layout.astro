@@ -151,6 +151,9 @@ const bannerOffset =
 
 		<link rel="alternate" type="application/rss+xml" title={profileConfig.name} href={`${Astro.site}rss.xml`}/>
 
+		<!-- Umami Analytics -->
+		<script defer src="https://stats.upxuu.com/script.js" data-website-id="cd983d6c-e011-489d-903f-4757ce41c14d"></script>
+
 	</head>
 	<body class=" min-h-screen transition " class:list={[{"lg:is-home": isHomePage, "enable-banner": enableBanner}]}
 		  data-overlayscrollbars-initialize
@@ -380,19 +383,24 @@ init();
 
 function fetchPageStats() {
     const pageUrl = window.location.pathname;
-    const apiUrl = 'https://comment.upxuu.com';
+    const umamiWebsiteId = 'cd983d6c-e011-489d-903f-4757ce41c14d';
+    const umamiApiUrl = 'https://stats.upxuu.com';
 
     const viewsEl = document.getElementById('post-views') || document.querySelector('.post-views');
     const likesEl = document.getElementById('post-likes') || document.querySelector('.post-likes');
 
     if (!viewsEl && !likesEl) return;
 
-    fetch(`${apiUrl}/page-stats?url=${encodeURIComponent(pageUrl)}`)
+    // 使用 Umami API 获取页面统计
+    fetch(`${umamiApiUrl}/api/websites/${umamiWebsiteId}/pages${encodeURIComponent(pageUrl)}/stats`)
         .then(res => res.ok ? res.json() : null)
         .then(data => {
             if (!data) return;
-            if (viewsEl) viewsEl.textContent = data.views || 0;
-            if (likesEl) likesEl.textContent = data.likes || 0;
+            // Umami 返回的数据格式：{ pageviews: [{ value: number }] }
+            const views = data.pageviews?.[0]?.value || 0;
+            if (viewsEl) viewsEl.textContent = views;
+            // Umami 不直接支持点赞，暂时隐藏点赞元素或使用 views 作为 fallback
+            if (likesEl) likesEl.textContent = views;
         })
         .catch(() => {});
 }
