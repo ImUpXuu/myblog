@@ -420,39 +420,35 @@ function fetchPageStats() {
 
 (window as any).fetchPageStats = fetchPageStats;
 
-// 获取首页文章统计（批量）
+// 获取首页文章统计（并行请求，提高加载速度）
 function fetchHomepageStats() {
     const apiUrl = 'https://u.upxuu.com';
     const postCards = document.querySelectorAll('[data-post-url]');
     
-    // 收集所有文章 URL
-    const urls = Array.from(postCards)
-        .map(card => card.getAttribute('data-post-url'))
-        .filter(url => url !== null);
-    
-    if (urls.length === 0) return;
-    
-    // 构建查询参数
-    const query = urls.map(url => `url=${encodeURIComponent(url)}`).join('&');
-    
-    // 使用 Cloudflare Worker 批量获取统计
-    fetch(`${apiUrl}/api/homepage-stats?${query}`)
-        .then(res => res.ok ? res.json() : null)
-        .then(data => {
-            if (!data || !data.stats) return;
-            
-            // 更新每个文章卡片的统计
-            data.stats.forEach((stat, index) => {
-                const card = postCards[index];
-                if (!card) return;
+    // 为每个文章卡片独立请求统计
+    postCards.forEach(card => {
+        const pageUrl = card.getAttribute('data-post-url');
+        if (!pageUrl) return;
+        
+        // 独立请求每个文章的统计
+        fetch(`${apiUrl}/api/page-stats?url=${encodeURIComponent(pageUrl)}`)
+            .then(res => res.ok ? res.json() : null)
+            .then(data => {
+                if (!data) return;
                 
                 const viewsEl = card.querySelector('.post-views');
                 const likesEl = card.querySelector('.post-likes');
-                if (viewsEl) viewsEl.textContent = stat.views || 0;
-                if (likesEl) likesEl.textContent = stat.likes || 0;
+                if (viewsEl) viewsEl.textContent = data.views || 0;
+                if (likesEl) likesEl.textContent = data.likes || 0;
+            })
+            .catch(() => {
+                // 请求失败时显示 0
+                const viewsEl = card.querySelector('.post-views');
+                const likesEl = card.querySelector('.post-likes');
+                if (viewsEl) viewsEl.textContent = '0';
+                if (likesEl) likesEl.textContent = '0';
             });
-        })
-        .catch(() => {});
+    });
 }
 
 // 统一的统计获取函数

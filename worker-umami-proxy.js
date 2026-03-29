@@ -27,7 +27,7 @@ export default {
         // 获取全站统计
         return await getSiteStats(url, request);
       } else if (pathname === '/api/homepage-stats') {
-        // 获取首页文章列表统计（批量）
+        // 获取首页文章列表统计（批量）- 已废弃，改为前端并行请求
         return await getHomepageStats(url, request);
       } else {
         return new Response('Not Found', { status: 404 });
