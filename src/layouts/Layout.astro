@@ -522,8 +522,8 @@ const setup = () => {
 		if (heightExtend) {
 			heightExtend.classList.remove('hidden')
 		}
-		// fetch all stats (views and likes)
-		fetchAllStats();
+		// 页面切换时不重新获取统计，避免重复计数
+		// fetchAllStats();
 	});
 	window.swup.hooks.on('visit:end', (_visit: {to: {url: string}}) => {
 		setTimeout(() => {
