@@ -69,6 +69,9 @@ function fetchHomepageStats() {
     }
 }
 
+// 将函数暴露到全局作用域，供 Swup 页面切换时调用
+(window as any).fetchHomepageStats = fetchHomepageStats;
+
 // 等待 DOM 加载完成后获取统计数据
 if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', fetchHomepageStats);

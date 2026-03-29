@@ -29,14 +29,3 @@ yarn.lock
 # ide
 .idea
 *.iml
-
-# Cloudflare Workers
-.wrangler/
-worker-*.js
-wrangler.toml
-*.toml
-
-# test files
-test-*.js
-get-*.js
-debug.log

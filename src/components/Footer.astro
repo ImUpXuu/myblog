@@ -12,7 +12,6 @@ const currentYear = new Date().getFullYear();
 <div class="transition border-dashed border-[oklch(85%_0.01_var(--hue))] dark:border-white/15 rounded-2xl mb-12 flex flex-col items-center justify-center px-6">
     <div class="transition text-50 text-sm text-center">
         &copy; <span id="copyright-year">{currentYear}</span> {profileConfig.name}. All Rights Reserved. /
-        <span id="site-total-views" class="transition link text-[var(--primary)] font-medium">加载中...</span> 次访问 /
         <a class="transition link text-[var(--primary)] font-medium" target="_blank" href={url('rss.xml')}>RSS</a> /
         <a class="transition link text-[var(--primary)] font-medium" target="_blank" href={url('sitemap-index.xml')}>Sitemap</a><br>
         Powered by
@@ -20,24 +19,3 @@ const currentYear = new Date().getFullYear();
         <a class="transition link text-[var(--primary)] font-medium" target="_blank" href="https://github.com/saicaca/fuwari">Fuwari</a>
     </div>
 </div>
-
-<script>
-// 加载网站总访问量
-async function loadTotalViews() {
-    const workerUrl = 'https://umami-api-proxy.upxuu.workers.dev';
-    try {
-        const res = await fetch(`${workerUrl}/api/total-stats`);
-        const data = await res.json();
-        document.getElementById('site-total-views').textContent = `${data.totalViews}`;
-    } catch (error) {
-        console.error('Failed to load total views:', error);
-        document.getElementById('site-total-views').textContent = '-';
-    }
-}
-
-if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', loadTotalViews);
-} else {
-    loadTotalViews();
-}
-</script>
