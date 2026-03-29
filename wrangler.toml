@@ -1,0 +1,12 @@
+name = "umami-proxy"
+main = "worker-umami-proxy.js"
+compatibility_date = "2024-01-01"
+
+# 环境变量（推荐将 token 放在这里）
+# [vars]
+# UMAMI_TOKEN = "your-token-here"
+
+# 如果需要自定义域名
+# routes = [
+#   { pattern = "api.upxuu.com", custom_domain = true }
+# ]

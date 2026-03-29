@@ -392,14 +392,15 @@ init();
 
 function fetchPageStats() {
     const pageUrl = window.location.pathname;
-    const apiUrl = 'https://comment.upxuu.com';
+    const apiUrl = 'https://umami-proxy.upxuu.workers.dev';
 
     const viewsEl = document.getElementById('post-views') || document.querySelector('.post-views');
     const likesEl = document.getElementById('post-likes') || document.querySelector('.post-likes');
 
     if (!viewsEl && !likesEl) return;
 
-    fetch(`${apiUrl}/page-stats?url=${encodeURIComponent(pageUrl)}`)
+    // 使用 Cloudflare Worker 代理 Umami API
+    fetch(`${apiUrl}/api/page-stats?url=${encodeURIComponent(pageUrl)}`)
         .then(res => res.ok ? res.json() : null)
         .then(data => {
             if (!data) return;
