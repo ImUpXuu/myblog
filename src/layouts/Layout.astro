@@ -389,11 +389,18 @@ function init() {
 
 /* Load settings when entering the site */
 init();
-fetchAllStats();
+
+// 页面加载后获取统计（延迟执行，避免阻塞其他脚本）
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', fetchAllStats);
+} else {
+    // 使用 setTimeout 延迟执行，避免阻塞评论 SDK 等脚本加载
+    setTimeout(fetchAllStats, 100);
+}
 
 function fetchPageStats() {
     const pageUrl = window.location.pathname;
-    const apiUrl = 'https://umami-proxy.upxuu.workers.dev';
+    const apiUrl = 'https://u.upxuu.com';
 
     const viewsEl = document.getElementById('post-views') || document.querySelector('.post-views');
     const likesEl = document.getElementById('post-likes') || document.querySelector('.post-likes');
@@ -415,7 +422,7 @@ function fetchPageStats() {
 
 // 获取首页文章统计（批量）
 function fetchHomepageStats() {
-    const apiUrl = 'https://umami-proxy.upxuu.workers.dev';
+    const apiUrl = 'https://u.upxuu.com';
     const postCards = document.querySelectorAll('[data-post-url]');
     
     // 收集所有文章 URL
