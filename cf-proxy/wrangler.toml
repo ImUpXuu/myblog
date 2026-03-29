@@ -1,21 +1,12 @@
 name = "umami-proxy"
-main = "worker.js"
+main = "worker-simple.js"
 compatibility_date = "2024-01-01"
 
 # 环境变量配置
 [vars]
 # Umami 实例地址
 UMAMI_URL = "https://stats.upxuu.com"
-# Umami 用户名
-UMAMI_USERNAME = "admin"
-# Umami 密码
-UMAMI_PASSWORD = "lijiaxupxu"
-# 允许访问的 API 路径（逗号分隔）
-ALLOWED_PATHS = "/stats,/pageviews"
-# 需要过滤的敏感字段（逗号分隔）
-BLOCKED_FIELDS = "visitors,visits,bounces,totaltime,countries,comparison"
-
-# 如果需要绑定自定义域名，取消下面的注释
-# routes = [
-#   { pattern = "umami-proxy.upxuu.workers.dev", custom_domain = true }
-# ]
+# Umami API Token（通过 /api/auth/login 获取）
+UMAMI_TOKEN = "bUeO7XXbCJbFXnZ5FPOYPghzkB0hYQqmRKDxHBJmdu/yoNMde4rvkfuhK4A3h0hUkt/ovKSK9xG3"
+# 网站 ID
+UMAMI_WEBSITE_ID = "cd983d6c-e011-489d-903f-4757ce41c14d"

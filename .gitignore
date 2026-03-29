@@ -29,3 +29,6 @@ yarn.lock
 # ide
 .idea
 *.iml
+
+# Cloudflare Worker proxy (contains sensitive tokens)
+cf-proxy/

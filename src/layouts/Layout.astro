@@ -392,8 +392,7 @@ init();
 
 function fetchPageStats() {
     const pageUrl = window.location.pathname;
-    const umamiProxyUrl = 'https://umami-proxy.upxuu.workers.dev'; // TODO: 替换为你的 Cloudflare Worker URL
-    const websiteId = 'cd983d6c-e011-489d-903f-4757ce41c14d';
+    const umamiProxyUrl = 'https://umami-proxy.upxuu.workers.dev';
     const commentApiUrl = 'https://comment.upxuu.com';
 
     const viewsEl = document.getElementById('post-views') || document.querySelector('.post-views');
@@ -401,11 +400,11 @@ function fetchPageStats() {
 
     if (!viewsEl && !likesEl) return;
 
-    // 使用 Umami API 获取浏览量（通过 Cloudflare Worker 中转）
-    fetch(`${umamiProxyUrl}/api/websites/${websiteId}/stats?path=${encodeURIComponent(pageUrl)}`)
+    // 使用简化接口获取浏览量：GET /views?url=/posts/test
+    fetch(`${umamiProxyUrl}/views?url=${encodeURIComponent(pageUrl)}`)
         .then(res => res.ok ? res.json() : null)
-        .then(umamiData => {
-            const views = umamiData?.pageviews || 0;
+        .then(data => {
+            const views = data?.views || 0;
             if (viewsEl) viewsEl.textContent = views;
         })
         .catch(() => {

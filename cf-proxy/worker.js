@@ -3,13 +3,11 @@
 
 // 环境变量（在 Cloudflare Dashboard 中设置）：
 // - UMAMI_URL: Umami 实例地址，如 https://stats.upxuu.com
-// - UMAMI_USERNAME: Umami 用户名
-// - UMAMI_PASSWORD: Umami 密码
+// - UMAMI_TOKEN: Umami API Token（预先获取）
 // - ALLOWED_PATHS: 允许访问的 API 路径（逗号分隔），例如：/stats,/pageviews
 // - BLOCKED_FIELDS: 需要过滤的敏感字段（逗号分隔），例如：visitors,visits,bounces,totaltime,countries
 
 let cachedToken = null;
-let tokenExpiry = null;
 
 export default {
   async fetch(request, env, ctx) {
@@ -24,8 +22,12 @@ export default {
     }
 
     try {
-      // 获取或刷新 token
-      const token = await getToken(env);
+      // 使用配置的 token（优先使用缓存）
+      const token = cachedToken || env.UMAMI_TOKEN;
+      if (!token) {
+        throw new Error('UMAMI_TOKEN not configured');
+      }
+      cachedToken = token;
       
       // 解析请求 URL
       const url = new URL(request.url);
@@ -91,45 +93,6 @@ export default {
     }
   },
 };
-
-/**
- * 获取 Umami token，如果已过期则重新登录
- */
-async function getToken(env) {
-  // 检查缓存的 token 是否仍然有效（提前 5 分钟过期）
-  if (cachedToken && tokenExpiry && Date.now() < tokenExpiry - 5 * 60 * 1000) {
-    return cachedToken;
-  }
-  
-  // 登录获取新 token
-  const loginUrl = new URL(env.UMAMI_URL);
-  loginUrl.pathname = '/api/auth/login';
-  
-  const response = await fetch(loginUrl.toString(), {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      username: env.UMAMI_USERNAME,
-      password: env.UMAMI_PASSWORD,
-    }),
-  });
-  
-  if (!response.ok) {
-    throw new Error(`Login failed: ${response.status} ${response.statusText}`);
-  }
-  
-  const data = await response.json();
-  cachedToken = data.token;
-  
-  // Token 默认 24 小时过期，我们设置为 23 小时
-  tokenExpiry = Date.now() + (23 * 60 * 60 * 1000);
-  
-  console.log('Umami token refreshed successfully');
-  
-  return cachedToken;
-}
 
 /**
  * 检查请求路径是否在允许列表中
