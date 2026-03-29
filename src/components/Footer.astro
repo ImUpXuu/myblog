@@ -18,4 +18,40 @@ const currentYear = new Date().getFullYear();
         <a class="transition link text-[var(--primary)] font-medium" target="_blank" href="https://astro.build">Astro</a> &
         <a class="transition link text-[var(--primary)] font-medium" target="_blank" href="https://github.com/saicaca/fuwari">Fuwari</a>
     </div>
+    <!-- 全站统计 -->
+    <div class="transition text-xs text-center mt-3 text-black/50 dark:text-white/50">
+        <span id="site-stats">
+            <span id="site-views">Loading...</span> 次浏览 · 
+            <span id="site-visits">Loading...</span> 人次
+        </span>
+    </div>
 </div>
+
+<script>
+// 获取全站统计
+async function fetchSiteStats() {
+    const apiUrl = 'https://umami-proxy.upxuu.workers.dev';
+    
+    try {
+        const response = await fetch(`${apiUrl}/api/site-stats`);
+        const data = await response.json();
+        
+        const viewsEl = document.getElementById('site-views');
+        const visitsEl = document.getElementById('site-visits');
+        
+        if (viewsEl) viewsEl.textContent = data.totalViews || 0;
+        if (visitsEl) visitsEl.textContent = data.totalVisits || 0;
+    } catch (error) {
+        console.error('Failed to fetch site stats:', error);
+        const viewsEl = document.getElementById('site-views');
+        const visitsEl = document.getElementById('site-visits');
+        if (viewsEl) viewsEl.textContent = '0';
+        if (visitsEl) visitsEl.textContent = '0';
+    }
+}
+
+// 页面加载时获取统计
+if (typeof window !== 'undefined') {
+    fetchSiteStats();
+}
+</script>
