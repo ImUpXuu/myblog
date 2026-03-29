@@ -4,6 +4,58 @@ published: 2026-03-29 19:49:00
 category: "技术"
 ---
 
+# 倒计时壁纸生成器
+
+一个模块化的桌面壁纸生成工具，为重要日子倒计时增添励志动力。
+
+![Python](https://img.shields.io/badge/Python-3.6+-blue.svg)
+![License](https://img.shields.io/badge/License-GPL--3.0-green.svg)
+![Version](https://img.shields.io/badge/Version-2.1.6-orange.svg)
+
+## ✨ 功能特性
+
+- 🖼️ **自动获取 Bing 每日一图** 作为壁纸背景
+- 📖 **一言 API 励志语录** 每日更新，传递感动与力量
+- ⏰ **智能倒计时** 精确计算剩余天数和周数
+- 🔧 **模块化设计** 壁纸生成与管理分离，清晰高效
+- 🎨 **高度可定制** 字体、颜色、布局随心配置
+- 🧹 **自动清理** 保留最近 3 天壁纸，节省空间
+
+## 🚀 快速开始
+
+
+<iframe 
+  src="https://player.bilibili.com/player.html?isOutside=true&aid=116312412002537&bvid=BV1mmXQBdE9v&cid=37074568582&p=1" 
+  width="100%" 
+  height="600" 
+  ...
+>
+</iframe>
+
+
+### 📥 下载
+
+**Windows 用户可以直接下载 exe 文件使用，无需安装 Python！**
+
+- [📥 下载主程序](https://raw-githubusercontent-com-gh.2x.nz/ImUpXuu/CDW/refs/heads/main/dist/CountdownWallpaper.exe) - CountdownWallpaper.exe
+- [📥 下载管理器](https://raw-githubusercontent-com-gh.2x.nz/ImUpXuu/CDW/refs/heads/main/dist/CDWManager.exe) - CDWManager.exe
+
+**使用说明：**
+
+1. 下载 `CountdownWallpaper.exe` 到任意目录
+2. 首次运行会自动下载管理器或从上方链接手动下载
+3. 使用管理器配置倒计时日期
+4. 保存后自动生成壁纸
+
+### 环境要求
+
+- Python 3.6+
+- Windows 系统
+- 依赖库：
+  ```bash
+  pip install -r requirements.txt
+  ```
+
 ### 使用方法
 
 #### 方式一：使用管理器（推荐）
@@ -155,6 +207,8 @@ pyinstaller --onefile --windowed --icon=icon.ico cdwmanager.py
 ---
 
 **让每一天的努力都闪闪发光！** ✨
+
+```
 
 ```
 
