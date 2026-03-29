@@ -392,30 +392,18 @@ init();
 
 function fetchPageStats() {
     const pageUrl = window.location.pathname;
-    const umamiProxyUrl = 'https://umami-proxy.upxuu.workers.dev';
-    const commentApiUrl = 'https://comment.upxuu.com';
+    const apiUrl = 'https://comment.upxuu.com';
 
     const viewsEl = document.getElementById('post-views') || document.querySelector('.post-views');
     const likesEl = document.getElementById('post-likes') || document.querySelector('.post-likes');
 
     if (!viewsEl && !likesEl) return;
 
-    // 使用简化接口获取浏览量：GET /views?url=/posts/test
-    fetch(`${umamiProxyUrl}/views?url=${encodeURIComponent(pageUrl)}`)
-        .then(res => res.ok ? res.json() : null)
-        .then(data => {
-            const views = data?.views || 0;
-            if (viewsEl) viewsEl.textContent = views;
-        })
-        .catch(() => {
-            if (viewsEl) viewsEl.textContent = '0';
-        });
-
-    // 点赞数继续使用 comment.upxuu.com
-    fetch(`${commentApiUrl}/page-stats?url=${encodeURIComponent(pageUrl)}`)
+    fetch(`${apiUrl}/page-stats?url=${encodeURIComponent(pageUrl)}`)
         .then(res => res.ok ? res.json() : null)
         .then(data => {
             if (!data) return;
+            if (viewsEl) viewsEl.textContent = data.views || 0;
             if (likesEl) likesEl.textContent = data.likes || 0;
         })
         .catch(() => {});
