@@ -390,25 +390,20 @@ function init() {
 /* Load settings when entering the site */
 init();
 
-// 页面加载后获取统计（延迟执行，避免阻塞其他脚本）
-if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', fetchAllStats);
-} else {
-    // 使用 setTimeout 延迟执行，避免阻塞评论 SDK 等脚本加载
-    setTimeout(fetchAllStats, 100);
-}
-
 function fetchPageStats() {
     const pageUrl = window.location.pathname;
-    const apiUrl = 'https://u.upxuu.com';
+    // 使用 Cloudflare Worker 中转 Umami API（部署后替换为实际 URL）
+    // const workerUrl = 'https://umami-api-proxy.xxxx.workers.dev';
+    const apiUrl = 'https://comment.upxuu.com'; // 临时使用原 API
 
     const viewsEl = document.getElementById('post-views') || document.querySelector('.post-views');
     const likesEl = document.getElementById('post-likes') || document.querySelector('.post-likes');
 
     if (!viewsEl && !likesEl) return;
 
-    // 使用 Cloudflare Worker 代理 Umami API
-    fetch(`${apiUrl}/api/page-stats?url=${encodeURIComponent(pageUrl)}`)
+    // TODO: 部署 Worker 后切换到新 API
+    // fetch(`${workerUrl}/api/page-stats?url=${encodeURIComponent(pageUrl)}`)
+    fetch(`${apiUrl}/page-stats?url=${encodeURIComponent(pageUrl)}`)
         .then(res => res.ok ? res.json() : null)
         .then(data => {
             if (!data) return;
@@ -419,50 +414,6 @@ function fetchPageStats() {
 }
 
 (window as any).fetchPageStats = fetchPageStats;
-
-// 获取首页文章统计（并行请求，提高加载速度）
-function fetchHomepageStats() {
-    const apiUrl = 'https://u.upxuu.com';
-    const postCards = document.querySelectorAll('[data-post-url]');
-    
-    // 为每个文章卡片独立请求统计
-    postCards.forEach(card => {
-        const pageUrl = card.getAttribute('data-post-url');
-        if (!pageUrl) return;
-        
-        // 独立请求每个文章的统计
-        fetch(`${apiUrl}/api/page-stats?url=${encodeURIComponent(pageUrl)}`)
-            .then(res => res.ok ? res.json() : null)
-            .then(data => {
-                if (!data) return;
-                
-                const viewsEl = card.querySelector('.post-views');
-                const likesEl = card.querySelector('.post-likes');
-                if (viewsEl) viewsEl.textContent = data.views || 0;
-                if (likesEl) likesEl.textContent = data.likes || 0;
-            })
-            .catch(() => {
-                // 请求失败时显示 0
-                const viewsEl = card.querySelector('.post-views');
-                const likesEl = card.querySelector('.post-likes');
-                if (viewsEl) viewsEl.textContent = '0';
-                if (likesEl) likesEl.textContent = '0';
-            });
-    });
-}
-
-// 统一的统计获取函数
-function fetchAllStats() {
-    const isHomepage = window.location.pathname === '/' || window.location.pathname === '';
-    
-    if (isHomepage) {
-        // 首页：批量获取所有文章统计
-        fetchHomepageStats();
-    } else {
-        // 其他页面：获取当前页面统计
-        fetchPageStats();
-    }
-}
 
 const setup = () => {
 	// TODO: temp solution to change the height of the banner
@@ -522,8 +473,8 @@ const setup = () => {
 		if (heightExtend) {
 			heightExtend.classList.remove('hidden')
 		}
-		// 页面切换时不重新获取统计，避免重复计数
-		// fetchAllStats();
+		// fetch page stats (views and likes)
+		fetchPageStats();
 	});
 	window.swup.hooks.on('visit:end', (_visit: {to: {url: string}}) => {
 		setTimeout(() => {

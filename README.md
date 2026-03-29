@@ -103,33 +103,6 @@ All commands are run from the root of the project, from a terminal:
 
 Check out the [Contributing Guide](https://github.com/saicaca/fuwari/blob/main/CONTRIBUTING.md) for details on how to contribute to this project.
 
-## 🔧 Umami Analytics Configuration
-
-This blog uses Umami for analytics. To configure Umami integration:
-
-1. Get your Umami credentials:
-   - Umami URL: `https://stats.upxuu.com`
-   - Username: `admin`
-   - Password: (your password)
-
-2. Login to get API token:
-   ```bash
-   node get-umami-token.js
-   ```
-
-3. Update `myblog/cf-proxy/wrangler.toml`:
-   ```toml
-   [vars]
-   UMAMI_URL = "https://stats.upxuu.com"
-   UMAMI_TOKEN = "your-token-here"
-   UMAMI_WEBSITE_ID = "your-website-id"
-   ```
-
-4. Test the connection:
-   ```bash
-   node test-umami.js
-   ```
-
 ## 📄 License
 
 This project is licensed under the MIT License.

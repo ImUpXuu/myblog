@@ -45,3 +45,34 @@ const jsonLd = isFirstPage ? {
     <PostPage page={page}></PostPage>
     <Pagination class="mx-auto onload-animation" page={page} style={`animation-delay: calc(var(--content-delay) + ${(len)*50}ms)`}></Pagination>
 </MainGridLayout>
+
+<script>
+// 批量获取首页文章的访问量和点赞数
+function fetchHomepageStats() {
+    const apiUrl = 'https://comment.upxuu.com';
+    const postCards = document.querySelectorAll('[data-post-url]');
+
+    for (const card of postCards) {
+        const pageUrl = card.getAttribute('data-post-url');
+        if (!pageUrl) continue;
+
+        fetch(`${apiUrl}/page-stats?url=${encodeURIComponent(pageUrl)}`)
+            .then(res => res.ok ? res.json() : null)
+            .then(data => {
+                if (!data) return;
+                const viewsEl = card.querySelector('.post-views');
+                const likesEl = card.querySelector('.post-likes');
+                if (viewsEl) viewsEl.textContent = data.views || 0;
+                if (likesEl) likesEl.textContent = data.likes || 0;
+            })
+            .catch(() => {});
+    }
+}
+
+// 等待 DOM 加载完成后获取统计数据
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', fetchHomepageStats);
+} else {
+    fetchHomepageStats();
+}
+</script>

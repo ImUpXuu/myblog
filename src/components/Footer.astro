@@ -12,35 +12,35 @@ const currentYear = new Date().getFullYear();
 <div class="transition border-dashed border-[oklch(85%_0.01_var(--hue))] dark:border-white/15 rounded-2xl mb-12 flex flex-col items-center justify-center px-6">
     <div class="transition text-50 text-sm text-center">
         &copy; <span id="copyright-year">{currentYear}</span> {profileConfig.name}. All Rights Reserved. /
+        <span id="site-total-views" class="transition link text-[var(--primary)] font-medium">加载中...</span> 次访问 /
         <a class="transition link text-[var(--primary)] font-medium" target="_blank" href={url('rss.xml')}>RSS</a> /
         <a class="transition link text-[var(--primary)] font-medium" target="_blank" href={url('sitemap-index.xml')}>Sitemap</a><br>
         Powered by
         <a class="transition link text-[var(--primary)] font-medium" target="_blank" href="https://astro.build">Astro</a> &
         <a class="transition link text-[var(--primary)] font-medium" target="_blank" href="https://github.com/saicaca/fuwari">Fuwari</a>
     </div>
-    <!-- 全站统计 -->
-    <div class="transition text-xs text-center mt-3 text-black/50 dark:text-white/50">
-        浏览次数：<span id="site-views">加载中...</span> · 
-        访问人次：<span id="site-visits">加载中...</span>
-    </div>
 </div>
 
-<script client:load>
-// 获取全站统计
-async function fetchSiteStats() {
-    try {
-        const response = await fetch('https://u.upxuu.com/api/site-stats');
-        const data = await response.json();
-        
-        document.getElementById('site-views').textContent = (data.totalViews || 0).toLocaleString();
-        document.getElementById('site-visits').textContent = (data.totalVisits || 0).toLocaleString();
-    } catch (error) {
-        console.error('统计获取失败:', error);
-        document.getElementById('site-views').textContent = '0';
-        document.getElementById('site-visits').textContent = '0';
-    }
+<script>
+// 加载网站总访问量
+async function loadTotalViews() {
+    // TODO: 部署 Worker 后使用新 API
+    // const workerUrl = 'https://umami-api-proxy.xxxx.workers.dev';
+    // try {
+    //     const res = await fetch(`${workerUrl}/api/total-stats`);
+    //     const data = await res.json();
+    //     document.getElementById('site-total-views').textContent = `${data.totalViews}`;
+    // } catch (error) {
+    //     console.error('Failed to load total views:', error);
+    // }
+    
+    // 临时使用 Umami 直接 API（需要 token）
+    // 部署 Worker 后请切换到上面的代码
 }
 
-// 立即执行
-fetchSiteStats();
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', loadTotalViews);
+} else {
+    loadTotalViews();
+}
 </script>
