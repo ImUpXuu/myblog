@@ -7,6 +7,6 @@ compatibility_date = "2024-01-01"
 # Umami 实例地址
 UMAMI_URL = "https://stats.upxuu.com"
 # Umami API Token（通过 /api/auth/login 获取）
-UMAMI_TOKEN = "bUeO7XXbCJbFXnZ5FPOYPghzkB0hYQqmRKDxHBJmdu/yoNMde4rvkfuhK4A3h0hUkt/ovKSK9xG3"
+UMAMI_TOKEN = "zRfUBgGdglK74brSR3Se/Y93UtVS1RzCPTjLemwzKpMZdGMrTYSndtG38Rofem7EljRqOZe4+qa2ycEDfAaUkx7cgpUK5Bu9oXUKeRByBAg9ERf+fZiUyIhtc+asY3s3qUd1Nsu0uevjFzfaqkhj+QSTo0w+ryavxt75gDsQ1giyQmolBNaAz207J19tp5VtZyymZn1P8WL/Puyc+wfQnae8/Uvk0o9GIBm5XFvAj8lDGSz8t1GdO7OUvebX2uUZZr7hjw4PLGsiaqDm3Nc2paH67DTa9i/Xcu0ABJqbwjohv0PEhysDH1FNjfW2h9lPWYwuaDIE25szdmYDe8XCFXMZlnWA74vwFvlKU0IdbA8tNmvFwxHjv9+WWTyw"
 # 网站 ID
 UMAMI_WEBSITE_ID = "cd983d6c-e011-489d-903f-4757ce41c14d"
