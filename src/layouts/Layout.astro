@@ -389,6 +389,7 @@ function init() {
 
 /* Load settings when entering the site */
 init();
+fetchAllStats();
 
 function fetchPageStats() {
     const pageUrl = window.location.pathname;
@@ -411,6 +412,54 @@ function fetchPageStats() {
 }
 
 (window as any).fetchPageStats = fetchPageStats;
+
+// 获取首页文章统计（批量）
+function fetchHomepageStats() {
+    const apiUrl = 'https://umami-proxy.upxuu.workers.dev';
+    const postCards = document.querySelectorAll('[data-post-url]');
+    
+    // 收集所有文章 URL
+    const urls = Array.from(postCards)
+        .map(card => card.getAttribute('data-post-url'))
+        .filter(url => url !== null);
+    
+    if (urls.length === 0) return;
+    
+    // 构建查询参数
+    const query = urls.map(url => `url=${encodeURIComponent(url)}`).join('&');
+    
+    // 使用 Cloudflare Worker 批量获取统计
+    fetch(`${apiUrl}/api/homepage-stats?${query}`)
+        .then(res => res.ok ? res.json() : null)
+        .then(data => {
+            if (!data || !data.stats) return;
+            
+            // 更新每个文章卡片的统计
+            data.stats.forEach((stat, index) => {
+                const card = postCards[index];
+                if (!card) return;
+                
+                const viewsEl = card.querySelector('.post-views');
+                const likesEl = card.querySelector('.post-likes');
+                if (viewsEl) viewsEl.textContent = stat.views || 0;
+                if (likesEl) likesEl.textContent = stat.likes || 0;
+            });
+        })
+        .catch(() => {});
+}
+
+// 统一的统计获取函数
+function fetchAllStats() {
+    const isHomepage = window.location.pathname === '/' || window.location.pathname === '';
+    
+    if (isHomepage) {
+        // 首页：批量获取所有文章统计
+        fetchHomepageStats();
+    } else {
+        // 其他页面：获取当前页面统计
+        fetchPageStats();
+    }
+}
 
 const setup = () => {
 	// TODO: temp solution to change the height of the banner
@@ -470,8 +519,8 @@ const setup = () => {
 		if (heightExtend) {
 			heightExtend.classList.remove('hidden')
 		}
-		// fetch page stats (views and likes)
-		fetchPageStats();
+		// fetch all stats (views and likes)
+		fetchAllStats();
 	});
 	window.swup.hooks.on('visit:end', (_visit: {to: {url: string}}) => {
 		setTimeout(() => {
