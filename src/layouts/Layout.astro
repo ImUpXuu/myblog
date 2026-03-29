@@ -392,18 +392,15 @@ init();
 
 function fetchPageStats() {
     const pageUrl = window.location.pathname;
-    // 使用 Cloudflare Worker 中转 Umami API（部署后替换为实际 URL）
-    // const workerUrl = 'https://umami-api-proxy.xxxx.workers.dev';
-    const apiUrl = 'https://comment.upxuu.com'; // 临时使用原 API
+    // Cloudflare Worker URL - 部署后自动替换
+    const workerUrl = 'https://umami-api-proxy.upxuu.workers.dev';
 
     const viewsEl = document.getElementById('post-views') || document.querySelector('.post-views');
     const likesEl = document.getElementById('post-likes') || document.querySelector('.post-likes');
 
     if (!viewsEl && !likesEl) return;
 
-    // TODO: 部署 Worker 后切换到新 API
-    // fetch(`${workerUrl}/api/page-stats?url=${encodeURIComponent(pageUrl)}`)
-    fetch(`${apiUrl}/page-stats?url=${encodeURIComponent(pageUrl)}`)
+    fetch(`${workerUrl}/api/page-stats?url=${encodeURIComponent(pageUrl)}`)
         .then(res => res.ok ? res.json() : null)
         .then(data => {
             if (!data) return;

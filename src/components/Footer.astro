@@ -24,18 +24,15 @@ const currentYear = new Date().getFullYear();
 <script>
 // 加载网站总访问量
 async function loadTotalViews() {
-    // TODO: 部署 Worker 后使用新 API
-    // const workerUrl = 'https://umami-api-proxy.xxxx.workers.dev';
-    // try {
-    //     const res = await fetch(`${workerUrl}/api/total-stats`);
-    //     const data = await res.json();
-    //     document.getElementById('site-total-views').textContent = `${data.totalViews}`;
-    // } catch (error) {
-    //     console.error('Failed to load total views:', error);
-    // }
-    
-    // 临时使用 Umami 直接 API（需要 token）
-    // 部署 Worker 后请切换到上面的代码
+    const workerUrl = 'https://umami-api-proxy.upxuu.workers.dev';
+    try {
+        const res = await fetch(`${workerUrl}/api/total-stats`);
+        const data = await res.json();
+        document.getElementById('site-total-views').textContent = `${data.totalViews}`;
+    } catch (error) {
+        console.error('Failed to load total views:', error);
+        document.getElementById('site-total-views').textContent = '-';
+    }
 }
 
 if (document.readyState === 'loading') {
