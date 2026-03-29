@@ -24,16 +24,18 @@ category: "技术"
 ## 🚀 快速开始
 
 
-<iframe 
-  src="https://player.bilibili.com/player.html?isOutside=true&aid=116312412002537&bvid=BV1mmXQBdE9v&cid=37074568582&p=1" 
-  width="100%" 
-  height="600" 
-  ...
->
-</iframe>
+<div style="position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden;">
+  <iframe 
+    src="https://player.bilibili.com/player.html?isOutside=true&aid=116312412002537&bvid=BV1mmXQBdE9v&cid=37074568582&p=1" 
+    style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;" 
+    scrolling="no" 
+    border="0" 
+    frameborder="no" 
+    framespacing="0" 
+    allowfullscreen="true">
+  </iframe>
+</div>
 
-
-### 📥 下载
 
 **Windows 用户可以直接下载 exe 文件使用，无需安装 Python！**
 
@@ -207,6 +209,8 @@ pyinstaller --onefile --windowed --icon=icon.ico cdwmanager.py
 ---
 
 **让每一天的努力都闪闪发光！** ✨
+
+```
 
 ```
 
