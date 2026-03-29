@@ -73,9 +73,12 @@ function fetchHomepageStats() {
 (window as any).fetchHomepageStats = fetchHomepageStats;
 
 // 等待 DOM 加载完成后获取统计数据
-if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', fetchHomepageStats);
-} else {
-    fetchHomepageStats();
-}
+// 使用 setTimeout 确保 Swup 切换后 DOM 已经完全渲染
+setTimeout(() => {
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', fetchHomepageStats);
+    } else {
+        fetchHomepageStats();
+    }
+}, 100);
 </script>
