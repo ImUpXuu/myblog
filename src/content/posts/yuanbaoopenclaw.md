@@ -1,5 +1,5 @@
 ---
-title: 元宝 创建openclaw，送轻量云服务器？？？——元宝bot二三事
+title: 元宝神操作！不仅免费部署OpenClaw，还能秒变永久轻量云服务器？？
 published: 2026-03-30
 description: '腾讯元宝推出重磅福利，可免费部署OpenClaw！本文手把手教你通过Tailscale内网穿透，将元宝Bot变身为一台可用的轻量云服务器，含1Panel安装、远程连接全流程。'
 image: ''
