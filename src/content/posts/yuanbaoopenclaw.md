@@ -1,4 +1,5 @@
 ---
+<<<<<<< HEAD
 title: 元宝神操作！不仅免费部署OpenClaw，还能秒变永久轻量云服务器？？
 published: 2026-03-30
 description: '腾讯元宝推出重磅福利，可免费部署OpenClaw！本文手把手教你通过Tailscale内网穿透，将元宝Bot变身为一台可用的轻量云服务器，含1Panel安装、远程连接全流程。'
@@ -7,6 +8,13 @@ tags: [折腾]
 category: '技术'
 draft: false 
 lang: ''
+=======
+title: "元宝神操作！免费部署OpenClaw，秒变永久轻量云服务器？？"
+published: 2026-03-30 00:00:00
+description: "腾讯元宝推出重磅福利，可免费部署OpenClaw！本文手把手教你通过Tailscale内网穿透，将元宝Bot变身为一台可用的轻量云服务器，含1Panel安装、远程连接全流程。"
+tags: ["折腾"]
+category: "技术"
+>>>>>>> b4809d9d55e6bf4aba9702ffd699ee1273d375b9
 ---
 
 # 元宝神操作！免费部署OpenClaw，秒变永久轻量云服务器？？
@@ -18,8 +26,6 @@ lang: ''
 > [!TIP]
 >
 > 既然都用元宝了，很多东西就可以让元宝帮我们干了，实际没有这个教程这么麻烦哈哈哈哈😂
-
-
 
 ## 1.前言
 
@@ -41,11 +47,7 @@ lang: ''
 
 [点击进入**Tailscale**官网](https://tailscale.com/download)
 
-
-
 ![Tailscale](https://edit.upxuu.com/image/img_1774879032644_image.png)
-
-
 
 这里我以Windows为例，其他版本一样
 
@@ -58,8 +60,6 @@ lang: ''
 这里直接用自然语言和它交流即可 让他通过官方脚本
 
 `curl -fsSL https://tailscale.com/install.sh | sh`安装tailscale 随后在你的自己的设备上打开登陆链接
-
-
 
 ![Screenshot_20260330_220458.jpg](https://edit.upxuu.com/image/img_1774879541880_Screenshot_20260330_220458.jpg)
 
@@ -74,4 +74,3 @@ lang: ''
 ![image.png](https://edit.upxuu.com/image/img_1774879890261_image.png)
 
 然后只需要输入你的元宝bot设备+端口号/安全连接 输入默认的账户名密码 你就拥有了一个免费的腾讯轻量云服务器！
-
