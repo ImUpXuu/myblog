@@ -1,10 +1,26 @@
 ---
 import MainGridLayout from "../layouts/MainGridLayout.astro";
 import BannerTitle from "../components/BannerTitle.astro";
+import { profileConfig, siteConfig } from "../config";
+
+const jsonLd = {
+	"@context": "https://schema.org",
+	"@type": "WebPage",
+	"@id": `${Astro.site}shuoshuo`,
+	name: "碎碎念",
+	description: "upxuu 的碎碎念",
+	url: `${Astro.site}shuoshuo`,
+	author: {
+		"@type": "Person",
+		name: profileConfig.name,
+	},
+	inLanguage: siteConfig.lang.replace("_", "-"),
+};
 ---
 
 <MainGridLayout title="碎碎念" description="upxuu 的碎碎念">
     <BannerTitle slot="banner-title"></BannerTitle>
+    <script is:inline slot="head" type="application/ld+json" set:html={JSON.stringify(jsonLd)}></script>
     <script slot="head" src="https://comment.upxuu.com/sdk.js" defer></script>
     <div class="flex w-full rounded-[var(--radius-large)] overflow-hidden relative min-h-32">
         <div class="card-base z-10 px-9 py-6 relative w-full">

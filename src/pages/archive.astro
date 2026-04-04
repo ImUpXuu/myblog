@@ -5,12 +5,28 @@ import { i18n } from "@i18n/translation";
 import BannerTitle from "../components/BannerTitle.astro";
 import MainGridLayout from "@/layouts/MainGridLayout.astro";
 import { getSortedPostsList } from "../utils/content-utils";
+import { siteConfig, profileConfig } from "../config";
 
 const sortedPostsList = await getSortedPostsList();
+
+const jsonLd = {
+	"@context": "https://schema.org",
+	"@type": "CollectionPage",
+	"@id": `${Astro.site}archive`,
+	name: i18n(I18nKey.archive),
+	description: `Archive of ${siteConfig.title}`,
+	url: `${Astro.site}archive`,
+	author: {
+		"@type": "Person",
+		name: profileConfig.name,
+	},
+	inLanguage: siteConfig.lang.replace("_", "-"),
+};
 ---
 
 <MainGridLayout title={i18n(I18nKey.archive)}>
     <BannerTitle slot="banner-title"></BannerTitle>
+    <script is:inline slot="head" type="application/ld+json" set:html={JSON.stringify(jsonLd)}></script>
     <ArchivePanel sortedPosts={sortedPostsList} client:only="svelte"></ArchivePanel>
 </MainGridLayout>
 
