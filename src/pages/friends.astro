@@ -7,8 +7,8 @@ import { profileConfig, siteConfig } from "../config";
 const friends = [
 	{
 		name: "UpXuu",
-		avatar: "https://www.upxuu.com/images/20260214145619.jpg",
-		url: "https://www.upxuu.com",
+		avatar: "https://upxuu.com/images/20260214145619.jpg",
+		url: "https://upxuu.com",
 		description: "逐光而上",
 		tags: ["博主", "技术"],
 	},
@@ -54,33 +54,38 @@ const jsonLd = {
 			</div>
 			
 			<!-- 申请友链说明 -->
-			<div class="mb-10 p-6 bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-gray-800 dark:to-gray-800 rounded-xl border border-indigo-100 dark:border-gray-700">
-				<h2 class="text-xl font-bold text-gray-800 dark:text-gray-200 mb-3 flex items-center gap-2">
-					<span>📝</span>
-					申请友链
-				</h2>
-				<div class="space-y-3 text-gray-700 dark:text-gray-300">
-					<p class="flex items-start gap-2">
-						<span class="text-indigo-500 font-bold">1.</span>
-						<span>请先添加本站友链（名称：UpXuu，地址：https://www.upxuu.com，描述：逐光而上）</span>
-					</p>
-					<p class="flex items-start gap-2">
-						<span class="text-indigo-500 font-bold">2.</span>
-						<span>在下方评论区留言，按照以下格式填写友链信息：</span>
-					</p>
-					<div class="ml-8 mt-2 p-4 bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 font-mono text-sm">
-						<p class="text-gray-600 dark:text-gray-400 mb-2">格式说明：</p>
-						<p><span class="text-green-600 dark:text-green-400">✓</span> 网站名称：你的博客名称</p>
-						<p><span class="text-green-600 dark:text-green-400">✓</span> 网站地址：https://your-site.com</p>
-						<p><span class="text-green-600 dark:text-green-400">✓</span> 网站描述：一句话介绍你的博客</p>
-						<p><span class="text-green-600 dark:text-green-400">✓</span> 图标地址：https://your-site.com/avatar.jpg</p>
+			<details class="mb-10 group">
+				<summary class="cursor-pointer list-none">
+					<div class="p-6 bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-gray-800 dark:to-gray-800 rounded-xl border border-indigo-100 dark:border-gray-700 flex items-center justify-between">
+						<h2 class="text-xl font-bold text-gray-800 dark:text-gray-200 flex items-center gap-2">
+							<span>📝</span>
+							申请友链
+						</h2>
+						<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-500 transition-transform group-open:rotate-180" viewBox="0 0 20 20" fill="currentColor">
+							<path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
+						</svg>
 					</div>
-					<p class="flex items-start gap-2">
-						<span class="text-indigo-500 font-bold">3.</span>
-						<span>审核通过后会自动展示，原则上只收录个人博客，内容需原创且有质量</span>
-					</p>
+				</summary>
+				<div class="mt-4 p-6 bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700">
+					<div class="space-y-3 text-gray-700 dark:text-gray-300">
+						<p class="flex items-start gap-2">
+							<span class="text-indigo-500 font-bold">1.</span>
+							<span>请先添加本站友链（名称：UpXuu，地址：https://upxuu.com，描述：逐光而上）</span>
+						</p>
+						<p class="flex items-start gap-2">
+							<span class="text-indigo-500 font-bold">2.</span>
+							<span>在下方评论区留言，按照以下格式填写友链信息：</span>
+						</p>
+						<div class="ml-8 mt-2 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 font-mono text-sm">
+							<p class="text-gray-600 dark:text-gray-400 mb-2">格式说明：</p>
+							<p><span class="text-green-600 dark:text-green-400">✓</span> 网站名称：你的博客名称</p>
+							<p><span class="text-green-600 dark:text-green-400">✓</span> 网站地址：https://your-site.com</p>
+							<p><span class="text-green-600 dark:text-green-400">✓</span> 网站描述：一句话介绍你的博客</p>
+							<p><span class="text-green-600 dark:text-green-400">✓</span> 图标地址：https://your-site.com/avatar.jpg</p>
+						</div>
+					</div>
 				</div>
-			</div>
+			</details>
 			
 			<!-- 友链列表 -->
 			<div class="friends-grid grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
