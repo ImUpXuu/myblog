@@ -17,8 +17,6 @@ category: "随笔"
 
 ![文庙门口](https://edit.upxuu.com/image/20260404160259_570.jpg)
 
-![20260404155233_106.jpg](https://edit.upxuu.com/image/20260404155233_106.jpg)
-
 ![文庙门口](https://edit.upxuu.com/image/20260404160250_531.jpg)
 
 ## 天宁寺
