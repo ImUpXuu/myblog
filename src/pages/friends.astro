@@ -1,0 +1,174 @@
+---
+import MainGridLayout from "../layouts/MainGridLayout.astro";
+import BannerTitle from "../components/BannerTitle.astro";
+import { profileConfig, siteConfig } from "../config";
+
+// 友链数据配置
+const friends = [
+	{
+		name: "UpXuu",
+		avatar: "https://www.upxuu.com/images/20260214145619.jpg",
+		url: "https://www.upxuu.com",
+		description: "逐光而上",
+		tags: ["博主", "技术"],
+	},
+	// 在这里添加更多友链...
+];
+
+const jsonLd = {
+	"@context": "https://schema.org",
+	"@type": "CollectionPage",
+	"@id": `${Astro.site}friends`,
+	name: "友情链接",
+	description: "UpXuu 的友情链接",
+	url: `${Astro.site}friends`,
+	author: {
+		"@type": "Person",
+		name: profileConfig.name,
+	},
+	inLanguage: siteConfig.lang.replace("_", "-"),
+};
+---
+
+<MainGridLayout title="友情链接" description="UpXuu 的友情链接">
+	<BannerTitle slot="banner-title"></BannerTitle>
+	<script is:inline slot="head" type="application/ld+json" set:html={JSON.stringify(jsonLd)}></script>
+	
+	<div class="flex w-full rounded-[var(--radius-large)] overflow-hidden relative min-h-32">
+		<div class="card-base z-10 px-6 md:px-9 py-6 relative w-full">
+			<!-- 页面标题 -->
+			<div class="mb-10 text-center">
+				<h1 class="text-4xl font-bold text-gray-800 dark:text-gray-200 mb-3">
+					🤝 友情链接
+				</h1>
+				<p class="text-gray-600 dark:text-gray-400 text-lg">
+					与优秀的人同行，与有趣的灵魂相遇
+				</p>
+			</div>
+			
+			<!-- 申请友链说明 -->
+			<div class="mb-10 p-6 bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-gray-800 dark:to-gray-800 rounded-xl border border-indigo-100 dark:border-gray-700">
+				<h2 class="text-xl font-bold text-gray-800 dark:text-gray-200 mb-3 flex items-center gap-2">
+					<span>📝</span>
+					申请友链
+				</h2>
+				<div class="space-y-2 text-gray-700 dark:text-gray-300">
+					<p class="flex items-start gap-2">
+						<span class="text-indigo-500 font-bold">1.</span>
+						<span>请先添加本站友链，然后发送邮件至 <a href="mailto:contact@upxuu.com" class="text-indigo-600 dark:text-indigo-400 hover:underline font-medium">contact@upxuu.com</a> 申请互换</span>
+					</p>
+					<p class="flex items-start gap-2">
+						<span class="text-indigo-500 font-bold">2.</span>
+						<span>邮件格式：网站名称 + 网址 + 描述 + 图标 URL</span>
+					</p>
+					<p class="flex items-start gap-2">
+						<span class="text-indigo-500 font-bold">3.</span>
+						<span>原则上只收录个人博客，内容需原创且有质量</span>
+					</p>
+				</div>
+			</div>
+			
+			<!-- 友链列表 -->
+			<div class="friends-grid grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+				{friends.map((friend) => (
+					<a
+						href={friend.url}
+						target="_blank"
+						rel="noopener noreferrer"
+						class="friend-card block group"
+					>
+						<div class="card-base p-6 transition-all duration-300 group-hover:scale-[1.02] group-hover:shadow-xl group-hover:border-indigo-200 dark:group-hover:border-indigo-800">
+							<div class="flex items-start gap-4">
+								<!-- 头像 -->
+								<div class="avatar-container flex-shrink-0">
+									<img
+										src={friend.avatar}
+										alt={friend.name}
+										class="w-16 h-16 rounded-full object-cover border-2 border-gray-200 dark:border-gray-700 group-hover:border-indigo-400 transition-colors"
+										loading="lazy"
+									/>
+								</div>
+								
+								<!-- 信息 -->
+								<div class="flex-1 min-w-0">
+									<h3 class="text-lg font-bold text-gray-800 dark:text-gray-200 mb-1 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors truncate">
+										{friend.name}
+									</h3>
+									<p class="text-gray-600 dark:text-gray-400 text-sm mb-3 line-clamp-2">
+										{friend.description}
+									</p>
+									
+									<!-- 标签 -->
+									{friend.tags && (
+										<div class="flex flex-wrap gap-2">
+											{friend.tags.map((tag) => (
+												<span class="px-2 py-1 text-xs rounded-full bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300">
+													{tag}
+												</span>
+											))}
+										</div>
+									)}
+								</div>
+								
+								<!-- 外链图标 -->
+								<div class="flex-shrink-0 text-gray-400 group-hover:text-indigo-500 transition-colors">
+									<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+										<path d="M11 3a1 1 0 100 2h2.586l-6.293 6.293a1 1 0 101.414 1.414L15 6.414V9a1 1 0 102 0V4a1 1 0 00-1-1h-5z" />
+										<path d="M5 5a2 2 0 00-2 2v8a2 2 0 002 2h8a2 2 0 002-2v-3a1 1 0 10-2 0v3H5V7h3a1 1 0 000-2H5z" />
+									</svg>
+								</div>
+							</div>
+						</div>
+					</a>
+				))}
+			</div>
+			
+			<!-- 统计信息 -->
+			<div class="mt-10 pt-6 border-t border-gray-200 dark:border-gray-700">
+				<div class="flex flex-wrap items-center justify-center gap-4 text-sm text-gray-600 dark:text-gray-400">
+					<span class="flex items-center gap-2">
+						<span class="text-lg">👥</span>
+						<span>共 <strong class="text-primary">{friends.length}</strong> 位朋友</span>
+					</span>
+				</div>
+			</div>
+		</div>
+	</div>
+</MainGridLayout>
+
+<style>
+.friends-grid {
+	animation: fadeIn 0.6s ease-out;
+}
+
+.friend-card {
+	text-decoration: none;
+	color: inherit;
+}
+
+.friend-card .friend-card {
+	animation: slideUp 0.6s ease-out backwards;
+}
+
+@keyframes fadeIn {
+	from {
+		opacity: 0;
+		transform: translateY(20px);
+	}
+	to {
+		opacity: 1;
+		transform: translateY(0);
+	}
+}
+
+@keyframes slideUp {
+	from {
+		opacity: 0;
+		transform: translateY(30px);
+	}
+	to {
+		opacity: 1;
+		transform: translateY(0);
+	}
+}
+</style>

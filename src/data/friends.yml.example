@@ -1,0 +1,21 @@
+# 友链配置说明
+# 复制此文件为 friends.yml 并填写你的友链信息
+
+# 友链列表
+friends:
+  # 示例友链 1
+  - name: "UpXuu"
+    avatar: "https://www.upxuu.com/images/20260214145619.jpg"
+    url: "https://www.upxuu.com"
+    description: "逐光而上"
+    tags: ["博主", "技术"]
+  
+  # 示例友链 2
+  - name: "朋友的博客"
+    avatar: "https://example.com/avatar.jpg"
+    url: "https://example.com"
+    description: "这是一个优秀的朋友博客"
+    tags: ["朋友", "生活"]
+  
+  # 添加更多友链...
+  # 复制上面的格式，修改对应的信息即可
