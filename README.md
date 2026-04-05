@@ -31,6 +31,7 @@ A static blog template built with [Astro](https://astro.build).
 - [x] Table of contents
 - [x] RSS feed
 - [x] SEO optimized with astro-seo and JSON-LD structured data
+- [x] Friends page for link exchange
 
 ## 🎨 Theme Configuration
 

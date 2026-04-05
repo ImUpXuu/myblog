@@ -33,6 +33,7 @@ const jsonLd = {
 <MainGridLayout title="友情链接" description="UpXuu 的友情链接">
 	<BannerTitle slot="banner-title"></BannerTitle>
 	<script is:inline slot="head" type="application/ld+json" set:html={JSON.stringify(jsonLd)}></script>
+	<script slot="head" src="https://comment.upxuu.com/sdk.js" defer></script>
 	
 	<div class="flex w-full rounded-[var(--radius-large)] overflow-hidden relative min-h-32">
 		<div class="card-base z-10 px-6 md:px-9 py-6 relative w-full">
@@ -52,18 +53,25 @@ const jsonLd = {
 					<span>📝</span>
 					申请友链
 				</h2>
-				<div class="space-y-2 text-gray-700 dark:text-gray-300">
+				<div class="space-y-3 text-gray-700 dark:text-gray-300">
 					<p class="flex items-start gap-2">
 						<span class="text-indigo-500 font-bold">1.</span>
-						<span>请先添加本站友链，然后发送邮件至 <a href="mailto:contact@upxuu.com" class="text-indigo-600 dark:text-indigo-400 hover:underline font-medium">contact@upxuu.com</a> 申请互换</span>
+						<span>请先添加本站友链（名称：UpXuu，地址：https://www.upxuu.com，描述：逐光而上）</span>
 					</p>
 					<p class="flex items-start gap-2">
 						<span class="text-indigo-500 font-bold">2.</span>
-						<span>邮件格式：网站名称 + 网址 + 描述 + 图标 URL</span>
+						<span>在下方评论区留言，按照以下格式填写友链信息：</span>
 					</p>
+					<div class="ml-8 mt-2 p-4 bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 font-mono text-sm">
+						<p class="text-gray-600 dark:text-gray-400 mb-2">格式说明：</p>
+						<p><span class="text-green-600 dark:text-green-400">✓</span> 网站名称：你的博客名称</p>
+						<p><span class="text-green-600 dark:text-green-400">✓</span> 网站地址：https://your-site.com</p>
+						<p><span class="text-green-600 dark:text-green-400">✓</span> 网站描述：一句话介绍你的博客</p>
+						<p><span class="text-green-600 dark:text-green-400">✓</span> 图标地址：https://your-site.com/avatar.jpg</p>
+					</div>
 					<p class="flex items-start gap-2">
 						<span class="text-indigo-500 font-bold">3.</span>
-						<span>原则上只收录个人博客，内容需原创且有质量</span>
+						<span>审核通过后会自动展示，原则上只收录个人博客，内容需原创且有质量</span>
 					</p>
 				</div>
 			</div>
@@ -131,6 +139,15 @@ const jsonLd = {
 						<span>共 <strong class="text-primary">{friends.length}</strong> 位朋友</span>
 					</span>
 				</div>
+			</div>
+			
+			<!-- 评论区 -->
+			<div class="mt-10 pt-10 border-t border-gray-200 dark:border-gray-700">
+				<h2 class="text-2xl font-bold text-gray-800 dark:text-gray-200 mb-6 flex items-center gap-2">
+					<span>💬</span>
+					申请友链留言区
+				</h2>
+				<div id="extalk-comments"></div>
 			</div>
 		</div>
 	</div>
