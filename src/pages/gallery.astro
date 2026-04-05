@@ -1,0 +1,134 @@
+---
+import MainGridLayout from "../layouts/MainGridLayout.astro";
+import BannerTitle from "../components/BannerTitle.astro";
+import { profileConfig, siteConfig } from "../config";
+
+const galleryIndexUrl = "https://edit.upxuu.com/img/index.json";
+
+let galleryData = null;
+let error = null;
+
+try {
+	const response = await fetch(galleryIndexUrl);
+	if (response.ok) {
+		galleryData = await response.json();
+	} else {
+		error = "无法加载图库索引";
+	}
+} catch (e) {
+	error = "加载图库索引失败";
+}
+
+const jsonLd = {
+	"@context": "https://schema.org",
+	"@type": "ImageGallery",
+	"@id": `${Astro.site}gallery`,
+	name: "图库",
+	description: "UpXuu 的图片库",
+	url: `${Astro.site}gallery`,
+	author: {
+		"@type": "Person",
+		name: profileConfig.name,
+	},
+	inLanguage: siteConfig.lang.replace("_", "-"),
+};
+---
+
+<MainGridLayout title="图库" description="UpXuu 的图片库">
+	<BannerTitle slot="banner-title"></BannerTitle>
+	<script is:inline slot="head" type="application/ld+json" set:html={JSON.stringify(jsonLd)}></script>
+	
+	<div class="flex w-full rounded-[var(--radius-large)] overflow-hidden relative min-h-32">
+		<div class="card-base z-10 px-6 md:px-9 py-6 relative w-full">
+			{error ? (
+				<div class="text-center py-12">
+					<p class="text-red-500 text-lg">{error}</p>
+				</div>
+			) : !galleryData ? (
+				<div class="text-center py-12">
+					<div class="animate-pulse">
+						<div class="h-4 bg-gray-200 dark:bg-gray-700 rounded w-3/4 mx-auto mb-4"></div>
+						<div class="h-4 bg-gray-200 dark:bg-gray-700 rounded w-1/2 mx-auto"></div>
+					</div>
+				</div>
+			) : (
+				<div class="gallery-container">
+					<!-- 月份列表 -->
+					<div class="months-grid grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+						{galleryData.months?.map((month) => (
+							<a 
+								href={`/gallery/${month.ym.replace('-', '/')}`}
+								class="month-card block group"
+							>
+								<div class="card-base overflow-hidden transition-all duration-300 group-hover:scale-[1.02] group-hover:shadow-xl">
+									{month.preview && (
+										<div class="preview-container relative aspect-video overflow-hidden">
+											<img 
+												src={month.preview} 
+												alt={`${month.ym} 预览`}
+												class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
+												loading="lazy"
+											/>
+											<div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
+											<div class="absolute bottom-3 left-3 text-white">
+												<div class="font-bold text-lg">{month.ym}</div>
+												<div class="text-sm opacity-90">{month.count} 张图片</div>
+											</div>
+										</div>
+									)}
+									{!month.preview && (
+										<div class="preview-container aspect-video bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-800 flex items-center justify-center">
+											<div class="text-center text-gray-400 dark:text-gray-500">
+												<div class="text-4xl mb-2">📷</div>
+												<div class="font-medium">{month.ym}</div>
+												<div class="text-sm">{month.count} 张图片</div>
+											</div>
+										</div>
+									)}
+								</div>
+							</a>
+						))}
+					</div>
+					
+					{galleryData.months?.length === 0 && (
+						<div class="text-center py-12">
+							<div class="text-6xl mb-4">📸</div>
+							<p class="text-gray-500 dark:text-gray-400">还没有图片</p>
+						</div>
+					)}
+					
+					<!-- 统计信息 -->
+					<div class="mt-8 pt-6 border-t border-gray-200 dark:border-gray-700">
+						<div class="flex flex-wrap gap-4 text-sm text-gray-600 dark:text-gray-400">
+							<span>共 {galleryData.months?.length || 0} 个月份</span>
+							<span>•</span>
+							<span>最后更新：{new Date(galleryData.updated).toLocaleDateString('zh-CN')}</span>
+						</div>
+					</div>
+				</div>
+			)}
+		</div>
+	</div>
+</MainGridLayout>
+
+<style>
+.gallery-container {
+	animation: fadeIn 0.5s ease-in;
+}
+
+.month-card {
+	text-decoration: none;
+	color: inherit;
+}
+
+@keyframes fadeIn {
+	from {
+		opacity: 0;
+		transform: translateY(20px);
+	}
+	to {
+		opacity: 1;
+		transform: translateY(0);
+	}
+}
+</style>

@@ -30,6 +30,7 @@ A static blog template built with [Astro](https://astro.build).
 - [x] [Markdown extended features](https://github.com/saicaca/fuwari?tab=readme-ov-file#-markdown-extended-syntax)
 - [x] Table of contents
 - [x] RSS feed
+- [x] SEO optimized with astro-seo and JSON-LD structured data
 
 ## 🎨 Theme Configuration
 
