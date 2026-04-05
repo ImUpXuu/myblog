@@ -4,7 +4,6 @@ import BannerTitle from "@/components/BannerTitle.astro";
 import { profileConfig, siteConfig } from "@/config";
 
 export async function getStaticPaths() {
-	// 获取图库索引
 	const galleryIndexUrl = "https://edit.upxuu.com/img/index.json";
 	let months = [];
 	
@@ -52,13 +51,26 @@ const jsonLd = {
 	<div class="flex w-full rounded-[var(--radius-large)] overflow-hidden relative min-h-32">
 		<div class="card-base z-10 px-6 md:px-9 py-6 relative w-full">
 			<!-- 返回链接 -->
-			<div class="mb-6">
-				<a href="/gallery" class="inline-flex items-center text-primary hover:underline">
-					<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" viewBox="0 0 20 20" fill="currentColor">
+			<div class="mb-8">
+				<a 
+					href="/gallery" 
+					class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors text-gray-700 dark:text-gray-300"
+				>
+					<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
 						<path fill-rule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clip-rule="evenodd" />
 					</svg>
 					返回图库
 				</a>
+			</div>
+			
+			<!-- 月份标题 -->
+			<div class="mb-8 pb-6 border-b border-gray-200 dark:border-gray-700">
+				<h2 class="text-3xl font-bold text-gray-800 dark:text-gray-200 mb-2">
+					{year}年{month}月
+				</h2>
+				<p class="text-gray-600 dark:text-gray-400">
+					记录美好时光
+				</p>
 			</div>
 			
 			<!-- 图片网格 -->
@@ -70,97 +82,25 @@ const jsonLd = {
 </MainGridLayout>
 
 <script>
-// 加载月份图片
-async function loadMonthImages() {
-	const year = "{year}";
-	const month = "{month}";
-	const monthIndexUrl = `https://edit.upxuu.com/img/${year}/${month}/index.json`;
-	
-	// 修复 URL，确保使用 HTTPS 并处理相对路径
-	function fixUrl(url) {
-		if (!url) return url;
-		// 如果是相对路径，转换为完整 URL
-		if (url.startsWith('images/')) {
-			return url.replace('images/', 'https://edit.upxuu.com/img/');
-		}
-		// 将 http:// 替换为 https://
-		return url.replace('http://', 'https://');
+// 使用 wsrv.nl 代理加速
+function getProxyUrl(url, width = 800, height = 600) {
+	if (!url) return url;
+	// 处理相对路径
+	if (url.startsWith('images/')) {
+		url = url.replace('images/', 'https://edit.upxuu.com/img/');
 	}
-	
-	try {
-		const response = await fetch(monthIndexUrl);
-		if (!response.ok) {
-			throw new Error('Failed to load month images');
-		}
-		
-		const data = await response.json();
-		const galleryContainer = document.getElementById('month-gallery');
-		
-		if (!data.images || data.images.length === 0) {
-			galleryContainer.innerHTML = `
-				<div class="text-center py-12">
-					<div class="text-6xl mb-4">📸</div>
-					<p class="text-gray-500 dark:text-gray-400">这个月份还没有图片</p>
-				</div>
-			`;
-			return;
-		}
-		
-		// 修复所有图片 URL 为 HTTPS
-		data.images.forEach(image => {
-			if (image.url) image.url = fixUrl(image.url);
-		});
-		
-		// 创建图片网格
-		const gridHtml = data.images.map((image, index) => `
-			<div class="image-item group" style="animation-delay: ${index * 50}ms">
-				<div class="image-wrapper">
-					<img 
-						src="${image.url}" 
-						alt="${image.name}"
-						class="gallery-image"
-						loading="lazy"
-						data-pswp-src="${image.url}"
-						data-pswp-width="${image.width || 1920}"
-						data-pswp-height="${image.height || 1080}"
-					/>
-					<div class="image-overlay">
-						<div class="image-info">
-							<div class="image-name">${image.name}</div>
-							<div class="image-meta">
-								${image.size ? formatFileSize(image.size) : ''}
-								${image.date ? ' • ' + new Date(image.date).toLocaleDateString('zh-CN') : ''}
-							</div>
-						</div>
-					</div>
-				</div>
-			</div>
-		`).join('');
-		
-		galleryContainer.innerHTML = `
-			<div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-				${gridHtml}
-			</div>
-			<div class="mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
-				<div class="flex flex-wrap gap-4 text-sm text-gray-600 dark:text-gray-400">
-					<span>共 ${data.count} 张图片</span>
-					<span>•</span>
-					<span>${year}年${month}月</span>
-				</div>
-			</div>
-		`;
-		
-		// 初始化 PhotoSwipe
-		initPhotoSwipe();
-	} catch (error) {
-		console.error('Error loading month images:', error);
-		const galleryContainer = document.getElementById('month-gallery');
-		galleryContainer.innerHTML = `
-			<div class="text-center py-12">
-				<p class="text-red-500">加载图片失败</p>
-			</div>
-		`;
+	// 转换为 https
+	url = url.replace('http://', 'https://');
+	return `https://wsrv.nl/?url=${encodeURIComponent(url)}&w=${width}&h=${height}&fit=cover&q=85`;
+}
+
+// 获取原始图片 URL（用于灯箱）
+function getOriginalUrl(url) {
+	if (!url) return url;
+	if (url.startsWith('images/')) {
+		url = url.replace('images/', 'https://edit.upxuu.com/img/');
 	}
+	return url.replace('http://', 'https://');
 }
 
 function formatFileSize(bytes) {
@@ -170,12 +110,98 @@ function formatFileSize(bytes) {
 	return (kb / 1024).toFixed(1) + ' MB';
 }
 
-function initPhotoSwipe() {
-	// PhotoSwipe 已经在 Layout.astro 中初始化
-	// 这里只需要确保新加载的图片可以被 PhotoSwipe 识别
-	if (window.lightbox) {
-		window.lightbox.destroy();
-		window.lightbox.init();
+async function loadMonthImages() {
+	const year = "{year}";
+	const month = "{month}";
+	const monthIndexUrl = `https://edit.upxuu.com/img/${year}/${month}/index.json`;
+	
+	const galleryContainer = document.getElementById('month-gallery');
+	
+	// 加载状态
+	galleryContainer.innerHTML = `
+		<div class="flex items-center justify-center py-20">
+			<div class="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+		</div>
+	`;
+	
+	try {
+		const response = await fetch(monthIndexUrl);
+		if (!response.ok) {
+			throw new Error('Failed to load month images');
+		}
+		
+		const data = await response.json();
+		
+		if (!data.images || data.images.length === 0) {
+			galleryContainer.innerHTML = `
+				<div class="text-center py-20">
+					<div class="text-7xl mb-6">📸</div>
+					<p class="text-xl text-gray-600 dark:text-gray-400">这个月份还没有图片</p>
+				</div>
+			`;
+			return;
+		}
+		
+		// 创建图片网格
+		const gridHtml = data.images.map((image, index) => {
+			const thumbUrl = getProxyUrl(image.url, 600, 450);
+			const originalUrl = getOriginalUrl(image.url);
+			
+			return `
+				<div class="image-item group" style="animation-delay: ${index * 50}ms">
+					<div class="image-wrapper">
+						<img 
+							src="${thumbUrl}" 
+							alt="${image.name}"
+							class="gallery-image"
+							loading="lazy"
+							data-pswp-src="${originalUrl}"
+							data-pswp-width="${image.width || 1920}"
+							data-pswp-height="${image.height || 1080}"
+						/>
+						<div class="image-overlay">
+							<div class="image-info">
+								<div class="image-name">${image.name}</div>
+								<div class="image-meta">
+									${image.size ? formatFileSize(image.size) : ''}
+									${image.date ? ' • ' + new Date(image.date).toLocaleDateString('zh-CN') : ''}
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			`;
+		}).join('');
+		
+		galleryContainer.innerHTML = `
+			<div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+				${gridHtml}
+			</div>
+			<div class="mt-10 pt-6 border-t border-gray-200 dark:border-gray-700">
+				<div class="flex flex-wrap items-center justify-between gap-4 text-sm text-gray-600 dark:text-gray-400">
+					<div class="flex items-center gap-4">
+						<span>📷 共 <strong class="text-primary">${data.count}</strong> 张图片</span>
+						<span>•</span>
+						<span>${year}年{month}月</span>
+					</div>
+				</div>
+			</div>
+		`;
+		
+		// 初始化 PhotoSwipe
+		if (window.lightbox) {
+			window.lightbox.destroy();
+			window.lightbox.init();
+		}
+	} catch (error) {
+		console.error('Error loading month images:', error);
+		galleryContainer.innerHTML = `
+			<div class="text-center py-20">
+				<div class="text-6xl mb-4">😕</div>
+				<p class="text-red-500 text-lg mb-2">加载图片失败</p>
+				<p class="text-gray-500 dark:text-gray-400 text-sm">请检查网络连接或稍后重试</p>
+			</div>
+		`;
 	}
 }
 
@@ -189,11 +215,11 @@ if (document.readyState === 'loading') {
 
 <style>
 .image-grid {
-	animation: fadeIn 0.5s ease-in;
+	animation: fadeIn 0.6s ease-out;
 }
 
 .image-item {
-	animation: slideUp 0.5s ease-out backwards;
+	animation: slideUp 0.6s ease-out backwards;
 }
 
 .image-wrapper {
@@ -202,13 +228,20 @@ if (document.readyState === 'loading') {
 	overflow: hidden;
 	border-radius: var(--radius-medium);
 	cursor: pointer;
+	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+	transition: all 0.3s ease;
+}
+
+.image-wrapper:hover {
+	box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+	transform: translateY(-4px);
 }
 
 .gallery-image {
 	width: 100%;
 	height: 100%;
 	object-fit: cover;
-	transition: transform 0.3s ease;
+	transition: transform 0.5s ease;
 }
 
 .image-wrapper:hover .gallery-image {
@@ -218,7 +251,7 @@ if (document.readyState === 'loading') {
 .image-overlay {
 	position: absolute;
 	inset: 0;
-	background: linear-gradient(to top, rgba(0,0,0,0.7) 0%, transparent 50%);
+	background: linear-gradient(to top, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.4) 50%, transparent 100%);
 	opacity: 0;
 	transition: opacity 0.3s ease;
 	display: flex;
@@ -266,7 +299,7 @@ if (document.readyState === 'loading') {
 @keyframes slideUp {
 	from {
 		opacity: 0;
-		transform: translateY(20px);
+		transform: translateY(30px);
 	}
 	to {
 		opacity: 1;

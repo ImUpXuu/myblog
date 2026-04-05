@@ -5,15 +5,10 @@ import { profileConfig, siteConfig } from "../config";
 
 const galleryIndexUrl = "https://edit.upxuu.com/img/index.json";
 
-// 修复 URL，确保使用 HTTPS 并处理相对路径
-function fixUrl(url: string): string {
+// 使用 wsrv.nl 代理加速图片加载
+function getProxyUrl(url: string, width = 400, height = 400): string {
 	if (!url) return url;
-	// 如果是相对路径，转换为完整 URL
-	if (url.startsWith('images/')) {
-		return url.replace('images/', 'https://edit.upxuu.com/img/');
-	}
-	// 将 http:// 替换为 https://
-	return url.replace('http://', 'https://');
+	return `https://wsrv.nl/?url=${encodeURIComponent(url)}&w=${width}&h=${height}&fit=cover&q=85`;
 }
 
 let galleryData = null;
@@ -23,18 +18,12 @@ try {
 	const response = await fetch(galleryIndexUrl);
 	if (response.ok) {
 		galleryData = await response.json();
-		// 修复所有 URL
-		if (galleryData.months) {
-			galleryData.months.forEach(month => {
-				if (month.preview) month.preview = fixUrl(month.preview);
-				if (month.index) month.index = fixUrl(month.index);
-			});
-		}
 	} else {
 		error = "无法加载图库索引";
 	}
 } catch (e) {
 	error = "加载图库索引失败";
+	console.error(e);
 }
 
 const jsonLd = {
@@ -60,69 +49,98 @@ const jsonLd = {
 		<div class="card-base z-10 px-6 md:px-9 py-6 relative w-full">
 			{error ? (
 				<div class="text-center py-12">
+					<div class="text-6xl mb-4">😕</div>
 					<p class="text-red-500 text-lg">{error}</p>
+					<p class="text-gray-500 dark:text-gray-400 mt-2 text-sm">请检查网络连接或稍后重试</p>
 				</div>
 			) : !galleryData ? (
 				<div class="text-center py-12">
-					<div class="animate-pulse">
-						<div class="h-4 bg-gray-200 dark:bg-gray-700 rounded w-3/4 mx-auto mb-4"></div>
+					<div class="animate-pulse space-y-4">
+						<div class="h-4 bg-gray-200 dark:bg-gray-700 rounded w-3/4 mx-auto"></div>
 						<div class="h-4 bg-gray-200 dark:bg-gray-700 rounded w-1/2 mx-auto"></div>
+						<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-8">
+							{Array.from({ length: 6 }).map((_, i) => (
+								<div class="aspect-video bg-gray-200 dark:bg-gray-700 rounded-lg"></div>
+							))}
+						</div>
 					</div>
 				</div>
 			) : (
 				<div class="gallery-container">
 					<!-- 月份列表 -->
-					<div class="months-grid grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-						{galleryData.months?.map((month) => (
-							<a 
-								href={`/gallery/${month.ym.replace('-', '/')}`}
-								class="month-card block group"
-							>
-								<div class="card-base overflow-hidden transition-all duration-300 group-hover:scale-[1.02] group-hover:shadow-xl">
-									{month.preview && (
-										<div class="preview-container relative aspect-video overflow-hidden">
-											<img 
-												src={month.preview} 
-												alt={`${month.ym} 预览`}
-												class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
-												loading="lazy"
-											/>
-											<div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
-											<div class="absolute bottom-3 left-3 text-white">
-												<div class="font-bold text-lg">{month.ym}</div>
-												<div class="text-sm opacity-90">{month.count} 张图片</div>
-											</div>
+					{galleryData.months?.length > 0 ? (
+						<>
+							<div class="months-grid grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+								{galleryData.months.map((month, index) => (
+									<a 
+										href={`/gallery/${month.ym.replace('-', '/')}`}
+										class="month-card block group"
+										style={`animation-delay: ${index * 50}ms`}
+									>
+										<div class="card-base overflow-hidden transition-all duration-300 group-hover:scale-[1.02] group-hover:shadow-xl">
+											{month.preview ? (
+												<div class="preview-container relative aspect-video overflow-hidden">
+													<img 
+														src={getProxyUrl(month.preview, 640, 360)} 
+														alt={`${month.ym} 预览，共 ${month.count} 张图片`}
+														class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
+														loading="lazy"
+													/>
+													<div class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent"></div>
+													<div class="absolute bottom-0 left-0 right-0 p-4 text-white">
+														<div class="font-bold text-xl mb-1">{month.ym}</div>
+														<div class="text-sm opacity-90 flex items-center gap-2">
+															<span>📷 {month.count} 张图片</span>
+														</div>
+													</div>
+												</div>
+											) : (
+												<div class="preview-container aspect-video bg-gradient-to-br from-indigo-100 to-purple-100 dark:from-gray-700 dark:to-gray-800 flex items-center justify-center">
+													<div class="text-center">
+														<div class="text-5xl mb-3">📷</div>
+														<div class="font-bold text-lg text-gray-700 dark:text-gray-300">{month.ym}</div>
+														<div class="text-sm text-gray-500 dark:text-gray-400 mt-1">{month.count} 张图片</div>
+													</div>
+												</div>
+											)}
 										</div>
-									)}
-									{!month.preview && (
-										<div class="preview-container aspect-video bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-800 flex items-center justify-center">
-											<div class="text-center text-gray-400 dark:text-gray-500">
-												<div class="text-4xl mb-2">📷</div>
-												<div class="font-medium">{month.ym}</div>
-												<div class="text-sm">{month.count} 张图片</div>
-											</div>
-										</div>
-									)}
+									</a>
+								))}
+							</div>
+							
+							<!-- 统计信息 -->
+							<div class="mt-10 pt-6 border-t border-gray-200 dark:border-gray-700">
+								<div class="flex flex-wrap items-center justify-between gap-4 text-sm text-gray-600 dark:text-gray-400">
+									<div class="flex items-center gap-4">
+										<span class="flex items-center gap-2">
+											<span class="text-lg">📊</span>
+											<span>共 <strong class="text-primary">{galleryData.months.length}</strong> 个月份</span>
+										</span>
+										<span>•</span>
+										<span class="flex items-center gap-2">
+											<span class="text-lg">🖼️</span>
+											<span>总计 <strong class="text-primary">{galleryData.months.reduce((sum, m) => sum + m.count, 0)}</strong> 张图片</span>
+										</span>
+									</div>
+									<span class="text-xs opacity-75">
+										最后更新：{new Date(galleryData.updated).toLocaleString('zh-CN', { 
+											year: 'numeric', 
+											month: '2-digit', 
+											day: '2-digit',
+											hour: '2-digit',
+											minute: '2-digit'
+										})}
+									</span>
 								</div>
-							</a>
-						))}
-					</div>
-					
-					{galleryData.months?.length === 0 && (
-						<div class="text-center py-12">
-							<div class="text-6xl mb-4">📸</div>
-							<p class="text-gray-500 dark:text-gray-400">还没有图片</p>
+							</div>
+						</>
+					) : (
+						<div class="text-center py-16">
+							<div class="text-7xl mb-6">📸</div>
+							<h3 class="text-xl font-bold text-gray-700 dark:text-gray-300 mb-2">还没有图片</h3>
+							<p class="text-gray-500 dark:text-gray-400">图片正在上传中，稍后再来看看吧</p>
 						</div>
 					)}
-					
-					<!-- 统计信息 -->
-					<div class="mt-8 pt-6 border-t border-gray-200 dark:border-gray-700">
-						<div class="flex flex-wrap gap-4 text-sm text-gray-600 dark:text-gray-400">
-							<span>共 {galleryData.months?.length || 0} 个月份</span>
-							<span>•</span>
-							<span>最后更新：{new Date(galleryData.updated).toLocaleDateString('zh-CN')}</span>
-						</div>
-					</div>
 				</div>
 			)}
 		</div>
@@ -131,7 +149,7 @@ const jsonLd = {
 
 <style>
 .gallery-container {
-	animation: fadeIn 0.5s ease-in;
+	animation: fadeIn 0.6s ease-out;
 }
 
 .month-card {
@@ -139,10 +157,25 @@ const jsonLd = {
 	color: inherit;
 }
 
+.month-card .month-card {
+	animation: slideUp 0.6s ease-out backwards;
+}
+
 @keyframes fadeIn {
 	from {
 		opacity: 0;
 		transform: translateY(20px);
+	}
+	to {
+		opacity: 1;
+		transform: translateY(0);
+	}
+}
+
+@keyframes slideUp {
+	from {
+		opacity: 0;
+		transform: translateY(30px);
 	}
 	to {
 		opacity: 1;
