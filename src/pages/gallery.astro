@@ -5,6 +5,17 @@ import { profileConfig, siteConfig } from "../config";
 
 const galleryIndexUrl = "https://edit.upxuu.com/img/index.json";
 
+// 修复 URL，确保使用 HTTPS 并处理相对路径
+function fixUrl(url: string): string {
+	if (!url) return url;
+	// 如果是相对路径，转换为完整 URL
+	if (url.startsWith('images/')) {
+		return url.replace('images/', 'https://edit.upxuu.com/img/');
+	}
+	// 将 http:// 替换为 https://
+	return url.replace('http://', 'https://');
+}
+
 let galleryData = null;
 let error = null;
 
@@ -12,6 +23,13 @@ try {
 	const response = await fetch(galleryIndexUrl);
 	if (response.ok) {
 		galleryData = await response.json();
+		// 修复所有 URL
+		if (galleryData.months) {
+			galleryData.months.forEach(month => {
+				if (month.preview) month.preview = fixUrl(month.preview);
+				if (month.index) month.index = fixUrl(month.index);
+			});
+		}
 	} else {
 		error = "无法加载图库索引";
 	}

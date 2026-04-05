@@ -76,6 +76,17 @@ async function loadMonthImages() {
 	const month = "{month}";
 	const monthIndexUrl = `https://edit.upxuu.com/img/${year}/${month}/index.json`;
 	
+	// 修复 URL，确保使用 HTTPS 并处理相对路径
+	function fixUrl(url) {
+		if (!url) return url;
+		// 如果是相对路径，转换为完整 URL
+		if (url.startsWith('images/')) {
+			return url.replace('images/', 'https://edit.upxuu.com/img/');
+		}
+		// 将 http:// 替换为 https://
+		return url.replace('http://', 'https://');
+	}
+	
 	try {
 		const response = await fetch(monthIndexUrl);
 		if (!response.ok) {
@@ -94,6 +105,11 @@ async function loadMonthImages() {
 			`;
 			return;
 		}
+		
+		// 修复所有图片 URL 为 HTTPS
+		data.images.forEach(image => {
+			if (image.url) image.url = fixUrl(image.url);
+		});
 		
 		// 创建图片网格
 		const gridHtml = data.images.map((image, index) => `
