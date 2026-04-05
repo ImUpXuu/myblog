@@ -26,6 +26,41 @@ export async function getStaticPaths() {
 const { monthData } = Astro.props;
 const { year, month } = Astro.params;
 
+// 获取月份图片数据
+const monthIndexUrl = `https://edit.upxuu.com/img/${year}/${month}/index.json`;
+let monthImages = [];
+let error = null;
+
+try {
+	const response = await fetch(monthIndexUrl);
+	if (response.ok) {
+		const data = await response.json();
+		monthImages = data.images || [];
+	} else {
+		error = "加载图片失败";
+	}
+} catch (e) {
+	error = "加载图片失败";
+	console.error(e);
+}
+
+// 使用 wsrv.nl 代理加速
+function getProxyUrl(url, width = 800, height = 600) {
+	if (!url) return url;
+	if (url.startsWith('images/')) {
+		url = url.replace('images/', 'https://edit.upxuu.com/img/');
+	}
+	url = url.replace('http://', 'https://');
+	return `https://wsrv.nl/?url=${encodeURIComponent(url)}&w=${width}&h=${height}&fit=cover&q=85`;
+}
+
+function formatFileSize(bytes) {
+	if (!bytes) return '';
+	const kb = bytes / 1024;
+	if (kb < 1024) return kb.toFixed(1) + ' KB';
+	return (kb / 1024).toFixed(1) + ' MB';
+}
+
 const jsonLd = {
 	"@context": "https://schema.org",
 	"@type": "ImageGallery",
@@ -73,145 +108,65 @@ const jsonLd = {
 				</p>
 			</div>
 			
-			<!-- 图片网格 -->
-			<div id="month-gallery" class="image-grid">
-				<!-- 图片将通过 JavaScript 加载 -->
-			</div>
-		</div>
-	</div>
-</MainGridLayout>
-
-<script>
-// 使用 wsrv.nl 代理加速
-function getProxyUrl(url, width = 800, height = 600) {
-	if (!url) return url;
-	// 处理相对路径
-	if (url.startsWith('images/')) {
-		url = url.replace('images/', 'https://edit.upxuu.com/img/');
-	}
-	// 转换为 https
-	url = url.replace('http://', 'https://');
-	return `https://wsrv.nl/?url=${encodeURIComponent(url)}&w=${width}&h=${height}&fit=cover&q=85`;
-}
-
-// 获取原始图片 URL（用于灯箱）
-function getOriginalUrl(url) {
-	if (!url) return url;
-	if (url.startsWith('images/')) {
-		url = url.replace('images/', 'https://edit.upxuu.com/img/');
-	}
-	return url.replace('http://', 'https://');
-}
-
-function formatFileSize(bytes) {
-	if (!bytes) return '';
-	const kb = bytes / 1024;
-	if (kb < 1024) return kb.toFixed(1) + ' KB';
-	return (kb / 1024).toFixed(1) + ' MB';
-}
-
-async function loadMonthImages() {
-	const year = "{year}";
-	const month = "{month}";
-	const monthIndexUrl = `https://edit.upxuu.com/img/${year}/${month}/index.json`;
-	
-	const galleryContainer = document.getElementById('month-gallery');
-	
-	// 加载状态
-	galleryContainer.innerHTML = `
-		<div class="flex items-center justify-center py-20">
-			<div class="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
-		</div>
-	`;
-	
-	try {
-		const response = await fetch(monthIndexUrl);
-		if (!response.ok) {
-			throw new Error('Failed to load month images');
-		}
-		
-		const data = await response.json();
-		
-		if (!data.images || data.images.length === 0) {
-			galleryContainer.innerHTML = `
+			<!-- 图片网格 - 直接服务端渲染 -->
+			{error ? (
 				<div class="text-center py-20">
-					<div class="text-7xl mb-6">📸</div>
-					<p class="text-xl text-gray-600 dark:text-gray-400">这个月份还没有图片</p>
+					<div class="text-6xl mb-4">😕</div>
+					<p class="text-red-500 text-lg mb-2">{error}</p>
+					<p class="text-gray-500 dark:text-gray-400 text-sm">请检查网络连接或稍后重试</p>
 				</div>
-			`;
-			return;
-		}
-		
-		// 创建图片网格
-		const gridHtml = data.images.map((image, index) => {
-			const thumbUrl = getProxyUrl(image.url, 600, 450);
-			const originalUrl = getOriginalUrl(image.url);
-			
-			return `
-				<div class="image-item group" style="animation-delay: ${index * 50}ms">
-					<div class="image-wrapper">
-						<img 
-							src="${thumbUrl}" 
-							alt="${image.name}"
-							class="gallery-image"
-							loading="lazy"
-							data-pswp-src="${originalUrl}"
-							data-pswp-width="${image.width || 1920}"
-							data-pswp-height="${image.height || 1080}"
-						/>
-						<div class="image-overlay">
-							<div class="image-info">
-								<div class="image-name">${image.name}</div>
-								<div class="image-meta">
-									${image.size ? formatFileSize(image.size) : ''}
-									${image.date ? ' • ' + new Date(image.date).toLocaleDateString('zh-CN') : ''}
+			) : monthImages.length > 0 ? (
+				<>
+					<div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+						{monthImages.map((image, index) => (
+							<div 
+								class="image-item group" 
+								style={`animation-delay: ${index * 50}ms`}
+							>
+								<div class="image-wrapper">
+									<img 
+										src={getProxyUrl(image.url, 600, 450)} 
+										alt={image.name}
+										class="gallery-image"
+										loading="lazy"
+										data-pswp-src={image.url.replace('images/', 'https://edit.upxuu.com/img/').replace('http://', 'https://')}
+										data-pswp-width={image.width || 1920}
+										data-pswp-height={image.height || 1080}
+									/>
+									<div class="image-overlay">
+										<div class="image-info">
+											<div class="image-name">{image.name}</div>
+											<div class="image-meta">
+												{image.size ? formatFileSize(image.size) : ''}
+												{image.date ? ' • ' + new Date(image.date).toLocaleDateString('zh-CN') : ''}
+											</div>
+										</div>
+									</div>
 								</div>
+							</div>
+						))}
+					</div>
+					
+					<!-- 统计信息 -->
+					<div class="mt-10 pt-6 border-t border-gray-200 dark:border-gray-700">
+						<div class="flex flex-wrap items-center justify-between gap-4 text-sm text-gray-600 dark:text-gray-400">
+							<div class="flex items-center gap-4">
+								<span>📷 共 <strong class="text-primary">{monthImages.length}</strong> 张图片</span>
+								<span>•</span>
+								<span>{year}年{month}月</span>
 							</div>
 						</div>
 					</div>
+				</>
+			) : (
+				<div class="text-center py-20">
+					<div class="text-7xl mb-6">�</div>
+					<p class="text-xl text-gray-600 dark:text-gray-400">这个月份还没有图片</p>
 				</div>
-			`;
-		}).join('');
-		
-		galleryContainer.innerHTML = `
-			<div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-				${gridHtml}
-			</div>
-			<div class="mt-10 pt-6 border-t border-gray-200 dark:border-gray-700">
-				<div class="flex flex-wrap items-center justify-between gap-4 text-sm text-gray-600 dark:text-gray-400">
-					<div class="flex items-center gap-4">
-						<span>📷 共 <strong class="text-primary">${data.count}</strong> 张图片</span>
-						<span>•</span>
-						<span>${year}年{month}月</span>
-					</div>
-				</div>
-			</div>
-		`;
-		
-		// 初始化 PhotoSwipe
-		if (window.lightbox) {
-			window.lightbox.destroy();
-			window.lightbox.init();
-		}
-	} catch (error) {
-		console.error('Error loading month images:', error);
-		galleryContainer.innerHTML = `
-			<div class="text-center py-20">
-				<div class="text-6xl mb-4">😕</div>
-				<p class="text-red-500 text-lg mb-2">加载图片失败</p>
-				<p class="text-gray-500 dark:text-gray-400 text-sm">请检查网络连接或稍后重试</p>
-			</div>
-		`;
-	}
-}
-
-// 页面加载时获取图片
-if (document.readyState === 'loading') {
-	document.addEventListener('DOMContentLoaded', loadMonthImages);
-} else {
-	loadMonthImages();
-}
-</script>
+			)}
+		</div>
+	</div>
+</MainGridLayout>
 
 <style>
 .image-grid {
