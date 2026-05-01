@@ -168,5 +168,17 @@
     "url": "https://www.80srz.com",
     "avatar": "https://www.80srz.com/logo.png",
     "description": "荒野中的一盏孤灯，照亮夜里依然前行的人们!"
+  },
+  {
+    "name": "FF",
+    "url": "https://www.foolishfox.cn/",
+    "avatar": "https://asset.foolishfox.cn/static/avatar.jpg",
+    "description": "foolish fox"
+  },
+  {
+    "name": "Bleaz's Blog",
+    "url": "https://blog.bleaz.net",
+    "avatar": "https://api.bleaz.top/img/links/logo.jpg",
+    "description": "不畏过往，不惧将来"
   }
 ]
