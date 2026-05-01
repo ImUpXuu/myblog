@@ -149,5 +149,18 @@
     "url": "https://chrison.cn",
     "avatar": "https://chrison.cn/logo.webp",
     "description": "前程似锦，未来可期、寻得良人、共赴白头，祝你也祝我。"
+  },
+  {
+    "name": "辰语",
+    "url": "https://chenyuweb.com",
+    "avatar": "https://chenyuweb.com/ur/logo.jpg",
+    "description": "在辰语，思考每一种观点。",
+    "issue_id": 49
+  },
+  {
+    "name": "Yunsen的小窝",
+    "url": "https://blog.imysen.com",
+    "avatar": "https://img.alicdn.com/bao/uploaded/i4/O1CN01TWOpM42DSyY5nC0hM_!!0-mtopupload.jpg",
+    "description": "行之，皆为乐意"
   }
 ]
