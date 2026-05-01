@@ -49,7 +49,7 @@ category: "技术"
 
 **实际对话示例：**
 
-```
+
 用户：帮我安装 tailscale
 
 Bot：好的，我会帮你安装 Tailscale。首先运行这个命令：
@@ -59,7 +59,6 @@ curl -fsSL https://tailscale.com/install.sh | sh
 tailscale up
 
 这会显示一个登录链接，请把链接给我
-```
 
 ![Screenshot_20260330_220458.jpg](https://edit.upxuu.com/image/img_1774879541880_Screenshot_20260330_220458.jpg)
 
