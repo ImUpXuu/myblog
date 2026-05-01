@@ -1,12 +1,8 @@
 ---
-title: 我的信息中考一模复盘：非常xx的数据分析题 使我的一分消失
-published: 2026-05-01
-description: '4.30 记录我在石家庄初中信息中考市一模中的逆天错误'
-image: 'https://edit.upxuu.com/img/2026/5/1/1777639970869_427.png'
-tags: []
-category: ''
-draft: false 
-lang: ''
+title: "我的信息中考一模复盘：非常xx的数据分析题 使我的一分消失"
+published: 2026-05-01 00:00:00
+image: "https://edit.upxuu.com/img/2026/5/1/1777639970869_427.png"
+description: "4.30 记录我在石家庄初中信息中考市一模中的逆天错误"
 ---
 
 > [!NOTE]
@@ -27,3 +23,6 @@ lang: ''
 
 看来必须要好好练了！！！！！！！1
 
+[image.png](https://edit.upxuu.com/img/2026/5/2/20260501231756_703.png)!
+
+![image.png](https://edit.upxuu.com/img/2026/5/2/20260501231847_611.png)
