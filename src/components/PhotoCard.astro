@@ -9,15 +9,20 @@ const { src, albumId, alt = "" } = Astro.props;
 ---
 
 <div class="gallery-photo-card break-inside-avoid mb-3">
-	<div class="block rounded-xl overflow-hidden group cursor-pointer">
+	<a
+		data-fancybox="gallery"
+		data-src={src}
+		data-thumb={src}
+		data-type="image"
+		href={src}
+		class="block rounded-xl overflow-hidden group cursor-pointer"
+	>
 		<img
 			src={src}
-			data-pswp-src={src}
-			data-cropped="true"
 			alt={alt}
 			loading="lazy"
 			decoding="async"
 			class="w-full h-auto object-cover transition-transform duration-300 group-hover:scale-105"
 		/>
-	</div>
+	</a>
 </div>
