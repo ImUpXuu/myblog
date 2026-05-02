@@ -21,6 +21,7 @@ import { defaultFavicons } from "../constants/icon";
 import type { Favicon } from "../types/config";
 import { pathsEqual, url } from "../utils/url-utils";
 import "katex/dist/katex.css";
+import "@fancyapps/ui/dist/fancybox/fancybox.css";
 import background from "../assets/images/background.png";
 import backgroundDark from "../assets/images/backgroundright.png";
 
@@ -654,53 +655,55 @@ window.onresize = () => {
 
 <script>
 import { Fancybox } from "@fancyapps/ui";
-import "@fancyapps/ui/dist/fancybox/fancybox.css";
 
 function bindFancybox() {
-		document.querySelectorAll(".custom-md img").forEach((img) => {
-			const el = img as HTMLElement;
-			if (!el.dataset.fancybox) {
-				el.dataset.fancybox = "gallery";
-			}
-		});
-		document.querySelectorAll("#post-cover img").forEach((img) => {
-			const el = img as HTMLElement;
-			if (!el.dataset.fancybox) {
-				el.dataset.fancybox = "gallery";
-			}
-		});
-		Fancybox.bind("[data-fancybox]", {
-			Toolbar: {
-				display: ["close"],
-			},
-			Images: {
-				Panzoom: {
-					maxScale: 3,
-				},
-			},
-		});
-	}
-
-function destroyFancybox() {
+	document.querySelectorAll(".custom-md img").forEach((img) => {
+		const el = img as HTMLElement;
+		if (!el.dataset.fancybox) {
+			el.dataset.fancybox = "gallery";
+		}
+	});
+	document.querySelectorAll("#post-cover img").forEach((img) => {
+		const el = img as HTMLElement;
+		if (!el.dataset.fancybox) {
+			el.dataset.fancybox = "gallery";
+		}
+	});
 	Fancybox.destroy();
+	Fancybox.bind("[data-fancybox]", {
+		Toolbar: {
+			display: ["close"],
+		},
+		Images: {
+			Panzoom: {
+				maxScale: 3,
+			},
+		},
+	});
+}
+
+function init() {
+	requestAnimationFrame(() => {
+		requestAnimationFrame(() => {
+			bindFancybox();
+		});
+	});
 }
 
 if (document.readyState === "loading") {
-	document.addEventListener("DOMContentLoaded", bindFancybox);
+	document.addEventListener("DOMContentLoaded", init);
 } else {
-	bindFancybox();
+	init();
 }
 
 if (window.swup) {
 	window.swup.hooks.on("page:view", () => {
-		destroyFancybox();
-		bindFancybox();
+		window.swup.hooks.on("content:replace", bindFancybox, { before: true });
 	});
 } else {
 	document.addEventListener("swup:enable", () => {
 		window.swup!.hooks.on("page:view", () => {
-			destroyFancybox();
-			bindFancybox();
+			window.swup!.hooks.on("content:replace", bindFancybox, { before: true });
 		});
 	});
 }
