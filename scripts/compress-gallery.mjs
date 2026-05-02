@@ -3,36 +3,42 @@ import path from "node:path";
 import sharp from "sharp";
 
 const GALLERY_DIR = path.join(process.cwd(), "public", "gallery");
-const TARGET_QUALITY = 80;
+const TARGET_QUALITY = 75;
 
 async function processImage(srcPath, destPath) {
 	const ext = path.extname(srcPath).toLowerCase();
+	const stats = fs.statSync(srcPath);
+	const currentSizeKB = stats.size / 1024;
 
 	try {
-		let pipeline = sharp(srcPath);
+		let buffer;
 
 		if (ext === ".png") {
-			pipeline = pipeline.png({ quality: TARGET_QUALITY, compressionLevel: 9, palette: true });
+			buffer = await sharp(srcPath)
+				.png({ quality: TARGET_QUALITY, compressionLevel: 9, palette: true })
+				.toBuffer();
 		} else if (ext === ".webp") {
-			pipeline = pipeline.webp({ quality: TARGET_QUALITY });
+			buffer = await sharp(srcPath)
+				.webp({ quality: TARGET_QUALITY, effort: 6 })
+				.toBuffer();
 		} else {
-			pipeline = pipeline.jpeg({ quality: TARGET_QUALITY, mozjpeg: true });
+			buffer = await sharp(srcPath)
+				.jpeg({ quality: TARGET_QUALITY, mozjpeg: true })
+				.toBuffer();
 		}
 
-		const stats = fs.statSync(srcPath);
-		const currentSizeKB = stats.size / 1024;
-		const compressed = await pipeline.toBuffer();
-		const newSizeKB = compressed.length / 1024;
-		fs.writeFileSync(destPath, compressed);
+		const newSizeKB = buffer.length / 1024;
+		fs.writeFileSync(destPath, buffer);
 
+		const ratio = ((1 - newSizeKB / currentSizeKB) * 100).toFixed(1);
 		if (newSizeKB < currentSizeKB) {
-			console.log(`  Compressed: ${path.basename(srcPath)} (${currentSizeKB.toFixed(0)}KB → ${newSizeKB.toFixed(0)}KB)`);
+			console.log(`  ✓ ${path.basename(srcPath)} ${currentSizeKB.toFixed(0)}KB → ${newSizeKB.toFixed(0)}KB (${ratio}%)`);
 		} else {
 			fs.copyFileSync(srcPath, destPath);
-			console.log(`  Skipped: ${path.basename(srcPath)} (${currentSizeKB.toFixed(0)}KB, no benefit)`);
+			console.log(`  – ${path.basename(srcPath)} ${currentSizeKB.toFixed(0)}KB (no gain)`);
 		}
 	} catch (err) {
-		console.error(`  Error: ${srcPath} - ${err.message}`);
+		console.error(`  ✗ ${srcPath}: ${err.message}`);
 	}
 }
 
@@ -44,33 +50,33 @@ async function main() {
 
 	const albums = fs.readdirSync(GALLERY_DIR, { withFileTypes: true });
 	let total = 0;
+	let tasks = [];
 
 	for (const album of albums) {
 		if (!album.isDirectory()) continue;
 
 		const albumPath = path.join(GALLERY_DIR, album.name);
 		const thumbPath = path.join(albumPath, "thumb");
+		const files = fs.readdirSync(albumPath).filter((f) => /\.(jpe?g|png|webp)$/i.test(f));
 
-		const files = fs.readdirSync(albumPath);
-		const imageFiles = files.filter((f) => /\.(jpe?g|png|webp)$/i.test(f));
-
-		if (imageFiles.length === 0) continue;
+		if (files.length === 0) continue;
 
 		if (!fs.existsSync(thumbPath)) {
 			fs.mkdirSync(thumbPath, { recursive: true });
 		}
 
-		console.log(`\nAlbum: ${album.name} (${imageFiles.length} images)`);
+		console.log(`\nAlbum: ${album.name} (${files.length} images)`);
 
-		for (const file of imageFiles) {
+		for (const file of files) {
 			const src = path.join(albumPath, file);
 			const dest = path.join(thumbPath, file);
-			await processImage(src, dest);
+			tasks.push(processImage(src, dest));
 			total++;
 		}
 	}
 
-	console.log(`\nDone! ${total} images compressed to /thumb/.`);
+	await Promise.all(tasks);
+	console.log(`\nDone! ${total} images processed.`);
 }
 
 main().catch(console.error);
