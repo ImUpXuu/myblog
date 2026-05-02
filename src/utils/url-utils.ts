@@ -40,5 +40,7 @@ export function getDir(path: string): string {
 }
 
 export function url(path: string) {
-	return joinUrl("", import.meta.env.BASE_URL, path);
+	const base = import.meta.env.BASE_URL || "/";
+	const normalizedPath = path.startsWith("/") ? path : `/${path}`;
+	return joinUrl(base, normalizedPath);
 }

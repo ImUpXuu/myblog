@@ -657,17 +657,29 @@ import { Fancybox } from "@fancyapps/ui";
 import "@fancyapps/ui/dist/fancybox/fancybox.css";
 
 function bindFancybox() {
-	Fancybox.bind("[data-fancybox], #post-cover img, .custom-md img", {
-		Toolbar: {
-			display: ["close"],
-		},
-		Images: {
-			Panzoom: {
-				maxScale: 3,
+		document.querySelectorAll(".custom-md img").forEach((img) => {
+			const el = img as HTMLElement;
+			if (!el.dataset.fancybox) {
+				el.dataset.fancybox = "gallery";
+			}
+		});
+		document.querySelectorAll("#post-cover img").forEach((img) => {
+			const el = img as HTMLElement;
+			if (!el.dataset.fancybox) {
+				el.dataset.fancybox = "gallery";
+			}
+		});
+		Fancybox.bind("[data-fancybox]", {
+			Toolbar: {
+				display: ["close"],
 			},
-		},
-	});
-}
+			Images: {
+				Panzoom: {
+					maxScale: 3,
+				},
+			},
+		});
+	}
 
 function destroyFancybox() {
 	Fancybox.destroy();

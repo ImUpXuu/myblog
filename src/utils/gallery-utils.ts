@@ -8,14 +8,15 @@ function withBase(assetPath: string): string {
 	if (/^(https?:)?\/\//i.test(assetPath) || /^(data|blob):/i.test(assetPath)) {
 		return assetPath;
 	}
+	const base = import.meta.env.BASE_URL || "/";
 	const normalizedPath = assetPath.startsWith("/")
 		? assetPath
 		: `/${assetPath}`;
-	const base = import.meta.env.BASE_URL || "/";
-	if (base !== "/" && normalizedPath.startsWith(base)) {
+	if (base === "/") {
 		return normalizedPath;
 	}
-	return url(normalizedPath);
+	const baseClean = base.endsWith("/") ? base.slice(0, -1) : base;
+	return `${baseClean}${normalizedPath}`;
 }
 
 export function scanAlbumPhotos(albumId: string): string[] {
