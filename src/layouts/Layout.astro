@@ -669,7 +669,7 @@ function bindFancybox() {
 			el.dataset.fancybox = "gallery";
 		}
 	});
-	Fancybox.destroy();
+	try { Fancybox.destroy(); } catch (_) {}
 	Fancybox.bind("[data-fancybox]", {
 		Toolbar: {
 			display: ["close"],
@@ -696,15 +696,21 @@ if (document.readyState === "loading") {
 	init();
 }
 
-if (window.swup) {
-	window.swup.hooks.on("page:view", () => {
-		window.swup.hooks.on("content:replace", bindFancybox, { before: true });
-	});
-} else {
-	document.addEventListener("swup:enable", () => {
-		window.swup!.hooks.on("page:view", () => {
-			window.swup!.hooks.on("content:replace", bindFancybox, { before: true });
+function setupSwup() {
+	if (window.swup) {
+		window.swup.on("page:view", () => {
+			requestAnimationFrame(() => {
+				requestAnimationFrame(() => {
+					bindFancybox();
+				});
+			});
 		});
-	});
+	}
+}
+
+if (window.swup) {
+	setupSwup();
+} else {
+	document.addEventListener("swup:enable", setupSwup);
 }
 </script>

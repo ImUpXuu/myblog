@@ -4,7 +4,7 @@ import { url } from "@utils/url-utils";
 interface Props {
 	id: string;
 	name: string;
-	cover: string;
+	cover: string | { thumb: string; full: string };
 	description?: string;
 	date?: string;
 	location?: string;
@@ -14,6 +14,8 @@ interface Props {
 
 const { id, name, cover, description, date, location, tags, photoCount } =
 	Astro.props;
+
+const coverSrc = typeof cover === "string" ? cover : cover?.thumb || "";
 ---
 
 <a

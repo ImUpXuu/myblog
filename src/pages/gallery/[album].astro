@@ -26,9 +26,9 @@ const columnWidth = galleryConfig.columnWidth || 240;
 
 <MainGridLayout title={albumMeta.name} description={albumMeta.description || ""}>
 	<div class="w-full rounded-[var(--radius-large)] overflow-hidden relative">
-		{cover ? (
+		{cover && cover.thumb ? (
 			<div class="relative w-full aspect-[3/1] min-h-[200px] max-h-[360px]">
-				<img src={cover} alt={albumMeta.name} class="w-full h-full object-cover" />
+				<img src={cover.thumb} alt={albumMeta.name} class="w-full h-full object-cover" />
 				<div class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent" />
 				<a
 					href={url("/gallery/")}
