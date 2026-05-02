@@ -658,16 +658,28 @@ import { Fancybox } from "@fancyapps/ui";
 
 function bindFancybox() {
 	document.querySelectorAll(".custom-md img").forEach((img) => {
-		const el = img as HTMLElement;
-		if (!el.dataset.fancybox) {
-			el.dataset.fancybox = "gallery";
-		}
+		const el = img as HTMLImageElement;
+		if (el.closest("a[data-fancybox]")) return;
+		const src = el.src || el.getAttribute("data-src") || "";
+		if (!src) return;
+		const wrapper = document.createElement("a");
+		wrapper.href = src;
+		wrapper.dataset.fancybox = "gallery";
+		wrapper.dataset.src = src;
+		el.parentNode!.insertBefore(wrapper, el);
+		wrapper.appendChild(el);
 	});
 	document.querySelectorAll("#post-cover img").forEach((img) => {
-		const el = img as HTMLElement;
-		if (!el.dataset.fancybox) {
-			el.dataset.fancybox = "gallery";
-		}
+		const el = img as HTMLImageElement;
+		if (el.closest("a[data-fancybox]")) return;
+		const src = el.src || el.getAttribute("data-src") || "";
+		if (!src) return;
+		const wrapper = document.createElement("a");
+		wrapper.href = src;
+		wrapper.dataset.fancybox = "gallery";
+		wrapper.dataset.src = src;
+		el.parentNode!.insertBefore(wrapper, el);
+		wrapper.appendChild(el);
 	});
 	try { Fancybox.destroy(); } catch (_) {}
 	Fancybox.bind("[data-fancybox]", {
