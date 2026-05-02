@@ -1,28 +1,62 @@
 ---
+interface Photo {
+	thumb: string;
+	full: string;
+}
+
 interface Props {
-	src: string;
+	photo: Photo;
 	albumId: string;
 	alt?: string;
 }
 
-const { src, albumId, alt = "" } = Astro.props;
+const { photo, albumId, alt = "" } = Astro.props;
 ---
 
 <div class="gallery-photo-card break-inside-avoid mb-3">
 	<a
 		data-fancybox="gallery"
-		data-src={src}
-		data-thumb={src}
+		data-src={photo.full}
+		data-thumb={photo.full}
 		data-type="image"
-		href={src}
+		href={photo.full}
 		class="block rounded-xl overflow-hidden group cursor-pointer"
 	>
 		<img
-			src={src}
+			src={photo.isThumb ? photo.thumb : photo.full}
 			alt={alt}
 			loading="lazy"
 			decoding="async"
-			class="w-full h-auto object-cover transition-transform duration-300 group-hover:scale-105"
+			class="lazy-img w-full h-auto object-cover transition-opacity duration-300 group-hover:scale-105"
+			style="opacity: 0;"
+			data-src={photo.isThumb ? photo.full : undefined}
 		/>
 	</a>
 </div>
+
+<script>
+	document.querySelectorAll(".lazy-img").forEach((img) => {
+		const el = img as HTMLImageElement;
+		if (el.dataset.lazyReady) return;
+		el.dataset.lazyReady = "true";
+
+		const imgLoader = new Image();
+		imgLoader.onload = () => {
+			el.src = imgLoader.src;
+			el.style.opacity = "1";
+		};
+		imgLoader.onerror = () => {
+			const src = el.getAttribute("data-src");
+			if (src) el.src = src;
+			el.style.opacity = "1";
+		};
+		imgLoader.src = el.src;
+	});
+</script>
+
+<style>
+	.lazy-img {
+		opacity: 0;
+		transition: opacity 0.4s ease-out;
+	}
+</style>
