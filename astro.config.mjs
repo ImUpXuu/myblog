@@ -118,13 +118,8 @@ export default defineConfig({
 			HTMLOptions: {
 				removalThreshold: 1024,
 			},
-			Image: true,
-			ImageOptions: {
-				quality: 80,
-				compressionLevel: "auto",
-			},
+			Image: false,
 			SVG: true,
-			// 排除外部资源
 			exclude: [/^https?:\/\//],
 		}),
 	],
