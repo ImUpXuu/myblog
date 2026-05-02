@@ -710,7 +710,7 @@ if (document.readyState === "loading") {
 
 function setupSwup() {
 	if (window.swup) {
-		window.swup.on("page:view", () => {
+		window.swup.hooks.on("page:view", () => {
 			requestAnimationFrame(() => {
 				requestAnimationFrame(() => {
 					bindFancybox();
