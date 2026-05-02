@@ -6,26 +6,13 @@ const GALLERY_DIR = path.join(process.cwd(), "public", "gallery");
 const TARGET_QUALITY = 75;
 
 async function processImage(srcPath, destPath) {
-	const ext = path.extname(srcPath).toLowerCase();
 	const stats = fs.statSync(srcPath);
 	const currentSizeKB = stats.size / 1024;
 
 	try {
-		let buffer;
-
-		if (ext === ".png") {
-			buffer = await sharp(srcPath)
-				.png({ quality: TARGET_QUALITY, compressionLevel: 9, palette: true })
-				.toBuffer();
-		} else if (ext === ".webp") {
-			buffer = await sharp(srcPath)
-				.webp({ quality: TARGET_QUALITY, effort: 6 })
-				.toBuffer();
-		} else {
-			buffer = await sharp(srcPath)
-				.jpeg({ quality: TARGET_QUALITY, mozjpeg: true })
-				.toBuffer();
-		}
+		const buffer = await sharp(srcPath)
+			.webp({ quality: TARGET_QUALITY, effort: 6 })
+			.toBuffer();
 
 		const newSizeKB = buffer.length / 1024;
 		fs.writeFileSync(destPath, buffer);
@@ -34,8 +21,9 @@ async function processImage(srcPath, destPath) {
 		if (newSizeKB < currentSizeKB) {
 			console.log(`  ✓ ${path.basename(srcPath)} ${currentSizeKB.toFixed(0)}KB → ${newSizeKB.toFixed(0)}KB (${ratio}%)`);
 		} else {
-			fs.copyFileSync(srcPath, destPath);
-			console.log(`  – ${path.basename(srcPath)} ${currentSizeKB.toFixed(0)}KB (no gain)`);
+			fs.copyFileSync(srcPath, destPath.replace(".webp", path.extname(srcPath)));
+			fs.unlinkSync(destPath);
+			console.log(`  – ${path.basename(srcPath)} ${currentSizeKB.toFixed(0)}KB (no gain, skipped)`);
 		}
 	} catch (err) {
 		console.error(`  ✗ ${srcPath}: ${err.message}`);
@@ -69,7 +57,8 @@ async function main() {
 
 		for (const file of files) {
 			const src = path.join(albumPath, file);
-			const dest = path.join(thumbPath, file);
+			const webpName = file.replace(/\.(jpe?g|png)$/i, ".webp");
+			const dest = path.join(thumbPath, webpName);
 			tasks.push(processImage(src, dest));
 			total++;
 		}
