@@ -4,7 +4,6 @@ import sharp from "sharp";
 
 const GALLERY_DIR = path.join(process.cwd(), "public", "gallery");
 const TARGET_QUALITY = 80;
-const MAX_SIZE_KB = 300;
 
 async function processImage(srcPath, destPath) {
 	const ext = path.extname(srcPath).toLowerCase();
@@ -22,18 +21,15 @@ async function processImage(srcPath, destPath) {
 
 		const stats = fs.statSync(srcPath);
 		const currentSizeKB = stats.size / 1024;
+		const compressed = await pipeline.toBuffer();
+		const newSizeKB = compressed.length / 1024;
+		fs.writeFileSync(destPath, compressed);
 
-		if (currentSizeKB > MAX_SIZE_KB) {
-			const resized = await pipeline
-				.resize(1920, 1920, { fit: "inside", withoutEnlargement: true })
-				.toBuffer();
-			fs.writeFileSync(destPath, resized);
-			const newSizeKB = resized.length / 1024;
-			console.log(`  Resized: ${path.basename(srcPath)} (${currentSizeKB.toFixed(0)}KB → ${newSizeKB.toFixed(0)}KB)`);
+		if (newSizeKB < currentSizeKB) {
+			console.log(`  Compressed: ${path.basename(srcPath)} (${currentSizeKB.toFixed(0)}KB → ${newSizeKB.toFixed(0)}KB)`);
 		} else {
-			const compressed = await pipeline.toBuffer();
-			fs.writeFileSync(destPath, compressed);
-			console.log(`  OK: ${path.basename(srcPath)} (${currentSizeKB.toFixed(0)}KB)`);
+			fs.copyFileSync(srcPath, destPath);
+			console.log(`  Skipped: ${path.basename(srcPath)} (${currentSizeKB.toFixed(0)}KB, no benefit)`);
 		}
 	} catch (err) {
 		console.error(`  Error: ${srcPath} - ${err.message}`);
