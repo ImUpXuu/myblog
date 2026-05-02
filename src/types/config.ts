@@ -101,3 +101,18 @@ export type BlogPostData = {
 export type ExpressiveCodeConfig = {
 	theme: string;
 };
+
+export type GalleryAlbum = {
+	id: string;
+	name: string;
+	description?: string;
+	cover?: string;
+	location?: string;
+	date?: string;
+	tags?: string[];
+};
+
+export type GalleryConfig = {
+	albums: GalleryAlbum[];
+	columnWidth?: number;
+};
