@@ -24,39 +24,56 @@ const { photo, albumId, alt = "" } = Astro.props;
 	>
 		<img
 			src={photo.isThumb ? photo.thumb : photo.full}
+			data-src={photo.isThumb ? photo.full : undefined}
 			alt={alt}
 			loading="lazy"
 			decoding="async"
-			class="lazy-img w-full h-auto object-cover transition-opacity duration-300 group-hover:scale-105"
-			style="opacity: 0;"
-			data-src={photo.isThumb ? photo.full : undefined}
+			class="lazy-img w-full h-auto object-cover transition-all duration-500"
 		/>
 	</a>
 </div>
 
 <script>
-	document.querySelectorAll(".lazy-img").forEach((img) => {
+	document.querySelectorAll(".lazy-img[data-src]").forEach((img) => {
 		const el = img as HTMLImageElement;
-		if (el.dataset.lazyReady) return;
-		el.dataset.lazyReady = "true";
+		if (el.dataset.lazyLoaded) return;
+		el.dataset.lazyLoaded = "true";
 
-		const imgLoader = new Image();
-		imgLoader.onload = () => {
-			el.src = imgLoader.src;
-			el.style.opacity = "1";
-		};
-		imgLoader.onerror = () => {
-			const src = el.getAttribute("data-src");
-			if (src) el.src = src;
-			el.style.opacity = "1";
-		};
-		imgLoader.src = el.src;
+		el.style.filter = "blur(4px)";
+		el.style.transform = "scale(1.02)";
+
+		const observer = new IntersectionObserver(
+			(entries) => {
+				entries.forEach((entry) => {
+					if (entry.isIntersecting) {
+						const target = entry.target as HTMLImageElement;
+						const fullSrc = target.getAttribute("data-src");
+						if (!fullSrc) return;
+
+						const loader = new Image();
+						loader.onload = () => {
+							target.src = fullSrc;
+							target.style.filter = "blur(0)";
+							target.style.transform = "scale(1)";
+						};
+						loader.onerror = () => {
+							target.style.filter = "blur(0)";
+							target.style.transform = "scale(1)";
+						};
+						loader.src = fullSrc;
+
+						observer.unobserve(target);
+					}
+				});
+			},
+			{ rootMargin: "400px 0px", threshold: 0 }
+		);
+
+		observer.observe(el);
+	});
+
+	document.querySelectorAll(".lazy-img:not([data-src])").forEach((img) => {
+		const el = img as HTMLImageElement;
+		el.style.opacity = "1";
 	});
 </script>
-
-<style>
-	.lazy-img {
-		opacity: 0;
-		transition: opacity 0.4s ease-out;
-	}
-</style>
