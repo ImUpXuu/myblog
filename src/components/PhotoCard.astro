@@ -14,11 +14,10 @@ const { photo, albumId, alt = "" } = Astro.props;
 ---
 
 <div class="gallery-photo-card break-inside-avoid mb-3">
-	<a
-		data-lightbox="gallery"
-		data-thumb={photo.isThumb ? photo.thumb : photo.full}
-		href={photo.full}
-		class="block rounded-xl overflow-hidden group cursor-pointer"
+	<div
+		data-lb-src={photo.full}
+		data-lb-thumb={photo.isThumb ? photo.thumb : photo.full}
+		class="lb-trigger block rounded-xl overflow-hidden group cursor-pointer"
 	>
 		<img
 			src={photo.isThumb ? photo.thumb : photo.full}
@@ -28,7 +27,7 @@ const { photo, albumId, alt = "" } = Astro.props;
 			decoding="async"
 			class="lazy-img w-full h-auto object-cover transition-all duration-500"
 		/>
-	</a>
+	</div>
 </div>
 
 <script>
@@ -75,30 +74,10 @@ const { photo, albumId, alt = "" } = Astro.props;
 		const el = img as HTMLImageElement;
 		el.style.opacity = "1";
 	});
-
-	function initGalleryLightbox() {
-		import("lightbox3").then(({ Lightbox }) => {
-			try { Lightbox.init(); } catch (_) {}
-		});
-	}
-
-	initGalleryLightbox();
-
-	if (window.swup) {
-		window.swup.hooks.on("content:replace", () => {
-			initGalleryLightbox();
-		});
-	} else {
-		document.addEventListener("swup:enable", () => {
-			window.swup!.hooks.on("content:replace", () => {
-				initGalleryLightbox();
-			});
-		});
-	}
 </script>
 
 <style>
-	a[data-lightbox] {
+	.lb-trigger {
 		cursor: zoom-in !important;
 	}
 </style>

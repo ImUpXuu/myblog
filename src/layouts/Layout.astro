@@ -681,6 +681,21 @@ function wrapImagesForLightbox() {
 		el.parentNode!.insertBefore(wrapper, el);
 		wrapper.appendChild(el);
 	});
+	document.querySelectorAll(".lb-trigger").forEach((trigger) => {
+		const src = trigger.getAttribute("data-lb-src");
+		const thumb = trigger.getAttribute("data-lb-thumb") || src;
+		if (!src) return;
+		if (trigger.querySelector("a[data-lightbox]")) return;
+		const wrapper = document.createElement("a");
+		wrapper.href = src;
+		wrapper.dataset.lightbox = "gallery";
+		wrapper.dataset.thumb = thumb;
+		const img = trigger.querySelector("img");
+		if (img) {
+			trigger.insertBefore(wrapper, img);
+			wrapper.appendChild(img);
+		}
+	});
 }
 
 function initLightbox() {
