@@ -81,17 +81,6 @@ const { photo, albumId, alt = "" } = Astro.props;
 		(link as HTMLElement).dataset.lbGuard = "true";
 		link.addEventListener("click", (e) => {
 			e.preventDefault();
-			e.stopPropagation();
-			const href = (link as HTMLAnchorElement).getAttribute("href");
-			if (!href) return;
-			import("lightbox3").then(({ Lightbox }) => {
-				try {
-					const lb = Lightbox.init();
-					lb.open(href);
-				} catch (_) {
-					window.open(href, "_blank");
-				}
-			});
 		});
 	});
 </script>
