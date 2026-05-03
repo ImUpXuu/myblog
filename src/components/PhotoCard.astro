@@ -17,7 +17,7 @@ const { photo, albumId, alt = "" } = Astro.props;
 	<a
 		data-lightbox="gallery"
 		data-thumb={photo.isThumb ? photo.thumb : photo.full}
-		href={photo.full}
+		data-href={photo.full}
 		class="block rounded-xl overflow-hidden group cursor-pointer"
 	>
 		<img
@@ -75,6 +75,34 @@ const { photo, albumId, alt = "" } = Astro.props;
 		const el = img as HTMLImageElement;
 		el.style.opacity = "1";
 	});
+
+	function initGalleryLightbox() {
+		document.querySelectorAll("a[data-lightbox][data-href]").forEach((link) => {
+			const href = link.getAttribute("data-href");
+			if (href && !link.getAttribute("href")) {
+				link.setAttribute("href", href);
+			}
+		});
+		try {
+			import("lightbox3").then(({ Lightbox }) => {
+				Lightbox.init();
+			});
+		} catch (_) {}
+	}
+
+	initGalleryLightbox();
+
+	if (window.swup) {
+		window.swup.hooks.on("content:replace", () => {
+			initGalleryLightbox();
+		});
+	} else {
+		document.addEventListener("swup:enable", () => {
+			window.swup!.hooks.on("content:replace", () => {
+				initGalleryLightbox();
+			});
+		});
+	}
 
 	document.querySelectorAll("a[data-lightbox]").forEach((link) => {
 		if ((link as HTMLElement).dataset.lbGuard) return;
