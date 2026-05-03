@@ -16,8 +16,7 @@ const { photo, albumId, alt = "" } = Astro.props;
 <div class="gallery-photo-card break-inside-avoid mb-3">
 	<a
 		data-lightbox="gallery"
-		data-thumb={photo.full}
-		data-type="image"
+		data-thumb={photo.isThumb ? photo.thumb : photo.full}
 		href={photo.full}
 		class="block rounded-xl overflow-hidden group cursor-pointer"
 	>

@@ -665,6 +665,7 @@ function wrapImagesForLightbox() {
 		const wrapper = document.createElement("a");
 		wrapper.href = src;
 		wrapper.dataset.lightbox = "gallery";
+		wrapper.dataset.thumb = src;
 		el.parentNode!.insertBefore(wrapper, el);
 		wrapper.appendChild(el);
 	});
@@ -676,6 +677,7 @@ function wrapImagesForLightbox() {
 		const wrapper = document.createElement("a");
 		wrapper.href = src;
 		wrapper.dataset.lightbox = "gallery";
+		wrapper.dataset.thumb = src;
 		el.parentNode!.insertBefore(wrapper, el);
 		wrapper.appendChild(el);
 	});
