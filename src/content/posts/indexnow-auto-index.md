@@ -1,13 +1,22 @@
-***
-
+---
 title: 给博客接入 IndexNow + Bing 自动索引
 published: 2026-05-03
 description: 通过 GitHub Actions 工作流，在文章更新时自动通知 Bing 爬取新内容，再也不用手动去 Bing Webmaster 提交了。
-image: ""
-tags: \[工具,博客,SEO.Github Action]
+image: ''
+tags: [工具,博客,SEO,Github Action]
 category: 技术
+draft: false
+---
 
 之前每次写完博客都得手动去 Bing Webmaster Tools 提交 URL，麻烦得很。最近接入了 IndexNow，配合 GitHub Actions 实现了文章更新时自动通知 Bing 爬取，记录一下。
+
+## 项目信息
+
+我的博客仓库在这里：
+
+::github{repo="imupxuu/myblog"}
+
+工作流文件在这里：[.github/workflows/indexnow.yml](https://github.com/imupxuu/myblog/blob/main/.github/workflows/indexnow.yml)
 
 ## 什么是 IndexNow
 
@@ -74,16 +83,30 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
-      - name: Build URLs from posts
-        id: urls
+      - name: Get changed post files
+        id: changed
+        run: |
+          CHANGED=$(git diff --name-only HEAD~1 HEAD | grep 'src/content/posts/.*\.md$' | tr '\n' ' ')
+          echo "changed=${CHANGED}" >> $GITHUB_OUTPUT
+
+      - name: Build URLs and submit
+        if: steps.changed.outputs.changed != ''
         run: |
           SITE_URL="https://upxuu.com"
-          URLS=""
+          CHANGED="${{ steps.changed.outputs.changed }}"
+
+          echo "Changed files: $CHANGED"
+          echo ""
+
+          URLS="["
           first=true
-          for file in src/content/posts/*.md; do
+          for file in $CHANGED; do
             slug=$(basename "$file" .md)
             url="${SITE_URL}/posts/${slug}/"
+            echo "  Found: $url"
             if [ "$first" = true ]; then
               first=false
             else
@@ -91,31 +114,10 @@ jobs:
             fi
             URLS="${URLS}\"${url}\""
           done
-          for dir in src/content/posts/*/; do
-            for file in "$dir"*.md; do
-              slug=$(basename "$file" .md)
-              url="${SITE_URL}/posts/${slug}/"
-              if [ "$first" = true ]; then
-                first=false
-              else
-                URLS="${URLS},"
-              fi
-              URLS="${URLS}\"${url}\""
-            done
-          done
-          echo "urls=[${URLS}]" >> $GITHUB_OUTPUT
+          URLS="${URLS}]"
 
-      - name: Submit to Bing via IndexNow
-        run: |
-          URLS="${{ steps.urls.outputs.urls }}"
-          if [ -z "$URLS" ] || [ "$URLS" = "[]" ]; then
-            echo "No URLs to submit"
-            echo "result=no_urls" >> $GITHUB_OUTPUT
-            exit 0
-          fi
-
-          echo "URL list:"
-          echo "$URLS" | python3 -c "import json,sys; [print(f'  - {u}') for u in json.load(sys.stdin)]"
+          echo ""
+          echo "Submitting to Bing..."
           echo ""
 
           RESPONSE=$(curl -s -w "\n%{http_code}" -X POST \
@@ -131,15 +133,14 @@ jobs:
           HTTP_CODE=$(echo "$RESPONSE" | tail -n1)
           BODY=$(echo "$RESPONSE" | sed '$d')
 
-          echo "---"
           echo "HTTP Status: $HTTP_CODE"
           echo "Response: $BODY"
-          echo "result=HTTP_${HTTP_CODE}" >> $GITHUB_OUTPUT
 ```
 
 ### 4. 工作流说明
 
-- **触发条件**：`src/content/posts/**/*.md` 有变更时自动触发（新建、修改、删除文章都会）
+- **触发条件**：`src/content/posts/**/*.md` 有变更时自动触发
+- **精准索引**：通过 `git diff --name-only HEAD~1 HEAD` 只处理本次变更的文章
 - **URL 生成**：从文件名读取 slug，拼接为 `https://upxuu.com/posts/{slug}/`
 - **提交地址**：`https://www.bing.com/indexnow`
 - **输出结果**：GitHub Actions 日志里直接输出 HTTP 状态码和响应内容，方便排查
