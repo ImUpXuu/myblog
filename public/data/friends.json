@@ -192,5 +192,11 @@
     "url": "https://www.mgstudio.icu",
     "avatar": "https://www.mgstudio.icu/_astro/touxiang.DHdnAPK1_ZR9jAF.webp",
     "description": "The world is big, you have to go and see"
+  },
+  {
+    "name": "JuniorTree",
+    "url": "https://www.juniortree.com",
+    "avatar": "https://s3.juniortree.com/pic/static/avatar.webp",
+    "description": "你应当选择你真正热爱的"
   }
 ]
