@@ -15,7 +15,8 @@ const { photo, albumId, alt = "" } = Astro.props;
 
 <div class="gallery-photo-card break-inside-avoid mb-3">
 	<a
-		data-lightbox="gallery"
+		data-fancybox="gallery"
+		data-src={photo.full}
 		data-thumb={photo.full}
 		data-type="image"
 		href={photo.full}
