@@ -39,9 +39,6 @@ const { photo, albumId, alt = "" } = Astro.props;
 		if (el.dataset.lazyLoaded) return;
 		el.dataset.lazyLoaded = "true";
 
-		el.style.filter = "blur(4px)";
-		el.style.transform = "scale(1.02)";
-
 		const observer = new IntersectionObserver(
 			(entries) => {
 				entries.forEach((entry) => {
@@ -52,13 +49,17 @@ const { photo, albumId, alt = "" } = Astro.props;
 
 						const loader = new Image();
 						loader.onload = () => {
-							target.src = fullSrc;
-							target.style.filter = "blur(0)";
-							target.style.transform = "scale(1)";
-						};
-						loader.onerror = () => {
-							target.style.filter = "blur(0)";
-							target.style.transform = "scale(1)";
+							target.style.transition = "filter 0.15s ease, transform 0.15s ease";
+							target.style.filter = "blur(6px)";
+							target.style.transform = "scale(1.03)";
+							requestAnimationFrame(() => {
+								requestAnimationFrame(() => {
+									target.src = fullSrc;
+									target.style.transition = "filter 0.4s ease, transform 0.4s ease";
+									target.style.filter = "blur(0)";
+									target.style.transform = "scale(1)";
+								});
+							});
 						};
 						loader.src = fullSrc;
 
