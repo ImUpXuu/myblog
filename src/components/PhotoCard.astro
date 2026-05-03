@@ -1,26 +1,126 @@
 ---
+interface Photo {
+	thumb: string;
+	full: string;
+}
+
 interface Props {
-	src: string;
+	photo: Photo;
 	albumId: string;
 	alt?: string;
 }
 
-const { src, albumId, alt = "" } = Astro.props;
+const { photo, albumId, alt = "" } = Astro.props;
 ---
 
 <div class="gallery-photo-card break-inside-avoid mb-3">
 	<div
-		data-fancybox={`gallery-${albumId}`}
-		data-src={src}
-		data-type="image"
-		class="block rounded-xl overflow-hidden group cursor-pointer"
+		data-lb-src={photo.full}
+		data-lb-thumb={photo.isThumb ? photo.thumb : photo.full}
+		class="lb-trigger block rounded-xl overflow-hidden group cursor-pointer"
 	>
 		<img
-			src={src}
+			src={photo.isThumb ? photo.thumb : photo.full}
+			data-src={photo.isThumb ? photo.full : undefined}
 			alt={alt}
 			loading="lazy"
 			decoding="async"
-			class="w-full h-auto object-cover transition-transform duration-300 group-hover:scale-105"
+			class="lazy-img w-full h-auto object-cover transition-all duration-500"
 		/>
 	</div>
 </div>
+
+<script>
+	document.querySelectorAll(".lazy-img[data-src]").forEach((img) => {
+		const el = img as HTMLImageElement;
+		if (el.dataset.lazyLoaded) return;
+		el.dataset.lazyLoaded = "true";
+
+		const observer = new IntersectionObserver(
+			(entries) => {
+				entries.forEach((entry) => {
+					if (entry.isIntersecting) {
+						const target = entry.target as HTMLImageElement;
+						const fullSrc = target.getAttribute("data-src");
+						if (!fullSrc) return;
+
+						const loader = new Image();
+						loader.onload = () => {
+							target.style.transition = "filter 0.15s ease, transform 0.15s ease";
+							target.style.filter = "blur(6px)";
+							target.style.transform = "scale(1.03)";
+							requestAnimationFrame(() => {
+								requestAnimationFrame(() => {
+									target.src = fullSrc;
+									target.style.transition = "filter 0.4s ease, transform 0.4s ease";
+									target.style.filter = "blur(0)";
+									target.style.transform = "scale(1)";
+								});
+							});
+						};
+						loader.src = fullSrc;
+
+						observer.unobserve(target);
+					}
+				});
+			},
+			{ rootMargin: "400px 0px", threshold: 0 }
+		);
+
+		observer.observe(el);
+	});
+
+	document.querySelectorAll(".lazy-img:not([data-src])").forEach((img) => {
+		const el = img as HTMLImageElement;
+		el.style.opacity = "1";
+	});
+
+	function initGallery() {
+		const items: { src: string; thumb?: string }[] = [];
+		document.querySelectorAll(".lb-trigger").forEach((el) => {
+			const src = el.getAttribute("data-lb-src");
+			const thumb = el.getAttribute("data-lb-thumb") || undefined;
+			if (src) items.push({ src, thumb });
+		});
+		if (items.length === 0) return;
+
+		import("lightbox3").then(({ Lightbox }) => {
+			const lb = Lightbox.init();
+
+			document.querySelectorAll(".lb-trigger").forEach((trigger, idx) => {
+				if ((trigger as HTMLElement).dataset.lbReady) return;
+				(trigger as HTMLElement).dataset.lbReady = "1";
+				trigger.addEventListener(
+					"click",
+					(e) => {
+						e.preventDefault();
+						e.stopPropagation();
+						e.stopImmediatePropagation();
+						lb.open(items[idx].src);
+					},
+					true
+				);
+			});
+		});
+	}
+
+	initGallery();
+
+	if (window.swup) {
+		window.swup.hooks.on("content:replace", () => {
+			initGallery();
+		});
+	} else {
+		document.addEventListener("swup:enable", () => {
+			window.swup!.hooks.on("content:replace", () => {
+				initGallery();
+			});
+		});
+	}
+</script>
+
+<style>
+	.lb-trigger {
+		cursor: zoom-in !important;
+	}
+</style>
