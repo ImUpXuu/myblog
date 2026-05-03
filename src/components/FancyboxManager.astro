@@ -1,0 +1,62 @@
+---
+import "@fancyapps/ui/dist/fancybox/fancybox.css";
+---
+
+<script>
+	let Fancybox: any;
+
+	async function setup() {
+		const hasElements = document.querySelector(
+			".custom-md img, #post-cover img, [data-fancybox]"
+		);
+		if (!hasElements) return;
+
+		if (!Fancybox) {
+			const mod = await import("@fancyapps/ui");
+			Fancybox = mod.Fancybox;
+		}
+
+		const commonOptions = {
+			Toolbar: { display: ["close"] },
+			animated: true,
+			dragToClose: true,
+			keyboard: {
+				Escape: "close",
+				Delete: "close",
+				Backspace: "close",
+				PageUp: "next",
+				PageDown: "prev",
+				ArrowRight: "next",
+				ArrowLeft: "prev",
+			},
+			fitToView: true,
+			preload: 3,
+			infinite: true,
+			Panzoom: { maxScale: 3, minScale: 1 },
+			caption: false,
+		};
+
+		document.querySelectorAll(".custom-md img, #post-cover img").forEach((img) => {
+			const el = img as HTMLImageElement;
+			if (el.closest("a[data-fancybox]")) return;
+			const src = el.src || el.getAttribute("data-src") || "";
+			if (!src || src.startsWith("data:")) return;
+			el.dataset.fancybox = "gallery";
+			el.dataset.src = src;
+		});
+
+		Fancybox.bind("[data-fancybox]", commonOptions);
+	}
+
+	function cleanup() {
+		if (Fancybox) {
+			Fancybox.close();
+			Fancybox.unbind(document.body);
+		}
+	}
+
+	setup();
+
+	document.addEventListener("swup:content:replace", setup);
+	document.addEventListener("swup:visit:start", cleanup);
+</script>

@@ -21,7 +21,6 @@ import { defaultFavicons } from "../constants/icon";
 import type { Favicon } from "../types/config";
 import { pathsEqual, url } from "../utils/url-utils";
 import "katex/dist/katex.css";
-import "lightbox3/style.css";
 import background from "../assets/images/background.png";
 import backgroundDark from "../assets/images/backgroundright.png";
 
@@ -654,64 +653,7 @@ window.onresize = () => {
 </script>
 
 <script>
-import { Lightbox } from "lightbox3";
+import FancyboxManager from "../components/FancyboxManager.astro";
 
-function wrapImagesForLightbox() {
-	document.querySelectorAll(".custom-md img").forEach((img) => {
-		const el = img as HTMLImageElement;
-		if (el.closest("a[data-lightbox]")) return;
-		const src = el.src || el.getAttribute("data-src") || "";
-		if (!src || src.startsWith("data:")) return;
-		const wrapper = document.createElement("a");
-		wrapper.href = src;
-		wrapper.dataset.lightbox = "gallery";
-		wrapper.dataset.thumb = src;
-		el.parentNode!.insertBefore(wrapper, el);
-		wrapper.appendChild(el);
-	});
-	document.querySelectorAll("#post-cover img").forEach((img) => {
-		const el = img as HTMLImageElement;
-		if (el.closest("a[data-lightbox]")) return;
-		const src = el.src || el.getAttribute("data-src") || "";
-		if (!src || src.startsWith("data:")) return;
-		const wrapper = document.createElement("a");
-		wrapper.href = src;
-		wrapper.dataset.lightbox = "gallery";
-		wrapper.dataset.thumb = src;
-		el.parentNode!.insertBefore(wrapper, el);
-		wrapper.appendChild(el);
-	});
-}
-
-function initLightbox() {
-	wrapImagesForLightbox();
-	try { Lightbox.init(); } catch (_) {}
-}
-
-initLightbox();
-
-function setupSwup() {
-	if (window.swup) {
-		window.swup.hooks.on("content:replace", () => {
-			wrapImagesForLightbox();
-			requestAnimationFrame(() => {
-				try { Lightbox.init(); } catch (_) {}
-			});
-		});
-	}
-}
-
-if (window.swup) {
-	setupSwup();
-} else {
-	document.addEventListener("swup:enable", setupSwup);
-}
-
-document.addEventListener("click", (e) => {
-	const target = e.target as HTMLElement;
-	const link = target.closest("a[data-lightbox]");
-	if (link) {
-		e.preventDefault();
-	}
-}, true);
+FancyboxManager;
 </script>
