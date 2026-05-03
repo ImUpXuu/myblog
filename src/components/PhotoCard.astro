@@ -14,10 +14,10 @@ const { photo, albumId, alt = "" } = Astro.props;
 ---
 
 <div class="gallery-photo-card break-inside-avoid mb-3">
-	<div
+	<a
 		data-lightbox="gallery"
 		data-thumb={photo.isThumb ? photo.thumb : photo.full}
-		data-href={photo.full}
+		href={photo.full}
 		class="block rounded-xl overflow-hidden group cursor-pointer"
 	>
 		<img
@@ -28,7 +28,7 @@ const { photo, albumId, alt = "" } = Astro.props;
 			decoding="async"
 			class="lazy-img w-full h-auto object-cover transition-all duration-500"
 		/>
-	</div>
+	</a>
 </div>
 
 <script>
@@ -77,34 +77,8 @@ const { photo, albumId, alt = "" } = Astro.props;
 	});
 
 	function initGalleryLightbox() {
-		const items: { href: string; thumb?: string }[] = [];
-		document.querySelectorAll("div[data-lightbox][data-href]").forEach((el) => {
-			const href = el.getAttribute("data-href");
-			const thumb = el.getAttribute("data-thumb") || undefined;
-			if (href) items.push({ href, thumb });
-		});
-		if (items.length === 0) return;
-
 		import("lightbox3").then(({ Lightbox }) => {
-			const lb = Lightbox.init();
-
-			document.querySelectorAll("div[data-lightbox][data-href]").forEach((el) => {
-				if ((el as HTMLElement).dataset.lbGuard) return;
-				(el as HTMLElement).dataset.lbGuard = "true";
-				el.addEventListener(
-					"click",
-					(e) => {
-						e.preventDefault();
-						e.stopPropagation();
-						const idx = Array.from(
-							document.querySelectorAll("div[data-lightbox][data-href]")
-						).indexOf(el);
-						lb.open(items, { startAtIdx: idx });
-					},
-					true
-				);
-				el.style.cursor = "zoom-in";
-			});
+			try { Lightbox.init(); } catch (_) {}
 		});
 	}
 
@@ -122,3 +96,9 @@ const { photo, albumId, alt = "" } = Astro.props;
 		});
 	}
 </script>
+
+<style>
+	a[data-lightbox] {
+		cursor: zoom-in !important;
+	}
+</style>

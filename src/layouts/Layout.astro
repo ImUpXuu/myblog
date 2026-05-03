@@ -706,4 +706,12 @@ if (window.swup) {
 } else {
 	document.addEventListener("swup:enable", setupSwup);
 }
+
+document.addEventListener("click", (e) => {
+	const target = e.target as HTMLElement;
+	const link = target.closest("a[data-lightbox]");
+	if (link) {
+		e.preventDefault();
+	}
+}, true);
 </script>
