@@ -1,6 +1,10 @@
 # About
 
-Hello, I am UpXuu (旭).
+## 我是谁~
+
+HELLO！ 我是UpXuu 一个喜欢折腾的开发者，每天库库刷题的学生 一个...
+
+
 
 Welcome to my blog! Here I share my thoughts, coding journey, and life experiences.
 

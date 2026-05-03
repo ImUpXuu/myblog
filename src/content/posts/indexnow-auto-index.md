@@ -6,8 +6,6 @@ description: 通过 GitHub Actions 工作流，在文章更新时自动通知 Bi
 image: ""
 tags: \[工具,博客,SEO.Github Action]
 category: 技术
-draft: false
-------------
 
 之前每次写完博客都得手动去 Bing Webmaster Tools 提交 URL，麻烦得很。最近接入了 IndexNow，配合 GitHub Actions 实现了文章更新时自动通知 Bing 爬取，记录一下。
 
@@ -15,19 +13,49 @@ draft: false
 
 [IndexNow](https://www.indexnow.org/) 是一个开放的搜索引擎索引协议，目前被 Bing、Yandex 等搜索引擎支持。原理很简单：网站主动 POST 一批 URL 给搜索引擎的 IndexNow 接口，搜索引擎收到后会尽快来抓取这些页面。
 
+然而，如果你在搜索引擎搜索，会发现都是叫你如何配置wordpress之类的带有后台的indexnow，这些cms平台可以使用插件，可是想本站用的Astro静态站点呢...! 于是，是时候请出我们的GitHub action啦
+
+## 接入indexnow 好处有哪些？
+
+事实上本站其实在使用indexnow索引之前在bing的权重特别低，一次偶然的尝试让我用上了indexnow 于是...终于索引啦！
+
 ## 接入过程
 
 ### 1. 获取 IndexNow Key
 
-登录 [Bing Webmaster Tools](https://www.bing.com/webmasters)，在"配置"→"IndexNow"里可以看到你的 key。或者直接用 API 方式提交，Bing 会自动验证域名所有权。
+#### 配置bing
+
+登录 [Bing Webmaster Tools](https://www.bing.com/webmasters)，首先先验证站点所有权，
+
+![image-20260503154224805](https://edit.upxuu.com/img/2026/5/3/1777794145979_973.png)
+
+这里由于我已经配置了 所以直接就是控制台 有关于如何鉴权这里就不过多赘述了
+
+#### 获取indexnow api key
+
+进入[How to add IndexNow to your website | Bing Webmaster Tools](https://www.bing.com/indexnow/getstarted) 一直向下滑动（真够隐藏的）
+
+![image-20260503154448786](https://edit.upxuu.com/img/2026/5/3/1777794289407_825.png)
+
+这里有官方的教程 其实还是比较易读的微软的英文(
+
+![image-20260503154831376](https://edit.upxuu.com/img/2026/5/3/1777794511962_347.png)
+
+说白了就是吧api key放到你的网站下 .txt 内容一样
+
+然后就可以了
 
 ### 2. 配置 GitHub Secrets
 
-把 key 存到仓库的 Secrets 里：
+由于这个key的权限非常高 可以直接控制你的索引 所以要把 key 存到仓库的 Secrets 里：
 
 - 路径：**Settings → Secrets and variables → Actions → New repository secret**
+
 - 名称：`INDEXNOW_SECRET`
+
 - 值：你的 IndexNow key
+
+  ![image-20260503155010533](https://edit.upxuu.com/img/2026/5/3/1777794611134_692.png)
 
 ### 3. 创建工作流文件
 
