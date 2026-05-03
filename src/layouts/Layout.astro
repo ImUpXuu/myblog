@@ -21,7 +21,7 @@ import { defaultFavicons } from "../constants/icon";
 import type { Favicon } from "../types/config";
 import { pathsEqual, url } from "../utils/url-utils";
 import "katex/dist/katex.css";
-import "@fancyapps/ui/dist/fancybox/fancybox.css";
+import "lightbox3/dist/lightbox3.css";
 import background from "../assets/images/background.png";
 import backgroundDark from "../assets/images/backgroundright.png";
 
@@ -654,50 +654,40 @@ window.onresize = () => {
 </script>
 
 <script>
-import { Fancybox } from "@fancyapps/ui";
+import { Lightbox } from "lightbox3";
 
-function bindFancybox() {
+let lb: ReturnType<typeof Lightbox.init> | null = null;
+
+function bindLightbox() {
 	document.querySelectorAll(".custom-md img").forEach((img) => {
 		const el = img as HTMLImageElement;
-		if (el.closest("a[data-fancybox]")) return;
+		if (el.closest("a[data-lightbox]")) return;
 		const src = el.src || el.getAttribute("data-src") || "";
 		if (!src) return;
 		const wrapper = document.createElement("a");
 		wrapper.href = src;
-		wrapper.dataset.fancybox = "gallery";
-		wrapper.dataset.src = src;
+		wrapper.dataset.lightbox = "gallery";
 		el.parentNode!.insertBefore(wrapper, el);
 		wrapper.appendChild(el);
 	});
 	document.querySelectorAll("#post-cover img").forEach((img) => {
 		const el = img as HTMLImageElement;
-		if (el.closest("a[data-fancybox]")) return;
+		if (el.closest("a[data-lightbox]")) return;
 		const src = el.src || el.getAttribute("data-src") || "";
 		if (!src) return;
 		const wrapper = document.createElement("a");
 		wrapper.href = src;
-		wrapper.dataset.fancybox = "gallery";
-		wrapper.dataset.src = src;
+		wrapper.dataset.lightbox = "gallery";
 		el.parentNode!.insertBefore(wrapper, el);
 		wrapper.appendChild(el);
 	});
-	try { Fancybox.destroy(); } catch (_) {}
-	Fancybox.bind("[data-fancybox]", {
-		Toolbar: {
-			display: ["close"],
-		},
-		Images: {
-			Panzoom: {
-				maxScale: 3,
-			},
-		},
-	});
+	lb = Lightbox.init();
 }
 
 function init() {
 	requestAnimationFrame(() => {
 		requestAnimationFrame(() => {
-			bindFancybox();
+			bindLightbox();
 		});
 	});
 }
@@ -713,7 +703,7 @@ function setupSwup() {
 		window.swup.hooks.on("page:view", () => {
 			requestAnimationFrame(() => {
 				requestAnimationFrame(() => {
-					bindFancybox();
+					bindLightbox();
 				});
 			});
 		});

@@ -32,9 +32,6 @@ importers:
       '@expressive-code/plugin-line-numbers':
         specifier: ^0.41.4
         version: 0.41.4
-      '@fancyapps/ui':
-        specifier: ^6.1.14
-        version: 6.1.14
       '@fontsource-variable/jetbrains-mono':
         specifier: ^5.2.8
         version: 5.2.8
@@ -86,6 +83,9 @@ importers:
       katex:
         specifier: ^0.16.27
         version: 0.16.27
+      lightbox3:
+        specifier: ^1.1.0
+        version: 1.1.0
       markdown-it:
         specifier: ^14.1.0
         version: 14.1.0
@@ -1294,9 +1294,6 @@ packages:
 
   '@expressive-code/plugin-text-markers@0.41.4':
     resolution: {integrity: sha512-lGqbjtIuiY+UZ+z61kKIJAZtF7H5xoT8lkxANmeoVaat+H47O5A+rr5WLmD45ezprO/NTogxHsaMfqRCuQ4vlw==}
-
-  '@fancyapps/ui@6.1.14':
-    resolution: {integrity: sha512-cBV73XXHrc0qMca+PJJ6qay3xweIgsoYse13rGRstgUs0xA5WAv1tgbSzPCIOOjiLs2S2jiVFJxyszgvgyfxMg==}
 
   '@fontsource-variable/jetbrains-mono@5.2.8':
     resolution: {integrity: sha512-WBA9elru6Jdp5df2mES55wuOO0WIrn3kpXnI4+W2ek5u3ZgLS9XS4gmIlcQhiZOWEKl95meYdvK7xI+ETLCq/Q==}
@@ -3961,6 +3958,9 @@ packages:
 
   layout-base@2.0.1:
     resolution: {integrity: sha512-dp3s92+uNI1hWIpPGH3jK2kxE2lMjdXdr+DH8ynZHpd6PUlH6x6cbuXnoMmiNumznqaNO31xu9e79F0uuZ0JFg==}
+
+  lightbox3@1.1.0:
+    resolution: {integrity: sha512-vy0vHBAuaAu95eKW+SjHyo/SFSG81I1cE94S+Emy0n/uHsI9X+J/8qBEX0wmqSpK0Pcv7jxmzHMO5odtPCkJWQ==}
 
   lightningcss-android-arm64@1.32.0:
     resolution: {integrity: sha512-YK7/ClTt4kAK0vo6w3X+Pnm0D2cf2vPHbhOXdoNti1Ga0al1P4TBZhwjATvjNwLEBCnKvjJc2jQgHXH0NEwlAg==}
@@ -7402,8 +7402,6 @@ snapshots:
     dependencies:
       '@expressive-code/core': 0.41.4
 
-  '@fancyapps/ui@6.1.14': {}
-
   '@fontsource-variable/jetbrains-mono@5.2.8': {}
 
   '@fontsource/roboto@5.2.9': {}
@@ -10527,6 +10525,8 @@ snapshots:
   layout-base@1.0.2: {}
 
   layout-base@2.0.1: {}
+
+  lightbox3@1.1.0: {}
 
   lightningcss-android-arm64@1.32.0:
     optional: true
