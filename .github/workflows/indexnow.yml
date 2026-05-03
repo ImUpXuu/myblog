@@ -1,0 +1,73 @@
+name: IndexNow
+
+on:
+  push:
+    paths:
+      - "src/content/posts/**/*.md"
+
+jobs:
+  indexnow:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build URLs from posts
+        id: urls
+        run: |
+          SITE_URL="https://upxuu.com"
+          URLS=""
+          first=true
+          for file in src/content/posts/*.md; do
+            slug=$(basename "$file" .md)
+            url="${SITE_URL}/posts/${slug}/"
+            if [ "$first" = true ]; then
+              first=false
+            else
+              URLS="${URLS},"
+            fi
+            URLS="${URLS}\"${url}\""
+          done
+          for dir in src/content/posts/*/; do
+            for file in "$dir"*.md; do
+              slug=$(basename "$file" .md)
+              url="${SITE_URL}/posts/${slug}/"
+              if [ "$first" = true ]; then
+                first=false
+              else
+                URLS="${URLS},"
+              fi
+              URLS="${URLS}\"${url}\""
+            done
+          done
+          echo "urls=[${URLS}]" >> $GITHUB_OUTPUT
+
+      - name: Submit to Bing via IndexNow
+        run: |
+          URLS="${{ steps.urls.outputs.urls }}"
+          if [ -z "$URLS" ] || [ "$URLS" = "[]" ]; then
+            echo "No URLs to submit"
+            echo "result=no_urls" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+
+          echo "URL list:"
+          echo "$URLS" | python3 -c "import json,sys; [print(f'  - {u}') for u in json.load(sys.stdin)]"
+          echo ""
+
+          RESPONSE=$(curl -s -w "\n%{http_code}" -X POST \
+            "https://www.bing.com/indexnow" \
+            -H "Content-Type: application/json" \
+            -H "Host: www.bing.com" \
+            -d "{
+              \"host\": \"upxuu.com\",
+              \"key\": \"${{ secrets.INDEXNOW_SECRET }}\",
+              \"urlList\": ${URLS}
+            }")
+
+          HTTP_CODE=$(echo "$RESPONSE" | tail -n1)
+          BODY=$(echo "$RESPONSE" | sed '$d')
+
+          echo "---"
+          echo "HTTP Status: $HTTP_CODE"
+          echo "Response: $BODY"
+          echo "result=HTTP_${HTTP_CODE}" >> $GITHUB_OUTPUT
