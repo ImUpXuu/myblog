@@ -3,61 +3,19 @@ import "@fancyapps/ui/dist/fancybox/fancybox.css";
 ---
 
 <script>
-	let Fancybox: any;
+	import { Fancybox } from "@fancyapps/ui";
 
-	async function setup() {
-		const selectors = [
-			".custom-md img, #post-cover img",
-			"[data-fancybox]:not(.custom-md img):not(#post-cover img)"
-		];
+	document.addEventListener("DOMContentLoaded", () => {
+		Fancybox.bind(".custom-md img", { groupAll: true });
+		Fancybox.bind("#post-cover img", { groupAll: true });
+		Fancybox.bind("[data-fancybox]", {});
+	});
 
-		const hasElements = selectors.some(selector => document.querySelector(selector));
-		if (!hasElements) return;
-
-		if (!Fancybox) {
-			const mod = await import("@fancyapps/ui");
-			Fancybox = mod.Fancybox;
-		}
-
-		const commonOptions = {
-			Toolbar: {
-				display: ["close"]
-			},
-			animated: true,
-			dragToClose: true,
-			keyboard: {
-				Escape: "close",
-				Delete: "close",
-				PageUp: "next",
-				PageDown: "prev",
-				ArrowRight: "next",
-				ArrowLeft: "prev"
-			},
-			fitToView: true,
-			preload: 3,
-			infinite: true,
-			Panzoom: { maxScale: 3, minScale: 1 },
-			caption: false
-		};
-
-		Fancybox.bind(".custom-md img, #post-cover img", {
-			...commonOptions,
-			groupAll: true,
-			Carousel: { transition: "slide", preload: 2 }
-		});
-
-		Fancybox.bind("[data-fancybox]:not(.custom-md img):not(#post-cover img)", commonOptions);
-	}
-
-	function cleanupFancybox() {
-		if (Fancybox) {
-			Fancybox.close();
-			Fancybox.unbind(document.body);
-		}
-	}
-
-	setup();
-
-	document.addEventListener("swup:content:replace", setup);
-	document.addEventListener("swup:visit:start", cleanupFancybox);
+	document.addEventListener("swup:content:replace", () => {
+		Fancybox.unbind(document.body);
+		Fancybox.close();
+		Fancybox.bind(".custom-md img", { groupAll: true });
+		Fancybox.bind("#post-cover img", { groupAll: true });
+		Fancybox.bind("[data-fancybox]", {});
+	});
 </script>
