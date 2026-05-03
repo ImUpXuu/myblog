@@ -18,7 +18,7 @@
 - ✅ 欢迎弹窗：首次访问显示地理位置欢迎信息
 - ✅ 开往集成：加入 [Travellings](https://www.travellings.cn/) 友链接力计划
 - ✅ 更新日志页面：展示完整的 Git commit 历史
-- ✅ 图片画廊：基于文件系统的相册系统，支持 WebP 压缩缩略图、Lightbox3 灯箱、blur-up 懒加载
+- ✅ 图片画廊：基于文件系统的相册系统，支持 WebP 压缩缩略图、Fancybox 灯箱、blur-up 懒加载
 - ✅ QQ群页面：独立 `/q` 页面展示群二维码，导航栏快捷入口
 
 ## 🤝 友链申请
@@ -60,8 +60,9 @@
 ## 📅 更新日志
 
 ### 2026-05-03
-- 灯箱从 Fancybox 迁移至 [Lightbox 3](https://lokeshdhakar.com/projects/lightbox3)，零依赖、spring 动画、原生支持缩略图→大图过渡
-- 修复灯箱点击跳转原图而非打开灯箱的问题：改用 `content:replace` 钩子 + capture 阶段事件委托兜底
+- 灯箱从 Lightbox3 迁回 Fancybox（参考 Firefly 的 FancyboxManager 方案）
+- PhotoCard 使用 `<div data-fancybox data-src>` 而非 `<a href>`，彻底避免 Swup 链接劫持
+- 新增独立 `FancyboxManager.astro` 组件统一管理灯箱初始化和 Swup 生命周期
 - 优化画廊懒加载体验：缩略图初始清晰显示，原图加载完成后短暂模糊过渡再替换
 
 ### 2026-04-26

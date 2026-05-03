@@ -104,7 +104,7 @@ const columnWidth = galleryConfig.columnWidth || 240;
 			{photos.length > 0 ? (
 				<div class="gallery-masonry" style={`column-count: 2; column-gap: 0.75rem; --col-width: ${columnWidth}px;`}>
 					{photos.map((photo) => (
-						<PhotoCard photo={photo} albumId={albumMeta.id} />
+						<PhotoCard src={photo.full} albumId={albumMeta.id} />
 					))}
 				</div>
 			) : (
