@@ -8,7 +8,7 @@
 
 在 Fuwari 原有功能的基础上，我添加了以下定制内容：
 
-- ✅ SEO 优化：集成 [astro-seo](https://github.com/jonasmerlin/astro-seo) 插件
+- ✅ SEO 优化：集成 [astro-seo](https://github.com/jonasmerlin/astro-seo) 插件，IndexNow 自动索引工作流
 - ✅ JSON-LD 结构化数据：支持文章、关于页面、归档页面等
 - ✅ 友链页面：支持友链申请和展示，自动化审核流程
 - ✅ 移动端优化：完善响应式设计

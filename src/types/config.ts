@@ -99,7 +99,7 @@ export type BlogPostData = {
 };
 
 export type ExpressiveCodeConfig = {
-	theme: string;
+	theme: string | { dark: string; light: string };
 };
 
 export type GalleryAlbum = {
