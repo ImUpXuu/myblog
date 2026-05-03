@@ -21,7 +21,7 @@ import { defaultFavicons } from "../constants/icon";
 import type { Favicon } from "../types/config";
 import { pathsEqual, url } from "../utils/url-utils";
 import "katex/dist/katex.css";
-import "@fancyapps/ui/dist/fancybox/fancybox.css";
+import "lightbox3/style.css";
 import background from "../assets/images/background.png";
 import backgroundDark from "../assets/images/backgroundright.png";
 
@@ -654,56 +654,46 @@ window.onresize = () => {
 </script>
 
 <script>
-import { Fancybox } from "@fancyapps/ui";
+import { Lightbox } from "lightbox3";
 
-function wrapImagesForFancybox() {
+function wrapImagesForLightbox() {
 	document.querySelectorAll(".custom-md img").forEach((img) => {
 		const el = img as HTMLImageElement;
-		if (el.closest("a[data-fancybox]")) return;
+		if (el.closest("a[data-lightbox]")) return;
 		const src = el.src || el.getAttribute("data-src") || "";
 		if (!src || src.startsWith("data:")) return;
 		const wrapper = document.createElement("a");
 		wrapper.href = src;
-		wrapper.dataset.fancybox = "gallery";
-		wrapper.dataset.src = src;
+		wrapper.dataset.lightbox = "gallery";
 		el.parentNode!.insertBefore(wrapper, el);
 		wrapper.appendChild(el);
 	});
 	document.querySelectorAll("#post-cover img").forEach((img) => {
 		const el = img as HTMLImageElement;
-		if (el.closest("a[data-fancybox]")) return;
+		if (el.closest("a[data-lightbox]")) return;
 		const src = el.src || el.getAttribute("data-src") || "";
 		if (!src || src.startsWith("data:")) return;
 		const wrapper = document.createElement("a");
 		wrapper.href = src;
-		wrapper.dataset.fancybox = "gallery";
-		wrapper.dataset.src = src;
+		wrapper.dataset.lightbox = "gallery";
 		el.parentNode!.insertBefore(wrapper, el);
 		wrapper.appendChild(el);
 	});
 }
 
-function initFancybox() {
-	wrapImagesForFancybox();
-	try { Fancybox.destroy(); } catch (_) {}
-	Fancybox.bind("[data-fancybox]", {
-		Toolbar: { display: ["close"] },
-		Images: { Panzoom: { maxScale: 3 } },
-	});
+function initLightbox() {
+	wrapImagesForLightbox();
+	try { Lightbox.init(); } catch (_) {}
 }
 
-initFancybox();
+initLightbox();
 
 function setupSwup() {
 	if (window.swup) {
 		window.swup.hooks.on("content:replace", () => {
-			wrapImagesForFancybox();
+			wrapImagesForLightbox();
 			requestAnimationFrame(() => {
-				try { Fancybox.destroy(); } catch (_) {}
-				Fancybox.bind("[data-fancybox]", {
-					Toolbar: { display: ["close"] },
-					Images: { Panzoom: { maxScale: 3 } },
-				});
+				try { Lightbox.init(); } catch (_) {}
 			});
 		});
 	}
@@ -714,25 +704,4 @@ if (window.swup) {
 } else {
 	document.addEventListener("swup:enable", setupSwup);
 }
-
-document.addEventListener("click", (e) => {
-	const target = e.target as HTMLElement;
-	const link = target.closest("a[data-fancybox]");
-	if (!link) return;
-	const href = link.getAttribute("href") || link.dataset.src;
-	if (!href) return;
-	e.preventDefault();
-	e.stopPropagation();
-	try {
-		new Fancybox([{
-			src: href,
-			type: "image",
-		}], {
-			Toolbar: { display: ["close"] },
-			Images: { Panzoom: { maxScale: 3 } },
-		});
-	} catch (_) {
-		window.open(href, "_blank");
-	}
-}, true);
 </script>

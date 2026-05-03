@@ -18,7 +18,7 @@
 - ✅ 欢迎弹窗：首次访问显示地理位置欢迎信息
 - ✅ 开往集成：加入 [Travellings](https://www.travellings.cn/) 友链接力计划
 - ✅ 更新日志页面：展示完整的 Git commit 历史
-- ✅ 图片画廊：基于文件系统的相册系统，支持 WebP 压缩缩略图、Fancybox 灯箱、blur-up 懒加载
+- ✅ 图片画廊：基于文件系统的相册系统，支持 WebP 压缩缩略图、Lightbox3 灯箱、blur-up 懒加载
 - ✅ QQ群页面：独立 `/q` 页面展示群二维码，导航栏快捷入口
 
 ## 🤝 友链申请
