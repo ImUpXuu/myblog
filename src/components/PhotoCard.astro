@@ -19,6 +19,11 @@ const { photo, albumId, alt = "" } = Astro.props;
 		data-thumb={photo.isThumb ? photo.thumb : photo.full}
 		href={photo.full}
 		class="block rounded-xl overflow-hidden group cursor-pointer"
+		onclick={(e) => {
+			if ((e.currentTarget as HTMLAnchorElement).dataset.lightbox) {
+				e.preventDefault();
+			}
+		}}
 	>
 		<img
 			src={photo.isThumb ? photo.thumb : photo.full}
