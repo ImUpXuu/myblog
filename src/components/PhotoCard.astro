@@ -14,7 +14,7 @@ const { photo, albumId, alt = "" } = Astro.props;
 ---
 
 <div class="gallery-photo-card break-inside-avoid mb-3">
-	<a
+	<div
 		data-lightbox="gallery"
 		data-thumb={photo.isThumb ? photo.thumb : photo.full}
 		data-href={photo.full}
@@ -28,7 +28,7 @@ const { photo, albumId, alt = "" } = Astro.props;
 			decoding="async"
 			class="lazy-img w-full h-auto object-cover transition-all duration-500"
 		/>
-	</a>
+	</div>
 </div>
 
 <script>
@@ -77,17 +77,29 @@ const { photo, albumId, alt = "" } = Astro.props;
 	});
 
 	function initGalleryLightbox() {
-		document.querySelectorAll("a[data-lightbox][data-href]").forEach((link) => {
-			const href = link.getAttribute("data-href");
-			if (href && !link.getAttribute("href")) {
-				link.setAttribute("href", href);
-			}
+		const items: { href: string; thumb?: string }[] = [];
+		document.querySelectorAll("div[data-lightbox][data-href]").forEach((el) => {
+			const href = el.getAttribute("data-href");
+			const thumb = el.getAttribute("data-thumb") || undefined;
+			if (href) items.push({ href, thumb });
 		});
-		try {
-			import("lightbox3").then(({ Lightbox }) => {
-				Lightbox.init();
+		if (items.length === 0) return;
+
+		import("lightbox3").then(({ Lightbox }) => {
+			const lb = Lightbox.init();
+
+			document.querySelectorAll("div[data-lightbox][data-href]").forEach((el) => {
+				if ((el as HTMLElement).dataset.lbGuard) return;
+				(el as HTMLElement).dataset.lbGuard = "true";
+				el.addEventListener("click", () => {
+					const idx = Array.from(
+						document.querySelectorAll("div[data-lightbox][data-href]")
+					).indexOf(el);
+					lb.open(items, { startAtIdx: idx });
+				});
+				el.style.cursor = "zoom-in";
 			});
-		} catch (_) {}
+		});
 	}
 
 	initGalleryLightbox();
@@ -103,12 +115,4 @@ const { photo, albumId, alt = "" } = Astro.props;
 			});
 		});
 	}
-
-	document.querySelectorAll("a[data-lightbox]").forEach((link) => {
-		if ((link as HTMLElement).dataset.lbGuard) return;
-		(link as HTMLElement).dataset.lbGuard = "true";
-		link.addEventListener("click", (e) => {
-			e.preventDefault();
-		});
-	});
 </script>
