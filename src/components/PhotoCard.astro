@@ -76,18 +76,36 @@ const { photo, albumId, alt = "" } = Astro.props;
 	});
 
 	function initGallery() {
-		const items: { src: string; thumb?: string }[] = [];
-		document.querySelectorAll(".lb-trigger").forEach((el) => {
-			const src = el.getAttribute("data-lb-src");
-			const thumb = el.getAttribute("data-lb-thumb") || undefined;
-			if (src) items.push({ src, thumb });
+		const triggers = document.querySelectorAll(".lb-trigger");
+		if (triggers.length === 0) return;
+
+		let galleryContainer = document.getElementById("lb-gallery-pool");
+		if (!galleryContainer) {
+			galleryContainer = document.createElement("div");
+			galleryContainer.id = "lb-gallery-pool";
+			galleryContainer.style.cssText = "position:absolute;width:0;height:0;overflow:hidden;pointer-events:none;opacity:0";
+			document.body.appendChild(galleryContainer);
+		}
+		galleryContainer.innerHTML = "";
+
+		const anchors: HTMLAnchorElement[] = [];
+		triggers.forEach((trigger) => {
+			const src = trigger.getAttribute("data-lb-src");
+			const thumb = trigger.getAttribute("data-lb-thumb") || src;
+			if (!src) return;
+			const a = document.createElement("a");
+			a.href = src;
+			a.dataset.lightbox = "gallery";
+			if (thumb) a.dataset.thumb = thumb;
+			galleryContainer!.appendChild(a);
+			anchors.push(a);
 		});
-		if (items.length === 0) return;
+		if (anchors.length === 0) return;
 
 		import("lightbox3").then(({ Lightbox }) => {
 			const lb = Lightbox.init();
 
-			document.querySelectorAll(".lb-trigger").forEach((trigger, idx) => {
+			triggers.forEach((trigger, idx) => {
 				if ((trigger as HTMLElement).dataset.lbReady) return;
 				(trigger as HTMLElement).dataset.lbReady = "1";
 				trigger.addEventListener(
@@ -96,7 +114,7 @@ const { photo, albumId, alt = "" } = Astro.props;
 						e.preventDefault();
 						e.stopPropagation();
 						e.stopImmediatePropagation();
-						lb.open(items[idx].src);
+						lb.open(anchors[idx]);
 					},
 					true
 				);
