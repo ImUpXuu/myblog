@@ -805,6 +805,7 @@ window.onresize = () => {
         bubble.className = 'msg-bubble ai-typing';
         div.appendChild(bubble);
         chatMessages.appendChild(div);
+        scrollChatToBottom();
         return bubble;
     }
 
@@ -964,11 +965,13 @@ window.onresize = () => {
                                 }
                                 if (aiBubble) {
                                     aiBubble.before(thinkingEl);
+                                    scrollChatToBottom();
                                 }
                             }
                             const textEl = thinkingEl.querySelector('.ai-thinking-text');
                             if (textEl) {
                                 textEl.textContent += reasoning;
+                                scrollChatToBottom();
                             }
                         }
 
@@ -980,6 +983,7 @@ window.onresize = () => {
                                 hr.className = 'ai-thinking-hr';
                                 if (aiBubble) {
                                     aiBubble.before(hr);
+                                    scrollChatToBottom();
                                 }
                                 hasContent = true;
                             }
