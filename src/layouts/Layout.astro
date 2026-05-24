@@ -818,6 +818,56 @@ window.onresize = () => {
         return el.innerHTML;
     }
 
+    function getArticleHeadings(): { slug: string; text: string }[] {
+        const el = document.getElementById('article-headings-data');
+        if (!el || !el.textContent) return [];
+        try {
+            return el.textContent.split('|').filter(Boolean).map(s => JSON.parse(s));
+        } catch {
+            return [];
+        }
+    }
+
+    function renderCitations(bubble: HTMLElement, text: string) {
+        const headings = getArticleHeadings();
+        if (!headings.length) return;
+        // Match [n] citations where n is a number
+        const citeRegex = /\[(\d+)\]/g;
+        let match;
+        let lastIndex = 0;
+        const fragment = document.createDocumentFragment();
+        while ((match = citeRegex.exec(text)) !== null) {
+            // Text before citation
+            if (match.index > lastIndex) {
+                fragment.appendChild(document.createTextNode(text.slice(lastIndex, match.index)));
+            }
+            const num = parseInt(match[1], 10);
+            const heading = headings[num - 1];
+            if (heading) {
+                const a = document.createElement('a');
+                a.href = '#' + heading.slug;
+                a.className = 'cite-link';
+                a.textContent = num + ' ';
+                const arrow = document.createElement('span');
+                arrow.className = 'cite-arrow';
+                arrow.textContent = '↗';
+                a.appendChild(arrow);
+                fragment.appendChild(a);
+            } else {
+                fragment.appendChild(document.createTextNode(match[0]));
+            }
+            lastIndex = match.index + match[0].length;
+        }
+        if (lastIndex < text.length) {
+            fragment.appendChild(document.createTextNode(text.slice(lastIndex)));
+        }
+        // Only replace if we actually added citation links
+        if (fragment.childNodes.length > 1 || (fragment.firstChild && fragment.firstChild.nodeType === 1)) {
+            bubble.innerHTML = '';
+            bubble.appendChild(fragment);
+        }
+    }
+
     async function sendMessage(text: string) {
         if (!text.trim() || isStreaming) return;
 
@@ -837,6 +887,8 @@ window.onresize = () => {
 
         let aiBubble: HTMLElement | null = null;
         let fullReply = '';
+        let thinkingEl: HTMLElement | null = null;
+        let hasContent = false;
 
         try {
             console.log('[AI Chat] POST to', WORKER_URL, { articleUrl: window.location.href, messagesCount: chatHistory.length });
@@ -891,8 +943,46 @@ window.onresize = () => {
 
                     try {
                         const json = JSON.parse(data);
-                        const content = json.choices?.[0]?.delta?.content;
+                        const delta = json.choices?.[0]?.delta;
+                        const reasoning = delta?.reasoning_content;
+                        const content = delta?.content;
+
+                        // reasoning content - show in thinking block
+                        if (reasoning && !hasContent) {
+                            if (!thinkingEl) {
+                                thinkingEl = document.createElement('div');
+                                thinkingEl.className = 'ai-thinking';
+                                const label = document.createElement('div');
+                                label.className = 'ai-thinking-label';
+                                label.textContent = 'Thinking...';
+                                thinkingEl.appendChild(label);
+                                const textEl = document.createElement('div');
+                                textEl.className = 'ai-thinking-text';
+                                thinkingEl.appendChild(textEl);
+                                if (!aiBubble) {
+                                    aiBubble = createAiBubble();
+                                }
+                                if (aiBubble) {
+                                    aiBubble.before(thinkingEl);
+                                }
+                            }
+                            const textEl = thinkingEl.querySelector('.ai-thinking-text');
+                            if (textEl) {
+                                textEl.textContent += reasoning;
+                            }
+                        }
+
+                        // actual content
                         if (content) {
+                            if (!hasContent && thinkingEl) {
+                                // first content after thinking - add separator
+                                const hr = document.createElement('hr');
+                                hr.className = 'ai-thinking-hr';
+                                if (aiBubble) {
+                                    aiBubble.before(hr);
+                                }
+                                hasContent = true;
+                            }
                             if (!aiBubble) {
                                 aiBubble = createAiBubble();
                             }
@@ -916,6 +1006,8 @@ window.onresize = () => {
         if (aiBubble) {
             console.log('[AI Chat] stream complete, chars:', fullReply.length);
             finishAiBubble(aiBubble);
+            // Render citations in the response
+            renderCitations(aiBubble, fullReply);
         }
         if (fullReply) {
             chatHistory.push({ role: 'assistant', content: fullReply });

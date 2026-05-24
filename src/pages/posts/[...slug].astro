@@ -268,3 +268,5 @@ if (document.readyState === 'loading') {
     setTimeout(fetchPageStats, 100);
 }
 </script>
+
+<div id="article-headings-data" aria-hidden="true" style="display:none">{headings.map(h => JSON.stringify({ slug: h.slug, text: h.text })).join('|')}</div>

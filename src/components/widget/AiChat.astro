@@ -88,4 +88,50 @@
 	0%, 80%, 100% { transform: scale(0); }
 	40% { transform: scale(1); }
 }
+.ai-thinking {
+	margin: 0.5rem 0;
+	padding: 0.5rem 0.75rem;
+	background: var(--toc-bg);
+	border-radius: 0.75rem;
+	border-left: 3px solid var(--primary);
+	opacity: 0.85;
+	font-size: 0.75rem;
+	line-height: 1.5;
+	max-width: 85%;
+	animation: msg-in 0.25s ease-out;
+}
+.ai-thinking-label {
+	font-weight: 600;
+	color: var(--primary);
+	margin-bottom: 0.25rem;
+	font-size: 0.7rem;
+	text-transform: uppercase;
+	letter-spacing: 0.05em;
+}
+.ai-thinking-text {
+	color: var(--btn-content);
+	word-break: break-word;
+}
+.ai-thinking-hr {
+	border: none;
+	border-top: 1px solid var(--line-color);
+	margin: 0.5rem 0;
+	max-width: 85%;
+}
+.cite-link {
+	color: var(--primary);
+	font-weight: 600;
+	text-decoration: none;
+	transition: opacity 0.15s;
+	white-space: nowrap;
+}
+.cite-link:hover {
+	opacity: 0.75;
+	text-decoration: underline;
+}
+.cite-arrow {
+	font-size: 0.65rem;
+	margin-left: 0.125rem;
+	display: inline-block;
+}
 </style>
