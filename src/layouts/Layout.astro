@@ -829,44 +829,64 @@ window.onresize = () => {
         }
     }
 
-    function renderCitations(bubble: HTMLElement, text: string) {
+    function renderInlineMd(text: string): string {
+        const esc = text
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;');
+        return esc
+            .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+            .replace(/\*(.+?)\*/g, '<em>$1</em>')
+            .replace(/`(.+?)`/g, '<code>$1</code>')
+            .replace(/\n/g, '<br>');
+    }
+
+    function renderJsonResponse(bubble: HTMLElement, text: string) {
         const headings = getArticleHeadings();
-        if (!headings.length) return;
-        // Match [n] citations where n is a number
-        const citeRegex = /\[(\d+)\]/g;
-        let match;
-        let lastIndex = 0;
+        let data: { p: string; r: number[] }[];
+        try {
+            data = JSON.parse(text);
+            if (!Array.isArray(data)) throw new Error('not array');
+        } catch {
+            // fallback: show raw text
+            if (headings.length) {
+                bubble.textContent = text;
+            }
+            return;
+        }
+
         const fragment = document.createDocumentFragment();
-        while ((match = citeRegex.exec(text)) !== null) {
-            // Text before citation
-            if (match.index > lastIndex) {
-                fragment.appendChild(document.createTextNode(text.slice(lastIndex, match.index)));
+        for (const item of data) {
+            const p = document.createElement('p');
+            p.style.margin = '0.4em 0';
+            p.innerHTML = renderInlineMd(item.p || '');
+
+            if (item.r && item.r.length && headings.length) {
+                const refSpan = document.createElement('span');
+                refSpan.style.marginLeft = '0.25em';
+                for (const n of item.r) {
+                    const heading = headings[n - 1];
+                    if (heading) {
+                        const a = document.createElement('a');
+                        a.href = '#' + heading.slug;
+                        a.className = 'cite-link';
+                        a.textContent = heading.text;
+                        const arrow = document.createElement('span');
+                        arrow.className = 'cite-arrow';
+                        arrow.textContent = '↗';
+                        a.appendChild(arrow);
+                        refSpan.appendChild(a);
+                        refSpan.appendChild(document.createTextNode(' '));
+                    }
+                }
+                p.appendChild(refSpan);
             }
-            const num = parseInt(match[1], 10);
-            const heading = headings[num - 1];
-            if (heading) {
-                const a = document.createElement('a');
-                a.href = '#' + heading.slug;
-                a.className = 'cite-link';
-                a.textContent = num + ' ';
-                const arrow = document.createElement('span');
-                arrow.className = 'cite-arrow';
-                arrow.textContent = '↗';
-                a.appendChild(arrow);
-                fragment.appendChild(a);
-            } else {
-                fragment.appendChild(document.createTextNode(match[0]));
-            }
-            lastIndex = match.index + match[0].length;
+
+            fragment.appendChild(p);
         }
-        if (lastIndex < text.length) {
-            fragment.appendChild(document.createTextNode(text.slice(lastIndex)));
-        }
-        // Only replace if we actually added citation links
-        if (fragment.childNodes.length > 1 || (fragment.firstChild && fragment.firstChild.nodeType === 1)) {
-            bubble.innerHTML = '';
-            bubble.appendChild(fragment);
-        }
+
+        bubble.innerHTML = '';
+        bubble.appendChild(fragment);
     }
 
     async function sendMessage(text: string) {
@@ -1010,8 +1030,7 @@ window.onresize = () => {
         if (aiBubble) {
             console.log('[AI Chat] stream complete, chars:', fullReply.length);
             finishAiBubble(aiBubble);
-            // Render citations in the response
-            renderCitations(aiBubble, fullReply);
+            renderJsonResponse(aiBubble, fullReply);
         }
         if (fullReply) {
             chatHistory.push({ role: 'assistant', content: fullReply });
