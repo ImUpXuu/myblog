@@ -1,0 +1,34 @@
+---
+interface Photo {
+	thumb: string;
+	full: string;
+	isThumb?: boolean;
+}
+
+interface Props {
+	photo: Photo;
+	albumId: string;
+	alt?: string;
+}
+
+const { photo, albumId, alt = "" } = Astro.props;
+---
+
+<div class="gallery-photo-card break-inside-avoid mb-3">
+	<div
+		data-fancybox={`gallery-${albumId}`}
+		data-src={photo.full}
+		class="block rounded-xl overflow-hidden group cursor-pointer"
+	>
+		<img
+			src={photo.isThumb ? photo.thumb : photo.full}
+			data-src-full={photo.full}
+			alt={alt}
+			loading="lazy"
+			decoding="async"
+			class="w-full h-auto object-cover transition-all duration-500 lazy-img"
+		/>
+	</div>
+</div>
+
+<style>

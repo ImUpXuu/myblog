@@ -1,0 +1,218 @@
+{
+  "main": {
+    "id": "5e67c159ae5dc841",
+    "type": "split",
+    "children": [
+      {
+        "id": "312bb5ef2ee9c0e6",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "656a0a282f5844c0",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "2025.9.27-国庆文艺汇演.md",
+                "mode": "source",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "2025.9.27-国庆文艺汇演"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "vertical"
+  },
+  "left": {
+    "id": "208f63483184b1f5",
+    "type": "split",
+    "children": [
+      {
+        "id": "8a72283feae7f6d0",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "3617625013f5850f",
+            "type": "leaf",
+            "state": {
+              "type": "file-explorer",
+              "state": {
+                "sortOrder": "alphabetical",
+                "autoReveal": false
+              },
+              "icon": "lucide-folder-closed",
+              "title": "文件列表"
+            }
+          },
+          {
+            "id": "bf4999ced9e25f02",
+            "type": "leaf",
+            "state": {
+              "type": "search",
+              "state": {
+                "query": "",
+                "matchingCase": false,
+                "explainSearch": false,
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical"
+              },
+              "icon": "lucide-search",
+              "title": "搜索"
+            }
+          },
+          {
+            "id": "7bcba1c1617e1c89",
+            "type": "leaf",
+            "state": {
+              "type": "bookmarks",
+              "state": {},
+              "icon": "lucide-bookmark",
+              "title": "书签"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300
+  },
+  "right": {
+    "id": "7e474db58230ea57",
+    "type": "split",
+    "children": [
+      {
+        "id": "bc879fc417f8e52e",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "48509d87762a493e",
+            "type": "leaf",
+            "state": {
+              "type": "backlink",
+              "state": {
+                "file": "2025.9.27-国庆文艺汇演.md",
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical",
+                "showSearch": false,
+                "searchQuery": "",
+                "backlinkCollapsed": false,
+                "unlinkedCollapsed": true
+              },
+              "icon": "links-coming-in",
+              "title": "2025.9.27-国庆文艺汇演 的反向链接列表"
+            }
+          },
+          {
+            "id": "1ee93fc1410992d0",
+            "type": "leaf",
+            "state": {
+              "type": "outgoing-link",
+              "state": {
+                "file": "2025.9.27-国庆文艺汇演.md",
+                "linksCollapsed": false,
+                "unlinkedCollapsed": true
+              },
+              "icon": "links-going-out",
+              "title": "2025.9.27-国庆文艺汇演 的出链列表"
+            }
+          },
+          {
+            "id": "f38d6c4c0425eb22",
+            "type": "leaf",
+            "state": {
+              "type": "tag",
+              "state": {
+                "sortOrder": "frequency",
+                "useHierarchy": true,
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-tags",
+              "title": "标签"
+            }
+          },
+          {
+            "id": "2f2fc1c52ece26a3",
+            "type": "leaf",
+            "state": {
+              "type": "all-properties",
+              "state": {
+                "sortOrder": "frequency",
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-archive",
+              "title": "添加笔记属性"
+            }
+          },
+          {
+            "id": "5bcc9c58f1f3ef73",
+            "type": "leaf",
+            "state": {
+              "type": "outline",
+              "state": {
+                "file": "2025.9.27-国庆文艺汇演.md",
+                "followCursor": false,
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-list",
+              "title": "2025.9.27-国庆文艺汇演 的大纲"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300,
+    "collapsed": true
+  },
+  "left-ribbon": {
+    "hiddenItems": {
+      "switcher:打开快速切换": false,
+      "graph:查看关系图谱": false,
+      "canvas:新建白板": false,
+      "daily-notes:打开/创建今天的日记": false,
+      "templates:插入模板": false,
+      "command-palette:打开命令面板": false,
+      "bases:新建数据库": false
+    }
+  },
+  "active": "656a0a282f5844c0",
+  "lastOpenFiles": [
+    "2025国庆快乐.md",
+    "2025.9.27-国庆文艺汇演.md",
+    "2025-10-05-092830.md",
+    "2025-10-01-132403.md",
+    "500.md",
+    "26springfestival.md",
+    "26qingming.md",
+    "轻舟已过万重山~.md",
+    "重走来时路.md",
+    "backtowin10.md",
+    "comtest.md",
+    "extalk.md",
+    "yuanbaoopenclaw.md",
+    "to-zhengding.md",
+    "woc-我作业好像落陕西了！！！.md",
+    "zk100days.md",
+    "人生中第一个域名!.md",
+    "未完待续的诗，初中这二分之一-——致我们逝去的一年半初中生活.md",
+    "我去时间有点极限.md",
+    "终于搞好了.md",
+    "a66.md",
+    "最冷的一集.md",
+    "AI时代的“眼见不为实”——关于深度伪造（Deepfake）技术的风险调查与防范思考.md",
+    "2026-04-08.md",
+    "2427•学习群-公告.md",
+    "81192-25years.md",
+    "未命名 1.canvas",
+    "未命名.canvas",
+    "未命名"
+  ]
+}

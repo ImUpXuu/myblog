@@ -1,0 +1,192 @@
+---
+import MainGridLayout from "../layouts/MainGridLayout.astro";
+import BannerTitle from "../components/BannerTitle.astro";
+import { profileConfig, siteConfig } from "../config";
+
+const jsonLd = {
+	"@context": "https://schema.org",
+	"@type": "WebPage",
+	"@id": `${Astro.site}privacy`,
+	name: "隐私政策",
+	description: "upxuu.com 的隐私政策，说明本站如何收集和使用数据",
+	url: `${Astro.site}privacy`,
+	author: {
+		"@type": "Person",
+		name: profileConfig.name,
+	},
+	inLanguage: siteConfig.lang.replace("_", "-"),
+};
+---
+
+<MainGridLayout title="隐私政策" description="upxuu.com 的隐私政策，说明本站如何收集和使用数据">
+	<BannerTitle slot="banner-title"></BannerTitle>
+	<script is:inline slot="head" type="application/ld+json" set:html={JSON.stringify(jsonLd)}></script>
+
+	<div class="flex w-full rounded-[var(--radius-large)] overflow-hidden relative min-h-32">
+		<div class="card-base z-10 px-6 md:px-9 py-6 relative w-full">
+			<div class="mb-8">
+				<h1 class="text-2xl font-bold text-gray-800 dark:text-gray-200 mb-1">隐私政策</h1>
+				<p class="text-sm text-gray-500 dark:text-gray-400">最后更新：2026年5月17日</p>
+			</div>
+
+			<div class="prose prose-sm max-w-none text-gray-700 dark:text-gray-300 space-y-6">
+
+				<section>
+					<h2 class="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-3">导语</h2>
+					<p>你好，我是 <strong>UpXuu</strong>，这个网站 <strong>upxuu.com</strong> 由我个人运营。</p>
+					<p>我非常重视你的隐私。因为自己也很讨厌被无端追踪，所以我会尽量把信息收集降到最低，并在这里清楚说明哪些数据会被处理、怎么用。使用本网站即表示你同意以下约定。</p>
+				</section>
+
+				<section>
+					<h2 class="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-3">一、我收集什么信息</h2>
+
+					<div class="space-y-4">
+						<div>
+							<h3 class="font-medium text-gray-800 dark:text-gray-200 mb-1">1. 你主动留给我的</h3>
+							<ul class="list-disc pl-5 space-y-1 text-sm">
+								<li><strong>评论</strong>：本站使用自托管 <strong>Waline</strong> 评论系统，当你发表评论时，会收集你填写的昵称、邮箱（仅用于 Gravatar 头像，不会公开显示）、网站（可选）以及评论内容。你可以选择匿名发表。</li>
+							</ul>
+						</div>
+
+						<div>
+							<h3 class="font-medium text-gray-800 dark:text-gray-200 mb-1">2. 自动收集的</h3>
+							<ul class="list-disc pl-5 space-y-2 text-sm">
+								<li>
+									<strong>访问日志</strong>：服务器会自动记录每次访问，包括匿名化的 IP 地址、浏览器类型、访问时间、看了哪些页面。这些是服务器运行必需的，我只会用它们排查故障或防御攻击，<strong>不会用来给你"画像"</strong>。
+								</li>
+								<li>
+									<strong>Umami Analytics（自托管）</strong>：部署在 stats.upxuu.com，我自己搭的私有实例。它是隐私友好的轻量统计——<strong>不设 Cookie、不收集个人身份数据</strong>，只告诉我有多少人访问、看了哪些页面、大概来自哪个国家。
+								</li>
+								<li>
+									<strong>Google Analytics</strong>：通过 googletagmanager.com 加载，会设置 Cookie 收集匿名访问数据用于流量分析。你可以在 <a href="https://tools.google.com/dlpage/gaoptout" class="text-[var(--primary)] hover:underline" target="_blank" rel="noopener noreferrer">这里</a> 安装浏览器插件来拒绝被它统计。
+								</li>
+								<li>
+									<strong>Microsoft Clarity</strong>：微软的用户行为分析工具，收集鼠标移动、点击、滚动行为，用于分析页面交互热力图。Clarity 会设置自己的 Cookie。
+								</li>
+								<li>
+									<strong>Cookie 与本地存储</strong>：除了上述 GA 和 Clarity 设的 Cookie 外，本站还使用浏览器 LocalStorage 记住你的主题偏好（亮色/暗色、主题色），以及是否为新访客（用于欢迎提示的控制）。这些数据<strong>仅存在你的设备上，不会上传到服务器</strong>。
+								</li>
+								<li>
+									<strong>IP 定位（欢迎问候）</strong>：访问时会向第三方 API（<code class="text-xs bg-gray-100 dark:bg-gray-800 px-1 rounded">v2.xxapi.cn</code>）发起一次性请求，获取访客的大致城市。仅用于欢迎语展示，<strong>数据不会回传至本站服务器</strong>，用完即弃。
+								</li>
+							</ul>
+						</div>
+					</div>
+				</section>
+
+				<section>
+					<h2 class="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-3">二、我用这些信息做什么</h2>
+					<ul class="list-disc pl-5 space-y-1 text-sm">
+						<li><strong>回复你</strong>：你在评论中留言，我自然会看到并可能回复。</li>
+						<li><strong>维持网站正常运行</strong>：比如看日志排查报错，或者拦截恶意爬虫。</li>
+						<li><strong>了解内容效果</strong>：看看哪些文章大家爱看，以便改进写作方向，不针对个人做画像追踪。</li>
+					</ul>
+					<p class="text-sm mt-2"><strong>我不会</strong>把你的信息卖给、租给任何人，也不拿去做广告定向推荐。如果哪天要换一种用法，会先在这里更新说明。</p>
+				</section>
+
+				<section>
+					<h2 class="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-3">三、第三方服务与嵌入内容</h2>
+					<p class="text-sm">以下是我目前使用的第三方服务，它们可能按自己的隐私政策收集数据：</p>
+					<div class="overflow-x-auto">
+						<table class="w-full text-sm border-collapse">
+							<thead>
+								<tr class="border-b border-gray-200 dark:border-gray-700">
+									<th class="text-left py-2 pr-4 font-medium">服务</th>
+									<th class="text-left py-2 pr-4 font-medium">域名</th>
+									<th class="text-left py-2 font-medium">用途</th>
+								</tr>
+							</thead>
+							<tbody class="divide-y divide-gray-100 dark:divide-gray-800">
+								<tr>
+									<td class="py-2 pr-4">Umami Analytics</td>
+									<td class="py-2 pr-4"><code class="text-xs bg-gray-100 dark:bg-gray-800 px-1 rounded">stats.upxuu.com</code></td>
+									<td class="py-2">自托管访问统计</td>
+								</tr>
+								<tr>
+									<td class="py-2 pr-4">Google Analytics</td>
+									<td class="py-2 pr-4"><code class="text-xs bg-gray-100 dark:bg-gray-800 px-1 rounded">googletagmanager.com</code></td>
+									<td class="py-2">流量分析</td>
+								</tr>
+								<tr>
+									<td class="py-2 pr-4">Microsoft Clarity</td>
+									<td class="py-2 pr-4"><code class="text-xs bg-gray-100 dark:bg-gray-800 px-1 rounded">clarity.ms</code></td>
+									<td class="py-2">用户行为分析</td>
+								</tr>
+								<tr>
+									<td class="py-2 pr-4">xxAPI</td>
+									<td class="py-2 pr-4"><code class="text-xs bg-gray-100 dark:bg-gray-800 px-1 rounded">v2.xxapi.cn</code></td>
+									<td class="py-2">IP 定位（欢迎问候）</td>
+								</tr>
+								<tr>
+									<td class="py-2 pr-4">图床</td>
+									<td class="py-2 pr-4"><code class="text-xs bg-gray-100 dark:bg-gray-800 px-1 rounded">f.xxu6.top</code></td>
+									<td class="py-2">Banner 背景图与文章配图</td>
+								</tr>
+								<tr>
+									<td class="py-2 pr-4">Waline</td>
+									<td class="py-2 pr-4"><code class="text-xs bg-gray-100 dark:bg-gray-800 px-1 rounded">自托管实例</code></td>
+									<td class="py-2">文章评论系统</td>
+								</tr>
+								<tr>
+									<td class="py-2 pr-4">开往 / 博友圈 / BlogsClub</td>
+									<td class="py-2 pr-4"><code class="text-xs bg-gray-100 dark:bg-gray-800 px-1 rounded">travellings.cn 等</code></td>
+									<td class="py-2">友链联盟徽标图片（页脚）</td>
+								</tr>
+							</tbody>
+						</table>
+					</div>
+				</section>
+
+				<section>
+					<h2 class="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-3">四、数据存多久</h2>
+					<ul class="list-disc pl-5 space-y-1 text-sm">
+						<li>你发表的评论会一直保留，除非你要求删除。</li>
+						<li>服务器日志会定期清除，最长保留 90 天。</li>
+						<li>分析工具的匿名统计数据通常保留一年或更久。</li>
+						<li>你设备上的 LocalStorage 数据随时可以通过浏览器设置清除。</li>
+					</ul>
+				</section>
+
+				<section>
+					<h2 class="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-3">五、你的权利</h2>
+					<p class="text-sm">你可以随时要求我：</p>
+					<ul class="list-disc pl-5 space-y-1 text-sm">
+						<li>告诉你我存了你的哪些信息</li>
+						<li>更正或删除这些信息</li>
+						<li>把你发表的评论删除或匿名化</li>
+					</ul>
+					<p class="text-sm mt-2">直接发邮件给我，我会在 7 天内处理。</p>
+					<p class="text-sm mt-2">此外，你可以通过以下方式自行保护隐私：</p>
+					<ul class="list-disc pl-5 space-y-1 text-sm">
+						<li>使用浏览器无痕/隐私模式访问本站</li>
+						<li><a href="https://tools.google.com/dlpage/gaoptout" class="text-[var(--primary)] hover:underline" target="_blank" rel="noopener noreferrer">安装 GA Opt-out 插件</a> 拒绝 Google Analytics</li>
+						<li>禁用 JavaScript 来阻止所有统计脚本运行</li>
+					</ul>
+				</section>
+
+				<section>
+					<h2 class="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-3">六、其他说明</h2>
+					<ul class="list-disc pl-5 space-y-2 text-sm">
+						<li>本站内容包含外部链接，点出去之后的网站我管不了，请看对方的隐私政策。</li>
+						<li>本站提供 RSS Feed（/rss.xml）和 Sitemap，不收集订阅者信息。</li>
+						<li>更新订阅功能通过 GitHub Issues 实现，依赖 GitHub 平台，相关数据处理请参见 <a href="https://docs.github.com/en/site-policy/privacy-policies/github-privacy-statement" class="text-[var(--primary)] hover:underline" target="_blank" rel="noopener noreferrer">GitHub 隐私声明</a>。</li>
+						<li>我不会故意收集儿童个人信息。如果你作为家长发现孩子给本站留了评论，请联系我删除。</li>
+						<li>本隐私政策可能会更新，有改动会在这页标注新日期。</li>
+					</ul>
+				</section>
+
+				<section>
+					<h2 class="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-3">七、联系我</h2>
+					<ul class="list-disc pl-5 space-y-1 text-sm">
+						<li><strong>运营者：</strong>UpXuu</li>
+						<li><strong>邮箱：</strong><a href="mailto:me@upxuu.com" class="text-[var(--primary)] hover:underline">me@upxuu.com</a></li>
+						<li><strong>网站：</strong>upxuu.com</li>
+						<li><strong>GitHub：</strong><a href="https://github.com/ImUpXuu" class="text-[var(--primary)] hover:underline" target="_blank" rel="noopener noreferrer">@ImUpXuu</a></li>
+					</ul>
+					<p class="text-sm mt-2">如果对隐私政策有疑问，随时邮件敲我。</p>
+				</section>
+
+			</div>
+		</div>
+	</div>
+</MainGridLayout>

@@ -1,0 +1,126 @@
+---
+
+import { profileConfig } from "../config";
+import { url } from "../utils/url-utils";
+import { getLatestCommit, formatRelativeTime, formatDate } from "../utils/git-info";
+
+const currentYear = new Date().getFullYear();
+const commitInfo = await getLatestCommit();
+---
+
+<!--<div class="border-t border-[var(&#45;&#45;primary)] mx-16 border-dashed py-8 max-w-[var(&#45;&#45;page-width)] flex flex-col items-center justify-center px-6">-->
+<div class="transition border-t border-black/10 dark:border-white/15 my-10 border-dashed mx-32"></div>
+<!--<div class="transition bg-[oklch(92%_0.01_var(&#45;&#45;hue))] dark:bg-black rounded-2xl py-8 mt-4 mb-8 flex flex-col items-center justify-center px-6">-->
+<div class="transition border-dashed border-[oklch(85%_0.01_var(--hue))] dark:border-white/15 rounded-2xl mb-12 bg-gray-50/80 dark:bg-gray-800/50 flex flex-col items-center justify-center px-6 py-8">
+    <div class="transition text-sm text-center text-gray-700 dark:text-gray-300">
+        &copy; <span id="copyright-year">{currentYear}</span> {profileConfig.name}. All Rights Reserved. /
+        <a class="transition link text-[var(--primary)] font-medium" target="_blank" href={url('rss.xml')}>RSS</a> /
+        <a class="transition link text-[var(--primary)] font-medium" target="_blank" href="https://github.com/ImUpXuu/myblog/issues/66">更新订阅</a> /
+        <a class="transition link text-[var(--primary)] font-medium" target="_blank" href={url('sitemap-index.xml')}>Sitemap</a><br>
+        Powered by
+        <a class="transition link text-[var(--primary)] font-medium" target="_blank" href="https://astro.build">Astro</a> &
+        <a class="transition link text-[var(--primary)] font-medium" target="_blank" href="https://github.com/saicaca/fuwari">Fuwari</a><br>
+        <a class="transition link text-[var(--primary)] font-medium" target="_blank" href="https://icp.gov.moe/?keyword=20269996">萌 ICP 备 20269996 号</a> /
+        <a class="transition link text-[var(--primary)] font-medium" href={url('privacy')}>隐私声明</a>
+        {commitInfo && (
+            <div class="mt-3 flex flex-col items-center gap-1.5 text-xs px-4">
+                <div class="flex flex-wrap items-center justify-center gap-2 text-gray-600 dark:text-gray-400">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd" />
+                    </svg>
+                    <span class="font-medium">Latest commit:</span>
+                    <a 
+                        href={`https://github.com/ImUpXuu/myblog/commit/${commitInfo.sha}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        class="text-[var(--primary)] hover:underline font-mono"
+                    >
+                        {commitInfo.shortSha}
+                    </a>
+                    <span class="text-gray-400">·</span>
+                    <span>最后更新于</span>
+                    <span>{formatDate(commitInfo.date)}</span>
+                    <span class="text-gray-400">·</span>
+                    <a 
+                        href="/diff"
+                        class="text-[var(--primary)] hover:underline"
+                    >
+                        更新日志
+                    </a>
+                </div>
+                <p class="text-gray-500 dark:text-gray-500 text-xs text-center break-words w-full">
+                    更新内容：{commitInfo.message}
+                </p>
+            </div>
+        )}
+        <div class="mt-4">
+            <button id="badge-toggle" class="flex items-center gap-1 text-xs text-gray-500 dark:text-gray-400 hover:text-[var(--primary)] transition-colors cursor-pointer group" aria-label="展开徽标">
+                <svg id="badge-arrow" class="w-3.5 h-3.5 transition-transform duration-200" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" />
+                </svg>
+                <span>友链接力</span>
+            </button>
+            <div id="badge-list" class="opacity-0 invisible h-0 overflow-hidden mt-2 flex items-center gap-3 flex-wrap transition-all duration-300">
+                <a 
+                    href="https://www.travellings.cn/go.html"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="inline-block transition hover:opacity-80"
+                    title="开往 - 友链接力"
+                >
+                    <img 
+                        src="https://www.travellings.cn/assets/logo.gif" 
+                        alt="开往"
+                        class="h-8 w-auto object-contain"
+                    />
+                </a>
+                <a 
+                    href="https://www.boyouquan.com"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="inline-block transition hover:opacity-80"
+                    title="博友圈"
+                >
+                    <img 
+                        src="https://www.boyouquan.com/images/logo/performance.svg?domainName=upxuu.com" 
+                        alt="博友圈"
+                        class="h-8 w-auto object-contain"
+                    />
+                </a>
+                <a 
+                    href="https://www.blogsclub.org/rank.html"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="inline-block transition hover:opacity-80"
+                    title="BlogsClub"
+                >
+                    <img 
+                        src="https://www.blogsclub.org/badge/upxuu.com" 
+                        alt="BlogsClub"
+                        style="height:60px!important"
+                        loading="lazy"
+                    />
+                </a>
+            </div>
+        </div>
+        <script>
+            const toggle = document.getElementById('badge-toggle');
+            const list = document.getElementById('badge-list');
+            const arrow = document.getElementById('badge-arrow');
+            if (toggle && list && arrow) {
+                toggle.addEventListener('click', () => {
+                    const isOpen = !list.classList.contains('invisible');
+                    if (isOpen) {
+                        list.classList.add('invisible', 'opacity-0', 'h-0');
+                        list.classList.remove('visible', 'opacity-100', 'h-auto');
+                        arrow.style.transform = 'rotate(0deg)';
+                    } else {
+                        list.classList.remove('invisible', 'opacity-0', 'h-0');
+                        list.classList.add('visible', 'opacity-100', 'h-auto');
+                        arrow.style.transform = 'rotate(90deg)';
+                    }
+                });
+            }
+        </script>
+    </div>
+</div>

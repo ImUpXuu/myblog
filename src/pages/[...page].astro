@@ -1,0 +1,115 @@
+---
+import type { GetStaticPaths } from "astro";
+import Pagination from "../components/control/Pagination.astro";
+import PostPage from "../components/PostPage.astro";
+import BannerTitle from "../components/BannerTitle.astro";
+import { PAGE_SIZE } from "../constants/constants";
+import MainGridLayout from "../layouts/MainGridLayout.astro";
+import { getSortedPosts } from "../utils/content-utils";
+import { siteConfig, profileConfig } from "../config";
+
+export const getStaticPaths = (async ({ paginate }) => {
+	const allBlogPosts = await getSortedPosts();
+	return paginate(allBlogPosts, { pageSize: PAGE_SIZE });
+}) satisfies GetStaticPaths;
+// https://github.com/withastro/astro/issues/6507#issuecomment-1489916992
+
+const { page } = Astro.props;
+
+const len = page.data.length;
+
+const isFirstPage = page.url.prev === undefined;
+
+const jsonLd = isFirstPage ? {
+	"@context": "https://schema.org",
+	"@type": "WebSite",
+	"@id": `${Astro.site}`,
+	name: siteConfig.title,
+	description: siteConfig.subtitle,
+	url: Astro.site,
+	publisher: {
+		"@type": "Person",
+		name: profileConfig.name,
+	},
+	author: {
+		"@type": "Person",
+		name: profileConfig.name,
+	},
+	inLanguage: siteConfig.lang.replace("_", "-"),
+	potentialAction: {
+		"@type": "SearchAction",
+		target: {
+			"@type": "EntryPoint",
+			urlTemplate: `${Astro.site}search?q={search_term_string}`,
+		},
+		"query-input": "required name=search_term_string",
+	},
+} : null;
+---
+
+<MainGridLayout>
+    <BannerTitle slot="banner-title"></BannerTitle>
+    {jsonLd && <script is:inline slot="head" type="application/ld+json" set:html={JSON.stringify(jsonLd)}></script>}
+    <PostPage page={page}></PostPage>
+    <Pagination class="mx-auto onload-animation" page={page} style={`animation-delay: calc(var(--content-delay) + ${(len)*50}ms)`}></Pagination>
+</MainGridLayout>
+
+<script>
+function animateNumber(el, target) {
+    const duration = 800;
+    const start = 0;
+    const startTime = performance.now();
+
+    function update(currentTime) {
+        const elapsed = currentTime - startTime;
+        const progress = Math.min(elapsed / duration, 1);
+        const eased = 1 - Math.pow(1 - progress, 3);
+        const current = Math.round(start + (target - start) * eased);
+        el.textContent = current.toLocaleString('zh-CN');
+        if (progress < 1) {
+            requestAnimationFrame(update);
+        }
+    }
+    requestAnimationFrame(update);
+}
+
+function fetchHomepageStats() {
+    const postCards = document.querySelectorAll('[data-post-url]');
+
+    for (const card of postCards) {
+        const pageUrl = card.getAttribute('data-post-url');
+        if (!pageUrl) continue;
+
+        const pathWithSlash = pageUrl.endsWith('/') ? pageUrl : pageUrl + '/';
+        const apiUrl = `https://upxuu.com/statsapi/alltime?path=${encodeURIComponent(pathWithSlash)}`;
+
+        const viewsEl = card.querySelector('.post-views');
+        if (!viewsEl) continue;
+
+        viewsEl.innerHTML = '<svg class="animate-spin h-3.5 w-3.5 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>';
+
+        fetch(apiUrl)
+            .then(res => res.ok ? res.json() : null)
+            .then(data => {
+                if (!data || !data.pageviews) {
+                    viewsEl.textContent = '0';
+                    return;
+                }
+                animateNumber(viewsEl, data.pageviews);
+            })
+            .catch(() => {
+                viewsEl.textContent = '-';
+            });
+    }
+}
+
+(window as any).fetchHomepageStats = fetchHomepageStats;
+
+setTimeout(() => {
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', fetchHomepageStats);
+    } else {
+        fetchHomepageStats();
+    }
+}, 100);
+</script>

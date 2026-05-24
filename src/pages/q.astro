@@ -1,0 +1,50 @@
+---
+import MainGridLayout from "../layouts/MainGridLayout.astro";
+import BannerTitle from "../components/BannerTitle.astro";
+import { profileConfig, siteConfig } from "../config";
+
+const jsonLd = {
+	"@context": "https://schema.org",
+	"@type": "WebPage",
+	"@id": `${Astro.site}q`,
+	name: "QQ群",
+	description: "加入 UpXuu 的 QQ 交流群",
+	url: `${Astro.site}q`,
+	author: {
+		"@type": "Person",
+		name: profileConfig.name,
+	},
+	inLanguage: siteConfig.lang.replace("_", "-"),
+};
+---
+
+<MainGridLayout title="QQ群" description="加入 UpXuu 的 QQ 交流群">
+	<BannerTitle slot="banner-title"></BannerTitle>
+	<script is:inline slot="head" type="application/ld+json" set:html={JSON.stringify(jsonLd)}></script>
+	
+	<div class="flex w-full rounded-[var(--radius-large)] overflow-hidden relative min-h-32">
+		<div class="card-base z-10 px-6 md:px-9 py-6 relative w-full">
+			<div class="mb-8 text-center">
+				<h1 class="text-3xl font-bold text-gray-800 dark:text-gray-200 mb-2">
+					💬 QQ 交流群
+				</h1>
+				<p class="text-sm text-gray-500 dark:text-gray-400">
+					扫码加入，一起聊天交流
+				</p>
+			</div>
+
+			<div class="flex justify-center mb-8">
+				<img
+					src="https://edit.upxuu.com/img/2026/4/26/20260426203928_741.png"
+					alt="QQ群二维码"
+					class="rounded-xl shadow-lg max-w-sm w-full"
+					loading="lazy"
+				/>
+			</div>
+
+			<div class="text-center text-xs text-gray-400 dark:text-gray-500">
+				使用手机 QQ 扫码加入
+			</div>
+		</div>
+	</div>
+</MainGridLayout>

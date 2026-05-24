@@ -1,0 +1,76 @@
+---
+import WidgetLayout from "./WidgetLayout.astro";
+---
+
+<WidgetLayout name="站点统计" isCollapsed={false}>
+    <div id="umami-sidebar-stats" class="space-y-2">
+        <div class="bg-gray-50 dark:bg-gray-800/60 px-3 py-2 rounded-lg flex items-center justify-between">
+            <span class="text-xs text-gray-600 dark:text-gray-400">👁️ 总访问量</span>
+            <span id="total-views" class="text-sm font-semibold text-gray-800 dark:text-gray-200">-</span>
+        </div>
+        <div class="bg-gray-50 dark:bg-gray-800/60 px-3 py-2 rounded-lg flex items-center justify-between">
+            <span class="text-xs text-gray-600 dark:text-gray-400">👥 总访问人数</span>
+            <span id="total-visitors" class="text-sm font-semibold text-gray-800 dark:text-gray-200">-</span>
+        </div>
+        <div class="bg-gray-50 dark:bg-gray-800/60 px-3 py-2 rounded-lg flex items-center justify-between">
+            <span class="text-xs text-gray-600 dark:text-gray-400">🚀 访问次数</span>
+            <span id="total-visits" class="text-sm font-semibold text-gray-800 dark:text-gray-200">-</span>
+        </div>
+    </div>
+</WidgetLayout>
+
+<script>
+function animateNumber(el, target) {
+    const duration = 800;
+    const start = 0;
+    const startTime = performance.now();
+
+    function update(currentTime) {
+        const elapsed = currentTime - startTime;
+        const progress = Math.min(elapsed / duration, 1);
+        const eased = 1 - Math.pow(1 - progress, 3);
+        const current = Math.round(start + (target - start) * eased);
+        el.textContent = current.toLocaleString('zh-CN');
+        if (progress < 1) {
+            requestAnimationFrame(update);
+        }
+    }
+    requestAnimationFrame(update);
+}
+
+async function fetchUmamiStats() {
+    try {
+        const viewsEl = document.getElementById('total-views');
+        const visitorsEl = document.getElementById('total-visitors');
+        const visitsEl = document.getElementById('total-visits');
+
+        const response = await fetch('https://upxuu.com/statsapi/alltime');
+        if (!response.ok) throw new Error('Failed to fetch');
+        const data = await response.json();
+
+        if (viewsEl) {
+            viewsEl.innerHTML = '<svg class="animate-spin h-3.5 w-3.5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>';
+        }
+        if (visitorsEl) {
+            visitorsEl.innerHTML = '<svg class="animate-spin h-3.5 w-3.5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>';
+        }
+        if (visitsEl) {
+            visitsEl.innerHTML = '<svg class="animate-spin h-3.5 w-3.5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>';
+        }
+
+        if (viewsEl && data.pageviews) {
+            animateNumber(viewsEl, data.pageviews);
+        }
+        if (visitorsEl && data.visitors) {
+            animateNumber(visitorsEl, data.visitors);
+        }
+        if (visitsEl && data.visits) {
+            animateNumber(visitsEl, data.visits);
+        }
+    } catch (error) {
+        console.error('Error fetching umami stats:', error);
+    }
+}
+
+fetchUmamiStats();
+</script>

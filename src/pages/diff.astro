@@ -1,0 +1,168 @@
+---
+import MainGridLayout from "../layouts/MainGridLayout.astro";
+import BannerTitle from "../components/BannerTitle.astro";
+import { profileConfig, siteConfig } from "../config";
+import { getCommitHistory, formatDate } from "../utils/git-info";
+
+const commits = await getCommitHistory(50);
+
+const jsonLd = {
+	"@context": "https://schema.org",
+	"@type": "WebPage",
+	"@id": `${Astro.site}diff`,
+	name: "更新日志",
+	description: "UpXuu 博客的更新历史记录",
+	url: `${Astro.site}diff`,
+	author: {
+		"@type": "Person",
+		name: profileConfig.name,
+	},
+	inLanguage: siteConfig.lang.replace("_", "-"),
+};
+---
+
+<MainGridLayout title="更新日志" description="UpXuu 博客的更新历史记录">
+	<BannerTitle slot="banner-title"></BannerTitle>
+	<script is:inline slot="head" type="application/ld+json" set:html={JSON.stringify(jsonLd)}></script>
+
+	<div class="flex w-full rounded-[var(--radius-large)] overflow-hidden relative min-h-32">
+		<div class="card-base z-10 px-6 md:px-9 py-6 relative w-full">
+			<div class="mb-8">
+				<h1 class="text-2xl font-bold text-gray-800 dark:text-gray-200 mb-1">
+					📝 更新日志
+				</h1>
+				<p class="text-sm text-gray-500 dark:text-gray-400">
+					记录博客的每一次更新与改进
+				</p>
+			</div>
+
+			{commits.length > 0 ? (
+				<div class="space-y-6">
+					{commits.map((commit) => (
+						<div class="commit-card border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden">
+							<!-- commit header -->
+							<a
+								href={`https://github.com/ImUpXuu/myblog/commit/${commit.sha}`}
+								target="_blank"
+								rel="noopener noreferrer"
+								class="block px-4 py-3 bg-gray-50 dark:bg-gray-800/60 border-b border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+							>
+								<div class="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm">
+									<span class="font-mono text-blue-600 dark:text-blue-400 hover:underline font-semibold">
+										{commit.shortSha}
+									</span>
+									<span class="text-gray-700 dark:text-gray-300 font-medium truncate">
+										{commit.message.split("\n")[0]}
+									</span>
+									<span class="ml-auto text-xs text-gray-400 dark:text-gray-500 whitespace-nowrap">
+										{formatDate(commit.date)}
+									</span>
+								</div>
+								<div class="flex items-center gap-4 mt-2 text-xs">
+									<span class="text-green-600 dark:text-green-400 font-semibold">
+										+{commit.totalAdditions}
+									</span>
+									<span class="text-red-600 dark:text-red-400 font-semibold">
+										-{commit.totalDeletions}
+									</span>
+									<span class="text-gray-500 dark:text-gray-400">
+										{commit.files.length} 个文件
+									</span>
+									<span class="text-gray-400 dark:text-gray-500">by {commit.author}</span>
+								</div>
+							</a>
+
+							<!-- file list -->
+							<div class="divide-y divide-gray-100 dark:divide-gray-700/50">
+								{commit.files.map((file) => (
+									<a
+										href={file.blob_url}
+										target="_blank"
+										rel="noopener noreferrer"
+										class="flex items-center gap-3 px-4 py-2 hover:bg-gray-50 dark:hover:bg-gray-800/40 transition-colors group"
+									>
+										<!-- status badge -->
+										<span
+											class={`w-16 text-xs font-mono text-center shrink-0 px-1 rounded ${
+												file.status === "added"
+													? "bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-400"
+													: file.status === "removed"
+														? "bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-400"
+														: file.status === "renamed"
+															? "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/40 dark:text-yellow-400"
+															: "bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400"
+											}`}
+										>
+											{file.status === "added"
+												? "A"
+												: file.status === "removed"
+													? "D"
+													: file.status === "renamed"
+														? "R"
+														: "M"}
+										</span>
+
+										<!-- filename -->
+										<span class="text-xs font-mono text-gray-700 dark:text-gray-300 truncate flex-1 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+											{file.filename}
+										</span>
+
+										<!-- stats bar -->
+										<div class="flex items-center gap-2 shrink-0">
+											{file.additions > 0 && (
+												<span class="text-xs text-green-600 dark:text-green-400 font-mono">
+													+{file.additions}
+												</span>
+											)}
+											{file.deletions > 0 && (
+												<span class="text-xs text-red-600 dark:text-red-400 font-mono">
+													-{file.deletions}
+												</span>
+											)}
+										</div>
+
+										<!-- mini bar -->
+										<div class="w-24 h-1.5 bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden hidden sm:block shrink-0">
+											<div class="h-full flex rounded-full overflow-hidden">
+												{file.changes > 0 && (
+													<>
+														<div
+															class="bg-green-500"
+															style={`width: ${(file.additions / file.changes) * 100}%`}
+														/>
+														<div
+															class="bg-red-500"
+															style={`width: ${(file.deletions / file.changes) * 100}%`}
+														/>
+													</>
+												)}
+											</div>
+										</div>
+									</a>
+								))}
+							</div>
+						</div>
+					))}
+				</div>
+			) : (
+				<div class="text-center py-12">
+					<div class="text-6xl mb-4">📭</div>
+					<p class="text-gray-500 dark:text-gray-400 mb-2">
+						暂时无法加载更新记录
+					</p>
+					<p class="text-xs text-gray-400 dark:text-gray-500">
+						可能是 GitHub API 速率限制，请稍后再试
+					</p>
+					<a
+						href="https://github.com/ImUpXuu/myblog/commits/main"
+						target="_blank"
+						rel="noopener noreferrer"
+						class="inline-block mt-4 px-4 py-2 bg-[var(--primary)] text-white rounded-lg hover:opacity-90 transition-opacity text-sm"
+					>
+						在 GitHub 上查看
+					</a>
+				</div>
+			)}
+		</div>
+	</div>
+</MainGridLayout>

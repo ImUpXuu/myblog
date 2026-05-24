@@ -1,0 +1,79 @@
+---
+import '@waline/client/style';
+
+interface Props {
+  path?: string;
+}
+
+const { path = '/' } = Astro.props;
+---
+
+<div class="waline-wrapper mt-8 p-6 rounded-2xl transition-colors shadow-sm">
+  <waline-comments data-server="https://com4.upxuu.com/" data-path={path}></waline-comments>
+</div>
+
+<script>
+  import { init } from '@waline/client';
+
+  class WalineComments extends HTMLElement {
+    walineInstance = null;
+
+    connectedCallback() {
+      const serverURL = this.dataset.server;
+      const pagePath = this.dataset.path || '/';
+      const container = document.createElement('div');
+      this.appendChild(container);
+
+      this.walineInstance = init({
+        el: container,
+        serverURL: serverURL,
+        path: pagePath,
+        dark: 'html.dark',
+        emoji: [
+          'https://unpkg.com/@waline/emojis@1.1.0/bilibili',
+        ],
+        lang: 'zh-CN',
+        search: false,
+        noRss: true,
+        reaction: true,
+      });
+    }
+
+    disconnectedCallback() {
+      if (this.walineInstance) {
+        this.walineInstance.destroy();
+      }
+    }
+  }
+
+  if (!customElements.get('waline-comments')) {
+    customElements.define('waline-comments', WalineComments);
+  }
+</script>
+
+<style is:global>
+  :root {
+    --waline-theme-color: var(--primary);
+    --waline-active-color: var(--primary);
+    --waline-font-size: 1rem;
+    --waline-border-radius: 0.75rem;
+    --waline-bgcolor: #ffffff;
+    --waline-bgcolor-light: #f5f5f5;
+    --waline-border-color: #e5e5e5;
+    --waline-text-color: #333333;
+    --waline-info-color: #666666;
+  }
+
+  html.dark {
+    --waline-bgcolor: #1a1a1a;
+    --waline-bgcolor-light: #252525;
+    --waline-border-color: #404040;
+    --waline-text-color: #e5e5e5;
+    --waline-info-color: #a0a0a0;
+  }
+
+  .waline-wrapper {
+    background: var(--waline-bgcolor);
+    border: 1px solid var(--waline-border-color);
+  }
+</style>

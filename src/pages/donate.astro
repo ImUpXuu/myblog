@@ -1,0 +1,51 @@
+---
+import MainGridLayout from "../layouts/MainGridLayout.astro";
+import BannerTitle from "../components/BannerTitle.astro";
+import { profileConfig, siteConfig } from "../config";
+import donateQr from "../assets/images/Screenshot_20260504_185946.jpg";
+
+const jsonLd = {
+	"@context": "https://schema.org",
+	"@type": "WebPage",
+	"@id": `${Astro.site}donate`,
+	name: "打赏",
+	description: "给 UpXuu 爆金币~",
+	url: `${Astro.site}donate`,
+	author: {
+		"@type": "Person",
+		name: profileConfig.name,
+	},
+	inLanguage: siteConfig.lang.replace("_", "-"),
+};
+---
+
+<MainGridLayout title="打赏" description="给 UpXuu 爆金币~">
+	<BannerTitle slot="banner-title"></BannerTitle>
+	<script is:inline slot="head" type="application/ld+json" set:html={JSON.stringify(jsonLd)}></script>
+	
+	<div class="flex w-full rounded-[var(--radius-large)] overflow-hidden relative min-h-32">
+		<div class="card-base z-10 px-6 md:px-9 py-6 relative w-full">
+			<div class="mb-8 text-center">
+				<h1 class="text-3xl font-bold text-gray-800 dark:text-gray-200 mb-2">
+					💰 给 UpXuu 爆金币~
+				</h1>
+				<p class="text-sm text-gray-500 dark:text-gray-400">
+					感谢你的支持，每一分都是对创作的鼓励
+				</p>
+			</div>
+
+			<div class="flex justify-center mb-8">
+				<img
+					src={donateQr.src}
+					alt="打赏二维码"
+					class="rounded-xl shadow-lg max-w-sm w-full"
+					loading="lazy"
+				/>
+			</div>
+
+			<div class="text-center text-xs text-gray-400 dark:text-gray-500">
+				扫码打赏，金额随意~
+			</div>
+		</div>
+	</div>
+</MainGridLayout>

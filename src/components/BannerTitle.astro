@@ -1,0 +1,232 @@
+---
+// 打字机效果的 Banner 标题组件
+---
+
+<div class="banner-title-container">
+    <h1 class="banner-main-title">
+        <span class="typing-wrapper">
+            <span class="typing-text" id="title-typing"></span><span class="cursor" id="title-cursor">|</span>
+        </span>
+    </h1>
+    <h2 class="banner-subtitle">
+        <span class="typing-wrapper">
+            <span class="typing-text" id="subtitle-typing"></span><span class="cursor" id="subtitle-cursor">|</span>
+        </span>
+    </h2>
+</div>
+
+<style>
+.banner-title-container {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+    z-index: 10;
+    width: 100%;
+    padding: 0 20px;
+    box-sizing: border-box;
+}
+
+body:not(.lg\:is-home) .banner-title-container {
+    top: 35vh;
+    transform: translate(-50%, 0);
+}
+
+@media (max-width: 768px) {
+    body:not(.lg\:is-home) .banner-title-container {
+        top: 45vh;
+        transform: translate(-50%, 0);
+    }
+}
+
+.banner-main-title {
+    font-size: clamp(2rem, 6vw, 4rem);
+    font-weight: 700;
+    color: #ffffff;
+    text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.6);
+    margin: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 1.2em;
+    line-height: 1.3;
+}
+
+.banner-subtitle {
+    font-size: clamp(1rem, 3vw, 1.5rem);
+    font-weight: 400;
+    color: #ffffff;
+    text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.6);
+    margin-top: 0.5rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 1.2em;
+    line-height: 1.3;
+}
+
+.typing-wrapper {
+    display: inline-block;
+    position: relative;
+    max-width: 100%;
+}
+
+.typing-text {
+    display: inline;
+    white-space: pre-wrap;
+    word-break: break-word;
+}
+
+.cursor {
+    display: inline-block;
+    color: #ffffff;
+    font-weight: 300;
+    animation: blink 1s step-end infinite;
+    margin-left: 2px;
+}
+
+@keyframes blink {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0;
+    }
+}
+
+/* 移动端优化 - 使用 vh 单位确保在可视区域内 */
+@media (max-width: 768px) {
+    .banner-title-container {
+        padding: 0 15px;
+        top: 45vh;
+        transform: translate(-50%, 0);
+    }
+    
+    .banner-main-title {
+        font-size: clamp(1.8rem, 8vw, 3rem);
+    }
+    
+    .banner-subtitle {
+        font-size: clamp(1rem, 5vw, 1.3rem);
+        margin-top: 0.8rem;
+    }
+}
+
+/* 小屏幕进一步优化 */
+@media (max-width: 480px) {
+    .banner-title-container {
+        top: 42vh;
+    }
+    
+    .banner-main-title {
+        font-size: clamp(1.6rem, 9vw, 2.5rem);
+    }
+    
+    .banner-subtitle {
+        font-size: clamp(0.95rem, 6vw, 1.2rem);
+        margin-top: 0.7rem;
+    }
+}
+
+/* 超小屏幕 */
+@media (max-width: 360px) {
+    .banner-title-container {
+        top: 40vh;
+        padding: 0 12px;
+    }
+    
+    .banner-main-title {
+        font-size: clamp(1.5rem, 10vw, 2.2rem);
+    }
+    
+    .banner-subtitle {
+        font-size: clamp(0.9rem, 7vw, 1.1rem);
+        margin-top: 0.6rem;
+    }
+}
+</style>
+
+<script>
+let _controller = null;
+let initialized = false;
+
+// 防止重复初始化
+if (window.__bannerInitialized) {
+    initialized = true;
+} else {
+    window.__bannerInitialized = true;
+}
+
+function sleep(ms) {
+    return new Promise(resolve => {
+        _controller = { resolve };
+        setTimeout(resolve, ms);
+    });
+}
+
+async function typeWriter(element, text, speed = 100) {
+    element.textContent = '';
+    for (let i = 0; i < text.length; i++) {
+        element.textContent += text.charAt(i);
+        await sleep(speed);
+    }
+}
+
+async function deleteWriter(element, speed = 50) {
+    while (element.textContent.length > 0) {
+        element.textContent = element.textContent.slice(0, -1);
+        await sleep(speed);
+    }
+}
+
+const subtitles = [
+    "HI I am UpXuu",
+    "upxu and you...",
+    "Life, coding and everything"
+];
+
+let currentSubtitleIndex = 0;
+
+async function initAnimation() {
+    if (initialized) return;
+    initialized = true;
+
+    const titleText = "UpXuu's Blog";
+
+    const cursors = document.querySelectorAll('.cursor');
+    cursors.forEach(cursor => cursor.style.opacity = '0');
+
+    const titleElement = document.getElementById('title-typing');
+    const subtitleElement = document.getElementById('subtitle-typing');
+    if (!titleElement || !subtitleElement) return;
+
+    titleElement.textContent = '';
+    subtitleElement.textContent = '';
+
+    const titleCursor = document.getElementById('title-cursor');
+    if (titleCursor) titleCursor.style.opacity = '1';
+
+    await typeWriter(titleElement, titleText, 150);
+    await sleep(500);
+
+    const subtitleCursor = document.getElementById('subtitle-cursor');
+    if (subtitleCursor) subtitleCursor.style.opacity = '1';
+
+    while (true) {
+        const currentText = subtitles[currentSubtitleIndex];
+        await typeWriter(subtitleElement, currentText, 100);
+        await sleep(2000);
+        await deleteWriter(subtitleElement, 50);
+        await sleep(300);
+        currentSubtitleIndex = (currentSubtitleIndex + 1) % subtitles.length;
+    }
+}
+
+// 只在首次加载时执行
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initAnimation, { once: true });
+} else {
+    initAnimation();
+}
+</script>

@@ -1,0 +1,22 @@
+# Redirects from old WordPress URLs to new Fuwari structure
+# Currently disabled due to redirect loops
+
+# # Exclude sitemap files
+# /sitemap-index.xml  /sitemap-index.xml  200
+# /posts/sitemap-index.xml  /posts/sitemap-index.xml  200
+# /sitemap.xml  /sitemap.xml  200
+# /posts/sitemap.xml  /posts/sitemap.xml  200
+
+# # Exclude static assets
+# /assets/*  /assets/:splat  200
+# /images/*  /images/:splat  200
+# /fonts/*  /fonts/:splat  200
+
+# # Exclude static pages
+# /about  /about  200
+# /archive  /archive  200
+# /shuoshuo  /shuoshuo  200
+# /rss.xml  /rss.xml  200
+
+# # Redirect root-level article URLs to /posts/
+# /*  /posts/:splat  301

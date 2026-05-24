@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ImgShare Gallery</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f0f4f8;
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 25px;
+            background: #fff;
+            border-bottom: 1px solid #e1e8ed;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .main-container {
+            display: flex;
+            min-height: calc(100vh - 57px);
+        }
+
+        .sidebar {
+            width: 220px;
+            background: #fff;
+            border-right: 1px solid #e1e8ed;
+            padding: 15px 0;
+            overflow-y: auto;
+            flex-shrink: 0;
+        }
+
+        .sidebar-title {
+            padding: 0 20px 15px;
+            font-size: 1rem;
+            font-weight: 600;
+            color: #1da1f2;
+            border-bottom: 1px solid #e1e8ed;
+            margin-bottom: 10px;
+        }
+
+        .timeline-item {
+            padding: 12px 20px;
+            cursor: pointer;
+            border-left: 3px solid transparent;
+            transition: all 0.2s;
+        }
+
+        .timeline-item:hover {
+            background: #f0f4f8;
+        }
+
+        .timeline-item.active {
+            background: #e8f4fc;
+            border-left-color: #1da1f2;
+        }
+
+        .timeline-month {
+            font-size: 0.95rem;
+            font-weight: 500;
+            color: #333;
+        }
+
+        .timeline-count {
+            font-size: 0.8rem;
+            color: #888;
+            margin-top: 2px;
+        }
+
+        .content-area {
+            flex: 1;
+            overflow: hidden;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: #1da1f2;
+        }
+
+        .logo-icon {
+            width: 32px;
+            height: 32px;
+            background: #1da1f2;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+        }
+
+        .stats {
+            display: flex;
+            gap: 20px;
+            font-size: 0.9rem;
+            color: #666;
+        }
+
+        .stat-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .month-bar {
+            display: flex;
+            gap: 8px;
+            padding: 12px 25px;
+            background: #fff;
+            border-bottom: 1px solid #e1e8ed;
+            overflow-x: auto;
+        }
+
+        .month-btn {
+            background: #f0f4f8;
+            color: #555;
+            border: 1px solid #ddd;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            white-space: nowrap;
+            transition: all 0.2s;
+        }
+
+        .month-btn:hover {
+            background: #e1e8ed;
+            border-color: #ccc;
+        }
+
+        .month-btn.active {
+            background: #1da1f2;
+            color: white;
+            border-color: #1da1f2;
+        }
+
+        .gallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 12px;
+            padding: 12px;
+        }
+
+        .gallery-item {
+            position: relative;
+            background: #fff;
+            border-radius: 8px;
+            overflow: hidden;
+            cursor: pointer;
+            transition: transform 0.2s;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        .gallery-item:hover {
+            transform: scale(1.02);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        }
+
+        .gallery-item img {
+            width: 100%;
+            aspect-ratio: 1/1;
+            object-fit: cover;
+            display: block;
+        }
+
+        .gallery-item-info {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            padding: 10px;
+            background: linear-gradient(to top, rgba(0,0,0,0.7), transparent);
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+
+        .gallery-item:hover .gallery-item-info {
+            opacity: 1;
+        }
+
+        .gallery-item-name {
+            font-size: 0.85rem;
+            color: #fff;
+            margin-bottom: 3px;
+            word-break: break-all;
+        }
+
+        .gallery-item-meta {
+            font-size: 0.75rem;
+            color: #eee;
+            display: flex;
+            gap: 10px;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 60px 20px;
+            color: #999;
+            font-size: 1rem;
+        }
+
+        .error {
+            background: #e74c3c;
+            color: white;
+            padding: 15px;
+            border-radius: 6px;
+            margin: 20px;
+            text-align: center;
+        }
+
+        .lightbox {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.95);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+        }
+
+        .lightbox.active {
+            display: flex;
+        }
+
+        .lightbox img {
+            max-width: 95%;
+            max-height: 85vh;
+            object-fit: contain;
+            border-radius: 4px;
+        }
+
+        .lightbox-close {
+            position: absolute;
+            top: 20px;
+            right: 30px;
+            font-size: 2.5rem;
+            color: white;
+            cursor: pointer;
+            user-select: none;
+            background: none;
+            border: none;
+        }
+
+        .lightbox-info {
+            color: #ccc;
+            margin-top: 15px;
+            text-align: center;
+            font-size: 0.9rem;
+        }
+
+        .lightbox-info h3 {
+            color: #fff;
+            margin-bottom: 8px;
+            font-weight: normal;
+        }
+
+        @media (max-width: 768px) {
+            .header {
+                flex-direction: column;
+                gap: 12px;
+                padding: 12px 15px;
+            }
+
+            .header-left {
+                width: 100%;
+                justify-content: space-between;
+            }
+
+            .stats {
+                display: none;
+            }
+
+            .sidebar {
+                display: none;
+            }
+
+            .month-bar {
+                padding: 12px 15px;
+            }
+
+            .gallery {
+                grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+                gap: 8px;
+                padding: 8px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="header-left">
+            <div class="logo">
+                <div class="logo-icon">📷</div>
+                <span>画廊</span>
+            </div>
+            <div class="stats">
+                <div class="stat-item">
+                    <span>📁</span>
+                    <span id="totalMonths">-</span>
+                </div>
+                <div class="stat-item">
+                    <span>🖼️</span>
+                    <span id="totalImages">-</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="main-container">
+        <div class="sidebar" id="sidebar">
+            <div class="sidebar-title">时间轴</div>
+            <div id="timeline"></div>
+        </div>
+
+        <div class="content-area">
+            <div class="month-bar" id="monthButtons"></div>
+            <div class="gallery" id="gallery"></div>
+        </div>
+    </div>
+
+    <div class="lightbox" id="lightbox">
+        <span class="lightbox-close" onclick="closeLightbox()">&times;</span>
+        <img id="lightboxImg" src="" alt="Full size image">
+        <div class="lightbox-info" id="lightboxInfo"></div>
+    </div>
+
+    <script>
+        const BASE_URL = 'https://edit.upxuu.com/img';
+        let allMonths = [];
+        let currentImages = [];
+
+        async function fetchJSON(url) {
+            try {
+                const response = await fetch(url);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return await response.json();
+            } catch (error) {
+                console.error('Fetch error:', error);
+                throw error;
+            }
+        }
+
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 B';
+            const k = 1024;
+            const sizes = ['B', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i];
+        }
+
+        function formatDate(dateStr) {
+            if (!dateStr) return '';
+            const date = new Date(dateStr);
+            return date.toLocaleDateString('zh-CN', {
+                month: 'short',
+                day: 'numeric'
+            });
+        }
+
+        async function loadRootIndex() {
+            const gallery = document.getElementById('gallery');
+            gallery.innerHTML = '<div class="loading">加载中...</div>';
+
+            try {
+                const rootIndex = await fetchJSON(`${BASE_URL}/index.json`);
+                allMonths = rootIndex.months || [];
+                
+                updateStats();
+                renderTimeline();
+                renderMonthButtons();
+                
+                if (allMonths.length > 0) {
+                    await loadMonth(allMonths[0].index);
+                } else {
+                    gallery.innerHTML = '<div class="loading">暂无数据</div>';
+                }
+            } catch (error) {
+                gallery.innerHTML = `
+                    <div class="error">
+                        <p>加载失败：${error.message}</p>
+                    </div>
+                `;
+            }
+        }
+
+        function updateStats() {
+            document.getElementById('totalMonths').textContent = allMonths.length;
+            const totalImages = allMonths.reduce((sum, month) => sum + (month.count || 0), 0);
+            document.getElementById('totalImages').textContent = totalImages;
+        }
+
+        function renderTimeline() {
+            const container = document.getElementById('timeline');
+            container.innerHTML = '';
+
+            allMonths.forEach((month, index) => {
+                const item = document.createElement('div');
+                item.className = 'timeline-item' + (index === 0 ? ' active' : '');
+                item.innerHTML = `
+                    <div class="timeline-month">${month.ym}</div>
+                    <div class="timeline-count">${month.count || 0} 张图片</div>
+                `;
+                item.onclick = () => {
+                    document.querySelectorAll('.timeline-item').forEach(t => t.classList.remove('active'));
+                    item.classList.add('active');
+                    loadMonth(month.index);
+                };
+                container.appendChild(item);
+            });
+        }
+
+        function renderMonthButtons() {
+            const container = document.getElementById('monthButtons');
+            container.innerHTML = '';
+
+            allMonths.forEach((month, index) => {
+                const btn = document.createElement('button');
+                btn.className = 'month-btn' + (index === 0 ? ' active' : '');
+                btn.textContent = `${month.ym}`;
+                btn.onclick = () => loadMonth(month.index, btn);
+                container.appendChild(btn);
+            });
+        }
+
+        async function loadMonth(monthIndexUrl, clickedBtn) {
+            const gallery = document.getElementById('gallery');
+            gallery.innerHTML = '<div class="loading">加载中...</div>';
+
+            if (clickedBtn) {
+                document.querySelectorAll('.month-btn').forEach(btn => btn.classList.remove('active'));
+                clickedBtn.classList.add('active');
+            }
+
+            try {
+                const monthData = await fetchJSON(monthIndexUrl);
+                currentImages = monthData.images || [];
+                renderGallery(currentImages);
+            } catch (error) {
+                gallery.innerHTML = `
+                    <div class="error">
+                        <p>加载失败：${error.message}</p>
+                    </div>
+                `;
+            }
+        }
+
+        function renderGallery(images) {
+            const gallery = document.getElementById('gallery');
+            
+            if (!images || images.length === 0) {
+                gallery.innerHTML = '<div class="loading">暂无图片</div>';
+                return;
+            }
+
+            gallery.innerHTML = '';
+            
+            images.forEach((image) => {
+                const item = document.createElement('div');
+                item.className = 'gallery-item';
+                item.onclick = () => openLightbox(image);
+
+                item.innerHTML = `
+                    <img src="${image.url}" alt="${image.name}" loading="lazy">
+                    <div class="gallery-item-info">
+                        <div class="gallery-item-name">${image.name}</div>
+                        <div class="gallery-item-meta">
+                            <span>${formatDate(image.date)}</span>
+                            <span>${formatFileSize(image.size)}</span>
+                        </div>
+                    </div>
+                `;
+
+                gallery.appendChild(item);
+            });
+        }
+
+        function openLightbox(image) {
+            const lightbox = document.getElementById('lightbox');
+            const lightboxImg = document.getElementById('lightboxImg');
+            const lightboxInfo = document.getElementById('lightboxInfo');
+
+            lightboxImg.src = image.url;
+            lightboxInfo.innerHTML = `
+                <h3>${image.name}</h3>
+                <p>${formatDate(image.date)} · ${formatFileSize(image.size)}</p>
+            `;
+
+            lightbox.classList.add('active');
+        }
+
+        function closeLightbox() {
+            const lightbox = document.getElementById('lightbox');
+            lightbox.classList.remove('active');
+            document.body.style.overflow = '';
+        }
+
+        document.getElementById('lightbox').addEventListener('click', (e) => {
+            if (e.target.id === 'lightbox') {
+                closeLightbox();
+            }
+        });
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                closeLightbox();
+            }
+        });
+
+        window.addEventListener('load', loadRootIndex);
+    </script>
+</body>
+</html>
