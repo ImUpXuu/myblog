@@ -1071,7 +1071,23 @@ window.onresize = () => {
         scrollChatToBottom();
     }
 
+    function resetChatState() {
+        chatHistory = [];
+        isChatOpen = false;
+        isStreaming = false;
+        if (chatPanel) {
+            chatPanel.style.transform = 'translateY(calc(100% + 32px))';
+            chatPanel.style.opacity = '0';
+        }
+        if (chatBackdrop) {
+            chatBackdrop.style.opacity = '0';
+            chatBackdrop.classList.add('hidden');
+        }
+        if (chatSend) chatSend.style.opacity = '1';
+    }
+
     function setupAiChat() {
+        resetChatState();
         chatBtn = document.getElementById('ai-chat-btn');
         chatPanel = document.getElementById('ai-chat-panel');
         chatBackdrop = document.getElementById('ai-chat-backdrop');
