@@ -1,5 +1,5 @@
 <div id="ai-chat-inner" class="flex flex-col h-full">
-	<div id="ai-chat-messages" class="flex-1 overflow-y-auto hide-scrollbar px-4 py-3 space-y-3">
+	<div id="ai-chat-messages" class="flex-1 overflow-y-auto hide-scrollbar px-4 py-3 flex flex-col gap-3">
 		<div class="text-center text-xs text-30 py-4">
 			可以问文章相关的问题，AI 会参考文章内容回答
 		</div>
@@ -9,13 +9,13 @@
 			<textarea
 				id="ai-chat-input"
 				rows="1"
-				class="flex-1 resize-none rounded-xl border border-[var(--line-color)] bg-[var(--card-bg)] px-3 py-2 text-sm text-[var(--deep-text)] placeholder:text-30 outline-none transition focus:border-[var(--primary)]"
+				class="flex-1 resize-none rounded-lg border border-[var(--line-color)] bg-[var(--card-bg)] px-3 py-2.5 text-sm text-[var(--deep-text)] placeholder:text-30 outline-none transition focus:border-[var(--primary)]"
 				placeholder="输入问题..."
-				style="min-height:40px;max-height:120px"
+				style="min-height:44px;max-height:132px"
 			></textarea>
 			<button
 				id="ai-chat-send"
-				class="w-10 h-10 shrink-0 rounded-xl bg-[var(--primary)] text-white flex items-center justify-center transition active:scale-90 hover:opacity-90"
+				class="w-10 h-10 shrink-0 rounded-lg bg-[var(--primary)] text-white flex items-center justify-center transition active:scale-90 hover:opacity-90"
 				aria-label="发送"
 			>
 				<svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -27,12 +27,18 @@
 </div>
 
 <style is:global>
+/* ─── messages container ─── */
+#ai-chat-messages {
+	scroll-behavior: smooth;
+}
+
+/* ─── message wrapper ─── */
 #ai-chat-messages .msg-user,
 #ai-chat-messages .msg-ai {
 	display: flex;
 	flex-direction: column;
-	max-width: 85%;
-	animation: msg-in 0.25s ease-out;
+	max-width: 88%;
+	animation: msg-in 0.2s ease-out;
 }
 #ai-chat-messages .msg-user {
 	margin-left: auto;
@@ -42,12 +48,15 @@
 	margin-right: auto;
 	align-items: flex-start;
 }
+
+/* ─── message bubble brick ─── */
 #ai-chat-messages .msg-bubble {
-	padding: 0.625rem 0.875rem;
-	border-radius: 1rem;
-	font-size: 0.8125rem;
-	line-height: 1.5;
+	padding: 0.75rem 1rem;
+	border-radius: 0.625rem;
+	font-size: 0.9375rem;
+	line-height: 1.6;
 	word-break: break-word;
+	white-space: pre-wrap;
 }
 #ai-chat-messages .msg-user .msg-bubble {
 	background: var(--primary);
@@ -58,26 +67,84 @@
 	background: var(--toc-bg);
 	color: var(--deep-text);
 	border-bottom-left-radius: 0.25rem;
+	border-left: 3px solid var(--primary);
 }
+
+/* ─── inside bubble: markdown ─── */
+#ai-chat-messages .msg-bubble p {
+	margin: 0.4em 0;
+}
+#ai-chat-messages .msg-bubble p:first-child {
+	margin-top: 0;
+}
+#ai-chat-messages .msg-bubble p:last-child {
+	margin-bottom: 0;
+}
+#ai-chat-messages .msg-bubble ul,
+#ai-chat-messages .msg-bubble ol {
+	margin: 0.4em 0;
+	padding-left: 1.5em;
+}
+#ai-chat-messages .msg-bubble li {
+	margin: 0.15em 0;
+}
+#ai-chat-messages .msg-bubble code {
+	background: rgba(0,0,0,0.08);
+	padding: 0.1em 0.35em;
+	border-radius: 3px;
+	font-size: 0.85em;
+	font-family: ui-monospace, monospace;
+}
+.dark #ai-chat-messages .msg-bubble code {
+	background: rgba(255,255,255,0.12);
+}
+#ai-chat-messages .msg-bubble pre {
+	margin: 0.5em 0;
+	padding: 0.625rem 0.875rem;
+	border-radius: 0.5rem;
+	background: rgba(0,0,0,0.06);
+	overflow-x: auto;
+	font-size: 0.8125rem;
+	line-height: 1.45;
+}
+.dark #ai-chat-messages .msg-bubble pre {
+	background: rgba(255,255,255,0.06);
+}
+#ai-chat-messages .msg-bubble pre code {
+	background: none;
+	padding: 0;
+	font-size: inherit;
+}
+#ai-chat-messages .msg-bubble strong {
+	font-weight: 700;
+}
+#ai-chat-messages .msg-bubble em {
+	font-style: italic;
+}
+
 @keyframes msg-in {
-	from { opacity: 0; transform: translateY(8px); }
+	from { opacity: 0; transform: translateY(6px); }
 	to { opacity: 1; transform: translateY(0); }
 }
+
+/* ─── typing cursor ─── */
 .ai-typing::after {
 	content: "|";
-	animation: blink 1s step-end infinite;
+	animation: blink 0.8s step-end infinite;
 }
 @keyframes blink {
 	50% { opacity: 0; }
 }
+
+/* ─── loading dots ─── */
 .ai-loading {
 	display: flex;
-	gap: 4px;
-	padding: 0.625rem 0.875rem;
+	gap: 5px;
+	padding: 0.75rem 1rem;
 }
 .ai-loading span {
-	width: 6px;
-	height: 6px;
+	width: 7px;
+	height: 7px;
 	border-radius: 50%;
 	background: var(--btn-content);
 	animation: bounce 1.4s infinite ease-in-out both;
@@ -88,36 +155,41 @@
 	0%, 80%, 100% { transform: scale(0); }
 	40% { transform: scale(1); }
 }
+
+/* ─── thinking block ─── */
 .ai-thinking {
-	margin: 0.5rem 0;
-	padding: 0.5rem 0.75rem;
+	margin: 0.25rem 0;
+	padding: 0.625rem 0.875rem;
 	background: var(--toc-bg);
-	border-radius: 0.75rem;
+	border-radius: 0.5rem;
 	border-left: 3px solid var(--primary);
-	opacity: 0.85;
-	font-size: 0.75rem;
-	line-height: 1.5;
-	max-width: 85%;
-	animation: msg-in 0.25s ease-out;
+	opacity: 0.8;
+	font-size: 0.8125rem;
+	line-height: 1.55;
+	max-width: 88%;
+	animation: msg-in 0.2s ease-out;
 }
 .ai-thinking-label {
-	font-weight: 600;
+	font-weight: 700;
 	color: var(--primary);
 	margin-bottom: 0.25rem;
-	font-size: 0.7rem;
+	font-size: 0.6875rem;
 	text-transform: uppercase;
-	letter-spacing: 0.05em;
+	letter-spacing: 0.06em;
 }
 .ai-thinking-text {
 	color: var(--btn-content);
 	word-break: break-word;
+	white-space: pre-wrap;
 }
 .ai-thinking-hr {
 	border: none;
 	border-top: 1px solid var(--line-color);
-	margin: 0.5rem 0;
-	max-width: 85%;
+	margin: 0.25rem 0;
+	max-width: 88%;
 }
+
+/* ─── citation links ─── */
 .cite-link {
 	color: var(--primary);
 	font-weight: 600;
@@ -130,7 +202,7 @@
 	text-decoration: underline;
 }
 .cite-arrow {
-	font-size: 0.65rem;
+	font-size: 0.625rem;
 	margin-left: 0.125rem;
 	display: inline-block;
 }
