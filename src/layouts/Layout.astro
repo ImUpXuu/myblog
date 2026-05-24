@@ -763,7 +763,7 @@ window.onresize = () => {
         setTimeout(() => { chatBackdrop!.classList.add('hidden'); }, 300);
         chatHistory = [];
         if (chatMessages) {
-            chatMessages.innerHTML = '<div class="text-center text-xs text-30 py-4">可以问文章相关的问题，AI 会参考文章内容回答</div>';
+            chatMessages.innerHTML = '<div class="text-center text-xs text-30 py-4">可以问文章相关的问题，XUUAI 会参考文章内容回答</div>';
         }
     }
 
@@ -828,47 +828,37 @@ window.onresize = () => {
         }
     }
 
-    function citeLinkByHeading(text: string): string | null {
+    function citeLinkHtml(num: number): string {
         const headings = getArticleHeadings();
-        const match = headings.find(h => h.text === text || h.slug === text);
-        if (!match) return null;
-        const slug = escapeHtml(match.slug);
-        const label = escapeHtml(match.text);
+        const heading = headings[num - 1];
+        if (!heading) return `[${num}]`;
+        const slug = escapeHtml(heading.slug);
+        const label = escapeHtml(heading.text);
         return `<a href="#${slug}" class="cite-link">${label}<span class="cite-arrow">↗</span></a>`;
     }
 
     // ─── inline markdown for streaming ───
     function renderInlineMd(text: string): string {
         let h = text;
-        // markdown links [text](url) → protect from heading detection
-        const mdLinks: string[] = [];
-        h = h.replace(/\[([^\]]+)\]\(([^)]+)\)/g, (_, t, u) => {
-            mdLinks.push(`<a href="${escapeHtml(u)}" target="_blank" rel="noopener">${escapeHtml(t)}</a>`);
-            return `%%MDLINK${mdLinks.length - 1}%%`;
-        });
-        // heading citations [heading text] (only when NOT followed by (url))
+        // citations [n] – convert to placeholder first to protect from escaping
         const cites: string[] = [];
-        h = h.replace(/\[([^\]]+)\]/g, (_, name) => {
-            const link = citeLinkByHeading(name);
-            if (link) {
-                cites.push(link);
-                return `%%CITE${cites.length - 1}%%`;
-            }
-            return `[${name}]`;
+        h = h.replace(/\[(\d+)\]/g, (_, n) => {
+            cites.push(citeLinkHtml(parseInt(n, 10)));
+            return `%%CITE${cites.length - 1}%%`;
         });
         h = escapeHtml(h);
-        // inline code (before other formatting to protect `code`)
+        // inline code
         h = h.replace(/`([^`]+)`/g, '<code>$1</code>');
         // bold
         h = h.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
         // italic
         h = h.replace(/\*([^*]+)\*/g, '<em>$1</em>');
+        // links
+        h = h.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener">$1</a>');
         // newlines
         h = h.replace(/\n/g, '<br>');
         // restore citations
         h = h.replace(/%%CITE(\d+)%%/g, (_, i) => cites[parseInt(i, 10)] || '');
-        // restore markdown links
-        h = h.replace(/%%MDLINK(\d+)%%/g, (_, i) => mdLinks[parseInt(i, 10)] || '');
         return h;
     }
 
