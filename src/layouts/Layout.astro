@@ -601,29 +601,70 @@ window.onresize = () => {
 // Mobile TOC interactions
 (function() {
     let tocBtn: HTMLElement | null = null;
+    let tocFab: HTMLElement | null = null;
     let tocPanel: HTMLElement | null = null;
     let tocBackdrop: HTMLElement | null = null;
     let tocClose: HTMLElement | null = null;
+    let backToTopBtn: HTMLElement | null = null;
+    let progressEl: HTMLElement | null = null;
+    let isTocOpen = false;
 
     function openToc() {
         if (!tocPanel || !tocBackdrop) return;
+        isTocOpen = true;
         tocPanel.style.transform = 'translateY(0)';
+        tocPanel.style.opacity = '1';
         tocBackdrop.classList.remove('hidden');
         setTimeout(() => { tocBackdrop!.style.opacity = '1'; }, 10);
     }
 
     function closeToc() {
         if (!tocPanel || !tocBackdrop) return;
-        tocPanel.style.transform = 'translateY(100%)';
+        isTocOpen = false;
+        tocPanel.style.transform = 'translateY(calc(100% + 32px))';
+        tocPanel.style.opacity = '0';
         tocBackdrop.style.opacity = '0';
         setTimeout(() => { tocBackdrop!.classList.add('hidden'); }, 300);
     }
 
+    function updateProgress() {
+        if (!progressEl) return;
+        const scrollTop = window.scrollY;
+        const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+        const pct = docHeight > 0 ? Math.round((scrollTop / docHeight) * 100) : 0;
+        progressEl.textContent = `${pct}%`;
+    }
+
+    function updateBackToTop() {
+        if (!backToTopBtn) return;
+        if (window.scrollY > 400) {
+            backToTopBtn.style.opacity = '1';
+            backToTopBtn.style.transform = 'translateY(0)';
+            backToTopBtn.style.pointerEvents = 'auto';
+        } else {
+            backToTopBtn.style.opacity = '0';
+            backToTopBtn.style.transform = 'translateY(8px)';
+            backToTopBtn.style.pointerEvents = 'none';
+        }
+    }
+
+    function onScroll() {
+        updateProgress();
+        updateBackToTop();
+    }
+
+    function scrollToTop() {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
     function setupMobileToc() {
+        tocFab = document.getElementById('mobile-toc-fab');
         tocBtn = document.getElementById('mobile-toc-btn');
         tocPanel = document.getElementById('mobile-toc-panel');
         tocBackdrop = document.getElementById('mobile-toc-backdrop');
         tocClose = document.getElementById('mobile-toc-close');
+        backToTopBtn = document.getElementById('mobile-back-to-top');
+        progressEl = document.getElementById('mobile-reading-progress');
 
         const hasToc = !!tocPanel;
 
@@ -632,19 +673,26 @@ window.onresize = () => {
             if (slot && tocPanel && tocPanel.parentElement !== slot) {
                 if (tocBackdrop) slot.insertBefore(tocBackdrop, slot.firstChild);
                 slot.appendChild(tocPanel);
-                if (tocBtn) slot.appendChild(tocBtn);
+                if (tocFab) slot.appendChild(tocFab);
             }
         }
 
-        if (tocBtn) {
-            tocBtn.style.display = hasToc ? 'flex' : 'none';
+        if (tocFab) {
+            tocFab.style.display = hasToc ? 'flex' : 'none';
+        }
+
+        if (backToTopBtn) {
+            backToTopBtn.onclick = (e) => {
+                e.stopPropagation();
+                scrollToTop();
+            };
         }
 
         if (!tocBtn || !tocPanel || !tocBackdrop) return;
 
         tocBtn.onclick = (e) => {
             e.stopPropagation();
-            if (tocPanel!.style.transform === 'translateY(0px)') {
+            if (isTocOpen) {
                 closeToc();
             } else {
                 openToc();
@@ -659,9 +707,13 @@ window.onresize = () => {
                 setTimeout(closeToc, 150);
             }
         };
+
+        updateProgress();
+        updateBackToTop();
     }
 
     window.addEventListener('popstate', closeToc);
+    window.addEventListener('scroll', onScroll, { passive: true });
 
     setupMobileToc();
 

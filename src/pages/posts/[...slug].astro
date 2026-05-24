@@ -189,27 +189,42 @@ const jsonLd = {
         </a>
     </div>
 
-    <!-- Mobile TOC FAB Button -->
-    {headings.length > 0 && <button id="mobile-toc-btn"
-      class="lg:!hidden fixed bottom-24 right-4 z-[59] w-12 h-12 rounded-2xl bg-[var(--card-bg)]
-             shadow-lg flex items-center justify-center transition-all duration-300
-             active:scale-90 hover:shadow-xl"
-      aria-label="目录" style="display:none;"
-    >
-        <Icon name="material-symbols:toc-rounded" class="text-[1.25rem] text-[var(--primary)]" />
-    </button>}
+    <!-- Mobile FAB Group (TOC + progress + back-to-top) -->
+    {headings.length > 0 && <div id="mobile-toc-fab" class="lg:!hidden fixed bottom-6 right-4 z-[59] flex flex-col items-center gap-2 transition-all duration-300" style="display:none;">
+        <button id="mobile-back-to-top"
+          class="w-10 h-10 rounded-full bg-[var(--card-bg)] shadow-md flex items-center justify-center
+                 transition-all duration-300 active:scale-90 hover:shadow-lg opacity-0 translate-y-2 pointer-events-none"
+          aria-label="回到顶部"
+        >
+            <svg class="w-5 h-5 text-[var(--primary)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M5 15l7-7 7 7" />
+            </svg>
+        </button>
+        <button id="mobile-toc-btn"
+          class="w-14 h-14 rounded-2xl bg-[var(--card-bg)] shadow-lg flex flex-col items-center justify-center
+                 transition-all duration-300 active:scale-90 hover:shadow-xl gap-0.5"
+          aria-label="目录"
+        >
+            <svg class="w-6 h-6 text-[var(--primary)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h7" />
+            </svg>
+        </button>
+        <span id="mobile-reading-progress" class="text-[10px] text-[var(--primary)] font-medium tabular-nums">0%</span>
+    </div>}
 
     <!-- Mobile TOC Panel + Backdrop -->
     {headings.length > 0 && <>
         <div id="mobile-toc-backdrop" class="lg:hidden fixed inset-0 bg-black/40 z-[60] hidden transition-opacity duration-300 opacity-0"></div>
-        <div id="mobile-toc-panel" class="lg:hidden fixed bottom-0 left-0 right-0 z-[61] rounded-t-2xl bg-[var(--page-bg)] shadow-2xl transition-transform duration-300 ease-out max-h-[70vh] overflow-hidden" style="transform: translateY(100%)">
+        <div id="mobile-toc-panel" class="lg:hidden fixed bottom-4 left-4 right-4 z-[61] rounded-2xl bg-[var(--page-bg)] shadow-2xl transition-all duration-300 ease-out max-h-[60vh] overflow-hidden" style="transform: translateY(calc(100% + 32px)); opacity: 0;">
             <div class="flex items-center justify-between px-4 py-3 border-b border-[var(--line-color)]">
                 <span class="text-sm font-bold text-[var(--deep-text)]">目录</span>
                 <button id="mobile-toc-close" class="w-8 h-8 rounded-lg flex items-center justify-center text-[var(--btn-content)] hover:bg-[var(--btn-regular-bg-hover)] transition" aria-label="关闭">
-                    <Icon name="material-symbols:close-rounded" class="text-xl"></Icon>
+                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
                 </button>
             </div>
-            <div id="mobile-toc" class="overflow-y-auto hide-scrollbar max-h-[calc(70vh_-_3.5rem)]">
+            <div id="mobile-toc" class="overflow-y-auto hide-scrollbar max-h-[calc(60vh_-_3.5rem)]">
                 <MobileToc headings={headings}></MobileToc>
             </div>
         </div>

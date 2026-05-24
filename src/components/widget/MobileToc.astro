@@ -1,7 +1,6 @@
 ---
 import type { MarkdownHeading } from "astro";
 import { siteConfig } from "../../config";
-import { url } from "../../utils/url-utils";
 
 interface Props {
 	headings: MarkdownHeading[];
@@ -14,206 +13,369 @@ for (const heading of headings) {
 	minDepth = Math.min(minDepth, heading.depth);
 }
 
-const removeTailingHash = (text: string) => {
-	let lastIndexOfHash = text.lastIndexOf("#");
-	if (lastIndexOfHash !== text.length - 1) {
-		return text;
+const maxLevel = siteConfig.toc.depth;
+const filtered = headings.filter((h) => h.depth < minDepth + maxLevel);
+
+type TocGroup = {
+	heading: MarkdownHeading;
+	children: MarkdownHeading[];
+};
+
+const groups: TocGroup[] = [];
+for (const h of filtered) {
+	if (h.depth === minDepth) {
+		groups.push({ heading: h, children: [] });
+	} else if (groups.length > 0) {
+		groups[groups.length - 1].children.push(h);
 	}
+}
+
+const removeTrailingHash = (text: string) => {
+	let lastIndexOfHash = text.lastIndexOf("#");
+	if (lastIndexOfHash !== text.length - 1) return text;
 	return text.substring(0, lastIndexOfHash);
 };
 
-let heading1Count = 1;
-const maxLevel = siteConfig.toc.depth;
+let headingNumber = 1;
 ---
 
-<mobile-toc-contents class="group">
-    <div id="mobile-toc-inner-wrapper" class="p-3 rounded-xl bg-[var(--toc-bg)] transition-colors">
-    {headings.filter((heading) => heading.depth < minDepth + maxLevel).map((heading) =>
-            <a href={`#${heading.slug}`} class="px-2 flex gap-2 relative transition w-full min-h-9 rounded-lg
-        hover:bg-[var(--toc-btn-hover)] active:bg-[var(--toc-btn-active)] py-2
-    ">
-                <div class:list={["transition w-5 h-5 shrink-0 rounded-lg text-xs flex items-center justify-center font-bold",
-                    {
-                        "bg-[var(--toc-badge-bg)] text-[var(--btn-content)]": heading.depth == minDepth,
-                        "ml-4": heading.depth == minDepth + 1,
-                        "ml-8": heading.depth == minDepth + 2,
-                    }
-                ]}
-                >
-                    {heading.depth == minDepth && heading1Count++}
-                    {heading.depth == minDepth + 1 && <div class="transition w-2 h-2 rounded-[0.1875rem] bg-[var(--toc-badge-bg)]"></div>}
-                    {heading.depth == minDepth + 2 && <div class="transition w-1.5 h-1.5 rounded-sm bg-black/5 dark:bg-white/10"></div>}
-                </div>
-                <div class:list={["transition text-sm", {
-                    "text-50": heading.depth == minDepth || heading.depth == minDepth + 1,
-                    "text-30": heading.depth == minDepth + 2,
-                }]}>{removeTailingHash(heading.text)}</div>
-            </a>
-    )}
-    <div id="mobile-toc-active-indicator" style="opacity: 0" class:list={[{'hidden': headings.length == 0}, "-z-10 absolute bg-[var(--toc-btn-hover)] left-0 right-0 rounded-lg transition-all " +
-        "group-hover:bg-transparent border-2 border-[var(--toc-btn-hover)] group-hover:border-[var(--toc-btn-active)] border-dashed"]}></div>
-    </div>
+<mobile-toc-contents class="group block">
+	<div id="mobile-toc-inner-wrapper" class="p-3 rounded-xl bg-[var(--toc-bg)] transition-colors">
+		{groups.map((group) => (
+			<div class="toc-group">
+				<button
+					class="toc-parent w-full flex items-center gap-2 px-2 py-2 rounded-lg transition hover:bg-[var(--toc-btn-hover)] active:bg-[var(--toc-btn-active)] text-left"
+					data-target={`toc-children-${group.heading.slug}`}
+				>
+					<span class="w-5 h-5 shrink-0 rounded-lg bg-[var(--toc-badge-bg)] text-[var(--btn-content)] text-xs flex items-center justify-center font-bold">
+						{headingNumber++}
+					</span>
+					<span class="text-sm text-50 font-medium flex-1 truncate">
+						{removeTrailingHash(group.heading.text)}
+					</span>
+					{group.children.length > 0 && (
+						<svg class="toc-chevron w-4 h-4 shrink-0 text-[var(--btn-content)] transition-transform duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+							<path stroke-linecap="round" stroke-linejoin="round" d="M6 9l6 6 6-6" />
+						</svg>
+					)}
+				</button>
+				{group.children.length > 0 && (
+					<div
+						id={`toc-children-${group.heading.slug}`}
+						class="toc-children overflow-hidden ml-4"
+						style="max-height: 0"
+					>
+						<div class="py-1">
+							{group.children.map((child) => (
+								<a
+									href={`#${child.slug}`}
+									class:list={[
+										"toc-link flex items-center gap-2 px-2 py-1.5 rounded-lg transition hover:bg-[var(--toc-btn-hover)] active:bg-[var(--toc-btn-active)]",
+										{ "ml-4": child.depth === minDepth + 2 },
+									]}
+								>
+									<div
+										class:list={[
+											"shrink-0 transition",
+											{
+												"w-2 h-2 rounded-[0.1875rem] bg-[var(--toc-badge-bg)]": child.depth === minDepth + 1,
+												"w-1.5 h-1.5 rounded-sm bg-black/5 dark:bg-white/10": child.depth === minDepth + 2,
+											},
+										]}
+									>
+									</div>
+									<span
+										class:list={[
+											"text-sm transition truncate",
+											{ "text-50": child.depth === minDepth + 1, "text-30": child.depth === minDepth + 2 },
+										]}
+									>
+										{removeTrailingHash(child.text)}
+									</span>
+								</a>
+							))}
+						</div>
+					</div>
+				)}
+			</div>
+		))}
+		<div
+			id="mobile-toc-active-indicator"
+			style="opacity:0"
+			class:list={[
+				{ hidden: groups.length === 0 },
+				"-z-10 absolute bg-[var(--toc-btn-hover)] left-0 right-0 rounded-lg transition-all",
+				"border-2 border-[var(--toc-btn-hover)] border-dashed",
+			]}
+		>
+		</div>
+	</div>
 </mobile-toc-contents>
 
 <script>
 class MobileTableOfContents extends HTMLElement {
-    tocEl: HTMLElement | null = null;
-    visibleClass = "visible";
-    observer: IntersectionObserver | null = null;
-    anchorNavTarget: HTMLElement | null = null;
-    headingIdxMap = new Map<string, number>();
-    headings: HTMLElement[] = [];
-    sections: HTMLElement[] = [];
-    tocEntries: HTMLAnchorElement[] = [];
-    active: boolean[] = [];
-    activeIndicator: HTMLElement | null = null;
+	tocEl: HTMLElement | null = null;
+	visibleClass = "visible";
+	observer: IntersectionObserver | null = null;
+	anchorNavTarget: HTMLElement | null = null;
+	headingIdxMap = new Map<string, number>();
+	headings: HTMLElement[] = [];
+	sections: HTMLElement[] = [];
+	tocEntries: HTMLAnchorElement[] = [];
+	active: boolean[] = [];
+	activeIndicator: HTMLElement | null = null;
+	activeParent: HTMLElement | null = null;
 
-    connectedCallback() {
-        this.observer = new IntersectionObserver(
-            this.markVisibleSection, { threshold: 0 }
-        );
-        const element = document.querySelector('.prose');
-        if (element) {
-            element.addEventListener('animationend', () => {
-                this.init();
-            }, { once: true });
-        }
-    };
+	connectedCallback() {
+		this.observer = new IntersectionObserver(this.markVisibleSection, {
+			threshold: 0,
+		});
+		const element = document.querySelector(".prose");
+		if (element) {
+			element.addEventListener("animationend", () => this.init(), {
+				once: true,
+			});
+		} else {
+			// swup navigation — prose already animated in
+			setTimeout(() => this.init(), 100);
+		}
+	}
 
-    markVisibleSection = (entries: IntersectionObserverEntry[]) => {
-        entries.forEach((entry) => {
-            const id = entry.target.children[0]?.getAttribute("id");
-            const idx = id ? this.headingIdxMap.get(id) : undefined;
-            if (idx != undefined)
-                this.active[idx] = entry.isIntersecting;
-            if (entry.isIntersecting && this.anchorNavTarget == entry.target.firstChild)
-                this.anchorNavTarget = null;
-        });
-        if (!this.active.includes(true))
-            this.fallback();
-        this.update();
-    };
+	markVisibleSection = (entries: IntersectionObserverEntry[]) => {
+		for (const entry of entries) {
+			const id = entry.target.children[0]?.getAttribute("id");
+			const idx = id ? this.headingIdxMap.get(id) : undefined;
+			if (idx != undefined) this.active[idx] = entry.isIntersecting;
+			if (entry.isIntersecting && this.anchorNavTarget === entry.target.firstChild)
+				this.anchorNavTarget = null;
+		}
+		if (!this.active.includes(true)) this.fallback();
+		this.update();
+	};
 
-    toggleActiveHeading = () => {
-        let i = this.active.length - 1;
-        let min = this.active.length - 1, max = -1;
-        while (i >= 0 && !this.active[i]) {
-            this.tocEntries[i]?.classList.remove(this.visibleClass);
-            i--;
-        }
-        while (i >= 0 && this.active[i]) {
-            this.tocEntries[i]?.classList.add(this.visibleClass);
-            min = Math.min(min, i);
-            max = Math.max(max, i);
-            i--;
-        }
-        while (i >= 0) {
-            this.tocEntries[i]?.classList.remove(this.visibleClass);
-            i--;
-        }
-        if (min > max) {
-            this.activeIndicator?.setAttribute("style", "opacity: 0");
-        } else {
-            let parentOffset = this.tocEl?.getBoundingClientRect().top || 0;
-            let scrollOffset = this.tocEl?.scrollTop || 0;
-            let top = this.tocEntries[min].getBoundingClientRect().top - parentOffset + scrollOffset;
-            let bottom = this.tocEntries[max].getBoundingClientRect().bottom - parentOffset + scrollOffset;
-            this.activeIndicator?.setAttribute("style", "opacity: 1");
-            this.activeIndicator?.setAttribute("style", `top: ${top}px; height: ${bottom - top}px; opacity: 1`);
-        }
-    };
+	toggleActiveHeading = () => {
+		// Find visible range and highlight parent button
+		let i = this.active.length - 1;
+		let min = this.active.length - 1,
+			max = -1;
 
-    scrollToActiveHeading = () => {
-        if (this.anchorNavTarget || !this.tocEl) return;
-        const activeHeading = document.querySelectorAll<HTMLDivElement>(`#mobile-toc .${this.visibleClass}`);
-        if (!activeHeading.length) return;
-        const topmost = activeHeading[0];
-        const bottommost = activeHeading[activeHeading.length - 1];
-        const tocHeight = this.tocEl.clientHeight;
-        let top;
-        if (bottommost.getBoundingClientRect().bottom - topmost.getBoundingClientRect().top < 0.9 * tocHeight)
-            top = topmost.offsetTop - 32;
-        else
-            top = bottommost.offsetTop - tocHeight * 0.8;
-        this.tocEl.scrollTo({ top, left: 0, behavior: "smooth" });
-    };
+		while (i >= 0 && !this.active[i]) {
+			this.tocEntries[i]?.classList.remove(this.visibleClass);
+			i--;
+		}
+		while (i >= 0 && this.active[i]) {
+			this.tocEntries[i]?.classList.add(this.visibleClass);
+			min = Math.min(min, i);
+			max = Math.max(max, i);
+			i--;
+		}
+		while (i >= 0) {
+			this.tocEntries[i]?.classList.remove(this.visibleClass);
+			i--;
+		}
 
-    update = () => {
-        requestAnimationFrame(() => {
-            this.toggleActiveHeading();
-            this.scrollToActiveHeading();
-        });
-    };
+		// Remove active from all parents
+		this.querySelectorAll(".toc-parent")?.forEach((b) =>
+			b.classList.remove("toc-parent-active")
+		);
 
-    fallback = () => {
-        if (!this.sections.length) return;
-        for (let i = 0; i < this.sections.length; i++) {
-            let offsetTop = this.sections[i].getBoundingClientRect().top;
-            let offsetBottom = this.sections[i].getBoundingClientRect().bottom;
-            if (this.isInRange(offsetTop, 0, window.innerHeight)
-                || this.isInRange(offsetBottom, 0, window.innerHeight)
-                || (offsetTop < 0 && offsetBottom > window.innerHeight)) {
-                this.markActiveHeading(i);
-            }
-            else if (offsetTop > window.innerHeight) break;
-        }
-    };
+		if (min <= max && this.tocEntries[min]) {
+			const activeEntry = this.tocEntries[min];
+			const parentBtn = activeEntry.closest(".toc-group")?.querySelector(
+				".toc-parent"
+			) as HTMLElement | null;
+			if (parentBtn) {
+				parentBtn.classList.add("toc-parent-active");
+				this.activeParent = parentBtn;
 
-    markActiveHeading = (idx: number) => {
-        this.active[idx] = true;
-    };
+				// auto-expand collapsed parent
+				const targetId = parentBtn.dataset.target;
+				if (targetId) {
+					const children = document.getElementById(targetId);
+					if (children && (children.style.maxHeight === "0px" || !children.style.maxHeight)) {
+						const content = children.firstElementChild as HTMLElement | null;
+						if (content) {
+							children.style.maxHeight = `${content.scrollHeight}px`;
+						}
+						const chevron = parentBtn.querySelector(".toc-chevron") as HTMLElement | null;
+						if (chevron) chevron.style.transform = "rotate(180deg)";
+					}
+				}
+			} else {
+				this.activeParent = null;
+			}
+		} else {
+			this.activeParent = null;
+		}
 
-    handleAnchorClick = (event: Event) => {
-        const anchor = event.composedPath().find((element) => element instanceof HTMLAnchorElement);
-        if (anchor) {
-            const id = decodeURIComponent(anchor.hash?.substring(1));
-            const idx = this.headingIdxMap.get(id);
-            if (idx !== undefined) {
-                this.anchorNavTarget = this.headings[idx];
-            } else {
-                this.anchorNavTarget = null;
-            }
-        }
-    };
+		if (min > max) {
+			this.activeIndicator?.setAttribute("style", "opacity: 0");
+		} else {
+			const parentOffset = this.tocEl?.getBoundingClientRect().top || 0;
+			const scrollOffset = this.tocEl?.scrollTop || 0;
+			const top =
+				this.tocEntries[min].getBoundingClientRect().top -
+				parentOffset +
+				scrollOffset;
+			const bottom =
+				this.tocEntries[max].getBoundingClientRect().bottom -
+				parentOffset +
+				scrollOffset;
+			this.activeIndicator?.setAttribute(
+				"style",
+				`top: ${top}px; height: ${bottom - top}px; opacity: 1`
+			);
+		}
+	};
 
-    isInRange(value: number, min: number, max: number) {
-        return min < value && value < max;
-    };
+	scrollToActiveHeading = () => {
+		if (this.anchorNavTarget || !this.tocEl) return;
+		const activeHeading = document.querySelectorAll<HTMLDivElement>(
+			`#mobile-toc .${this.visibleClass}`
+		);
+		if (!activeHeading.length) return;
+		const topmost = activeHeading[0];
+		const bottommost = activeHeading[activeHeading.length - 1];
+		const tocHeight = this.tocEl.clientHeight;
+		let top: number;
+		if (
+			bottommost.getBoundingClientRect().bottom -
+				topmost.getBoundingClientRect().top <
+			0.9 * tocHeight
+		)
+			top = (topmost as HTMLElement).offsetTop - 32;
+		else top = (bottommost as HTMLElement).offsetTop - tocHeight * 0.8;
+		this.tocEl.scrollTo({ top, left: 0, behavior: "smooth" });
+	};
 
-    init() {
-        this.tocEl = document.getElementById("mobile-toc-inner-wrapper");
-        if (!this.tocEl) return;
-        this.tocEl.addEventListener("click", this.handleAnchorClick, { capture: true });
-        this.activeIndicator = document.getElementById("mobile-toc-active-indicator");
-        this.tocEntries = Array.from(document.querySelectorAll<HTMLAnchorElement>("#mobile-toc a[href^='#']"));
-        if (this.tocEntries.length === 0) return;
-        this.sections = new Array(this.tocEntries.length);
-        this.headings = new Array(this.tocEntries.length);
-        for (let i = 0; i < this.tocEntries.length; i++) {
-            const id = decodeURIComponent(this.tocEntries[i].hash?.substring(1));
-            const heading = document.getElementById(id);
-            const section = heading?.parentElement;
-            if (heading instanceof HTMLElement && section instanceof HTMLElement) {
-                this.headings[i] = heading;
-                this.sections[i] = section;
-                this.headingIdxMap.set(id, i);
-            }
-        }
-        this.active = new Array(this.tocEntries.length).fill(false);
-        this.sections.forEach((section) => this.observer?.observe(section));
-        this.fallback();
-        this.update();
-    };
+	update = () => {
+		requestAnimationFrame(() => {
+			this.toggleActiveHeading();
+			this.scrollToActiveHeading();
+		});
+	};
 
-    disconnectedCallback() {
-        if (this.observer) {
-            this.observer.disconnect();
-        }
-        this.tocEl?.removeEventListener("click", this.handleAnchorClick);
-    };
+	fallback = () => {
+		if (!this.sections.length) return;
+		for (let i = 0; i < this.sections.length; i++) {
+			const offsetTop = this.sections[i].getBoundingClientRect().top;
+			const offsetBottom = this.sections[i].getBoundingClientRect().bottom;
+			if (
+				this.isInRange(offsetTop, 0, window.innerHeight) ||
+				this.isInRange(offsetBottom, 0, window.innerHeight) ||
+				(offsetTop < 0 && offsetBottom > window.innerHeight)
+			) {
+				this.markActiveHeading(i);
+			} else if (offsetTop > window.innerHeight) break;
+		}
+	};
+
+	markActiveHeading = (idx: number) => {
+		this.active[idx] = true;
+	};
+
+	handleAccordionClick = (event: Event) => {
+		const btn = (event.target as HTMLElement).closest(".toc-parent") as HTMLElement | null;
+		if (!btn) return;
+
+		const targetId = btn.dataset.target;
+		if (!targetId) return;
+
+		const children = document.getElementById(targetId);
+		if (!children) return;
+
+		const chevron = btn.querySelector(".toc-chevron") as HTMLElement | null;
+		const content = children.firstElementChild as HTMLElement | null;
+
+		if (!content) return;
+
+		const isOpen = children.style.maxHeight !== "0px" && children.style.maxHeight;
+
+		if (isOpen) {
+			children.style.maxHeight = "0px";
+			if (chevron) chevron.style.transform = "rotate(0deg)";
+		} else {
+			children.style.maxHeight = `${content.scrollHeight}px`;
+			if (chevron) chevron.style.transform = "rotate(180deg)";
+		}
+	};
+
+	handleAnchorClick = (event: Event) => {
+		const anchor = event
+			.composedPath()
+			.find((element) => element instanceof HTMLAnchorElement) as HTMLAnchorElement | undefined;
+		if (anchor) {
+			const id = decodeURIComponent(anchor.hash?.substring(1));
+			const idx = this.headingIdxMap.get(id);
+			if (idx !== undefined) {
+				this.anchorNavTarget = this.headings[idx];
+			} else {
+				this.anchorNavTarget = null;
+			}
+		}
+	};
+
+	isInRange(value: number, min: number, max: number) {
+		return min < value && value < max;
+	}
+
+	init() {
+		this.tocEl = document.getElementById("mobile-toc-inner-wrapper");
+		if (!this.tocEl) return;
+		this.tocEl.addEventListener("click", this.handleAnchorClick, {
+			capture: true,
+		});
+		this.tocEl.addEventListener("click", this.handleAccordionClick, {
+			capture: false,
+		});
+		this.activeIndicator = document.getElementById(
+			"mobile-toc-active-indicator"
+		);
+		this.tocEntries = Array.from(
+			document.querySelectorAll<HTMLAnchorElement>(
+				"#mobile-toc a[href^='#']"
+			)
+		);
+		if (this.tocEntries.length === 0) return;
+		this.sections = new Array(this.tocEntries.length);
+		this.headings = new Array(this.tocEntries.length);
+		for (let i = 0; i < this.tocEntries.length; i++) {
+			const id = decodeURIComponent(
+				this.tocEntries[i].hash?.substring(1)
+			);
+			const heading = document.getElementById(id);
+			const section = heading?.parentElement;
+			if (heading instanceof HTMLElement && section instanceof HTMLElement) {
+				this.headings[i] = heading;
+				this.sections[i] = section;
+				this.headingIdxMap.set(id, i);
+			}
+		}
+		this.active = new Array(this.tocEntries.length).fill(false);
+		for (const section of this.sections) this.observer?.observe(section);
+		this.fallback();
+		this.update();
+	}
+
+	disconnectedCallback() {
+		if (this.observer) {
+			this.observer.disconnect();
+		}
+		this.tocEl?.removeEventListener("click", this.handleAnchorClick, true);
+		this.tocEl?.removeEventListener("click", this.handleAccordionClick);
+	}
 }
 
 if (!customElements.get("mobile-toc-contents")) {
-    customElements.define("mobile-toc-contents", MobileTableOfContents);
+	customElements.define("mobile-toc-contents", MobileTableOfContents);
 }
 </script>
+
+<style is:global>
+.toc-children {
+	transition: max-height 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.toc-parent-active {
+	background: var(--toc-btn-active);
+}
+</style>
