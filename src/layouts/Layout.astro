@@ -600,7 +600,7 @@ window.onresize = () => {
 
 // Mobile TOC interactions
 (function() {
-    const tocBtn = document.getElementById('mobile-toc-btn');
+    let tocBtn: HTMLElement | null = null;
     let tocPanel: HTMLElement | null = null;
     let tocBackdrop: HTMLElement | null = null;
     let tocClose: HTMLElement | null = null;
@@ -620,6 +620,7 @@ window.onresize = () => {
     }
 
     function setupMobileToc() {
+        tocBtn = document.getElementById('mobile-toc-btn');
         tocPanel = document.getElementById('mobile-toc-panel');
         tocBackdrop = document.getElementById('mobile-toc-backdrop');
         tocClose = document.getElementById('mobile-toc-close');

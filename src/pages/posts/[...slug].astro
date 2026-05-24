@@ -16,7 +16,6 @@ import PostMetadata from "../../components/PostMeta.astro";
 import { profileConfig, siteConfig } from "../../config";
 import { formatDateToYYYYMMDD } from "../../utils/date-utils";
 import Waline from "../../components/Waline.astro";
-import MobileToc from "../../components/widget/MobileToc.astro";
 
 export async function getStaticPaths() {
 	const blogEntries = await getSortedPosts();
@@ -189,41 +188,7 @@ const jsonLd = {
         </a>
     </div>
 
-    <!-- Mobile TOC Panel + Backdrop -->
-    {headings.length > 0 && <>
-        <div id="mobile-toc-backdrop" class="lg:hidden fixed inset-0 bg-black/40 z-[60] hidden transition-opacity duration-300 opacity-0"></div>
-        <div id="mobile-toc-panel" class="lg:hidden fixed bottom-0 left-0 right-0 z-[61] rounded-t-2xl bg-[var(--page-bg)] shadow-2xl transition-transform duration-300 ease-out max-h-[70vh] overflow-hidden" style="transform: translateY(100%)">
-            <div class="flex items-center justify-between px-4 py-3 border-b border-[var(--line-color)]">
-                <span class="text-sm font-bold text-[var(--deep-text)]">目录</span>
-                <button id="mobile-toc-close" class="w-8 h-8 rounded-lg flex items-center justify-center text-[var(--btn-content)] hover:bg-[var(--btn-regular-bg-hover)] transition" aria-label="关闭">
-                    <Icon name="material-symbols:close-rounded" class="text-xl"></Icon>
-                </button>
-            </div>
-            <div id="mobile-toc" class="overflow-y-auto hide-scrollbar max-h-[calc(70vh_-_3.5rem)]">
-                <MobileToc headings={headings}></MobileToc>
-            </div>
-        </div>
-    </>}
-
 </MainGridLayout>
-
-<script>
-function relocateMobileToc() {
-    const panel = document.getElementById('mobile-toc-panel');
-    const backdrop = document.getElementById('mobile-toc-backdrop');
-    const slot = document.getElementById('mobile-toc-slot');
-    if (!panel || !slot) return;
-    if (panel.parentElement !== slot) {
-        if (backdrop) slot.insertBefore(backdrop, slot.firstChild);
-        slot.appendChild(panel);
-    }
-}
-if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', relocateMobileToc);
-} else {
-    relocateMobileToc();
-}
-</script>
 
 <script>
 // 页面加载时获取统计数据
