@@ -739,11 +739,51 @@ window.onresize = () => {
     let chatMessages: HTMLElement | null = null;
     let isChatOpen = false;
     let isStreaming = false;
-    let chatHistory: Array<{ role: string; content: string }> = [];
+    let chatHistory: Array<{ role: string; content: string; articleSlug?: string }> = [];
+
+    function currentArticleSlug(): string {
+        const m = window.location.pathname.match(/\/posts\/(.+?)\/?$/);
+        return m ? m[1] : '';
+    }
+
+    function loadChatHistory() {
+        try {
+            const saved = localStorage.getItem('xuai-chat-history');
+            if (saved) {
+                chatHistory = JSON.parse(saved);
+                const slug = currentArticleSlug();
+                if (slug && chatHistory.length && chatHistory[0].articleSlug && chatHistory[0].articleSlug !== slug) {
+                    chatHistory = [];
+                }
+            }
+        } catch {}
+    }
+    function saveChatHistory() {
+        try { localStorage.setItem('xuai-chat-history', JSON.stringify(chatHistory)); } catch {}
+    }
+    function renderChatHistory() {
+        if (!chatMessages) return;
+        chatMessages.innerHTML = '<div class="text-center text-xs text-30 py-4">可以问文章相关的问题，XUUAI 会参考文章内容回答</div>';
+        for (const msg of chatHistory) {
+            if (msg.role === 'user') {
+                addMessage('user', msg.content);
+            } else {
+                const div = document.createElement('div');
+                div.className = 'msg-ai';
+                const bubble = document.createElement('div');
+                bubble.className = 'msg-bubble';
+                div.appendChild(bubble);
+                chatMessages.appendChild(div);
+                renderJsonResponse(bubble, msg.content, msg.articleSlug);
+            }
+        }
+    }
 
     function openAiChat() {
         if (!chatPanel || !chatBackdrop) return;
         isChatOpen = true;
+        loadChatHistory();
+        renderChatHistory();
         chatPanel.style.transform = 'translateY(0)';
         chatPanel.style.opacity = '1';
         chatBackdrop.classList.remove('hidden');
@@ -761,10 +801,6 @@ window.onresize = () => {
         chatPanel.style.opacity = '0';
         chatBackdrop.style.opacity = '0';
         setTimeout(() => { chatBackdrop!.classList.add('hidden'); }, 300);
-        chatHistory = [];
-        if (chatMessages) {
-            chatMessages.innerHTML = '<div class="text-center text-xs text-30 py-4">可以问文章相关的问题，XUUAI 会参考文章内容回答</div>';
-        }
     }
 
     function scrollChatToBottom() {
@@ -841,8 +877,8 @@ window.onresize = () => {
             .replace(/\n/g, '<br>');
     }
 
-    function renderJsonResponse(bubble: HTMLElement, text: string) {
-        const headings = getArticleHeadings();
+    function renderJsonResponse(bubble: HTMLElement, text: string, articleSlug?: string) {
+        const headings = (!articleSlug || articleSlug === currentArticleSlug()) ? getArticleHeadings() : [];
         let data: { p: string; r: number[] }[];
         try {
             data = JSON.parse(text);
@@ -894,7 +930,8 @@ window.onresize = () => {
 
         // add user message
         addMessage('user', text.trim());
-        chatHistory.push({ role: 'user', content: text.trim() });
+        chatHistory.push({ role: 'user', content: text.trim(), articleSlug: currentArticleSlug() });
+        saveChatHistory();
 
         if (chatInput) chatInput.value = '';
         if (chatInput) {
@@ -1030,10 +1067,11 @@ window.onresize = () => {
         if (aiBubble) {
             console.log('[AI Chat] stream complete, chars:', fullReply.length);
             finishAiBubble(aiBubble);
-            renderJsonResponse(aiBubble, fullReply);
+            renderJsonResponse(aiBubble, fullReply, currentArticleSlug());
         }
         if (fullReply) {
-            chatHistory.push({ role: 'assistant', content: fullReply });
+            chatHistory.push({ role: 'assistant', content: fullReply, articleSlug: currentArticleSlug() });
+            saveChatHistory();
         }
         removeAiLoading();
         isStreaming = false;
