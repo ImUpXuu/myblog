@@ -739,27 +739,19 @@ window.onresize = () => {
     let chatMessages: HTMLElement | null = null;
     let isChatOpen = false;
     let isStreaming = false;
-    let chatHistory: Array<{ role: string; content: string; articleSlug?: string }> = [];
+    let chatHistory: Array<{ role: string; content: string }> = [];
 
-    function currentArticleSlug(): string {
-        const m = window.location.pathname.match(/\/posts\/(.+?)\/?$/);
-        return m ? m[1] : '';
+    function chatStorageKey(): string {
+        return 'xuai-chat-' + window.location.pathname.replace(/[^a-z0-9]/gi, '_');
     }
-
     function loadChatHistory() {
         try {
-            const saved = localStorage.getItem('xuai-chat-history');
-            if (saved) {
-                chatHistory = JSON.parse(saved);
-                const slug = currentArticleSlug();
-                if (slug && chatHistory.length && chatHistory[0].articleSlug && chatHistory[0].articleSlug !== slug) {
-                    chatHistory = [];
-                }
-            }
+            const saved = localStorage.getItem(chatStorageKey());
+            if (saved) chatHistory = JSON.parse(saved);
         } catch {}
     }
     function saveChatHistory() {
-        try { localStorage.setItem('xuai-chat-history', JSON.stringify(chatHistory)); } catch {}
+        try { localStorage.setItem(chatStorageKey(), JSON.stringify(chatHistory)); } catch {}
     }
     function renderChatHistory() {
         if (!chatMessages) return;
@@ -774,7 +766,7 @@ window.onresize = () => {
                 bubble.className = 'msg-bubble';
                 div.appendChild(bubble);
                 chatMessages.appendChild(div);
-                renderJsonResponse(bubble, msg.content, msg.articleSlug);
+                renderJsonResponse(bubble, msg.content);
             }
         }
     }
@@ -877,8 +869,8 @@ window.onresize = () => {
             .replace(/\n/g, '<br>');
     }
 
-    function renderJsonResponse(bubble: HTMLElement, text: string, articleSlug?: string) {
-        const headings = (!articleSlug || articleSlug === currentArticleSlug()) ? getArticleHeadings() : [];
+    function renderJsonResponse(bubble: HTMLElement, text: string) {
+        const headings = getArticleHeadings();
         let data: { p: string; r: number[] }[];
         try {
             data = JSON.parse(text);
@@ -930,7 +922,7 @@ window.onresize = () => {
 
         // add user message
         addMessage('user', text.trim());
-        chatHistory.push({ role: 'user', content: text.trim(), articleSlug: currentArticleSlug() });
+        chatHistory.push({ role: 'user', content: text.trim() });
         saveChatHistory();
 
         if (chatInput) chatInput.value = '';
@@ -1067,10 +1059,10 @@ window.onresize = () => {
         if (aiBubble) {
             console.log('[AI Chat] stream complete, chars:', fullReply.length);
             finishAiBubble(aiBubble);
-            renderJsonResponse(aiBubble, fullReply, currentArticleSlug());
+            renderJsonResponse(aiBubble, fullReply);
         }
         if (fullReply) {
-            chatHistory.push({ role: 'assistant', content: fullReply, articleSlug: currentArticleSlug() });
+            chatHistory.push({ role: 'assistant', content: fullReply });
             saveChatHistory();
         }
         removeAiLoading();
