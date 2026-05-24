@@ -234,6 +234,7 @@ const bannerOffset =
 </style>
 
 <script>
+import 'overlayscrollbars/overlayscrollbars.css';
 import {
 	OverlayScrollbars,
 	// ScrollbarsHidingPlugin,
@@ -827,138 +828,45 @@ window.onresize = () => {
         }
     }
 
-    function citeLinkHtml(num: number): string {
+    function renderCitations(bubble: HTMLElement, text: string) {
         const headings = getArticleHeadings();
-        const heading = headings[num - 1];
-        if (!heading) return `[${num}]`;
-        const slug = escapeHtml(heading.slug);
-        return `<a href="#${slug}" class="cite-link">${num}<span class="cite-arrow">↗</span></a>`;
-    }
-
-    // ─── inline markdown for streaming ───
-    function renderInlineMd(text: string): string {
-        let h = text;
-        // citations [n] – convert to placeholder first to protect from escaping
-        const cites: string[] = [];
-        h = h.replace(/\[(\d+)\]/g, (_, n) => {
-            cites.push(citeLinkHtml(parseInt(n, 10)));
-            return `\x00CITE${cites.length - 1}\x00`;
-        });
-        h = escapeHtml(h);
-        // inline code
-        h = h.replace(/`([^`]+)`/g, '<code>$1</code>');
-        // bold
-        h = h.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
-        // italic
-        h = h.replace(/\*([^*]+)\*/g, '<em>$1</em>');
-        // links
-        h = h.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener">$1</a>');
-        // newlines
-        h = h.replace(/\n/g, '<br>');
-        // restore citations
-        h = h.replace(/\x00CITE(\d+)\x00/g, (_, i) => cites[parseInt(i, 10)] || '');
-        return h;
-    }
-
-    // ─── full markdown for final render ───
-    function renderFullMd(text: string): string {
-        const lines = text.split('\n');
-        const out: string[] = [];
-        let i = 0;
-
-        function flushParagraph(buf: string[]) {
-            if (buf.length === 0) return;
-            const para = buf.join('\n').trim();
-            if (!para) return;
-            out.push(`<p>${renderInlineMd(para)}</p>`);
+        if (!headings.length) return;
+        // Match [n] citations where n is a number
+        const citeRegex = /\[(\d+)\]/g;
+        let match;
+        let lastIndex = 0;
+        const fragment = document.createDocumentFragment();
+        while ((match = citeRegex.exec(text)) !== null) {
+            // Text before citation
+            if (match.index > lastIndex) {
+                fragment.appendChild(document.createTextNode(text.slice(lastIndex, match.index)));
+            }
+            const num = parseInt(match[1], 10);
+            const heading = headings[num - 1];
+            if (heading) {
+                const a = document.createElement('a');
+                a.href = '#' + heading.slug;
+                a.className = 'cite-link';
+                a.textContent = num + ' ';
+                const arrow = document.createElement('span');
+                arrow.className = 'cite-arrow';
+                arrow.textContent = '↗';
+                a.appendChild(arrow);
+                fragment.appendChild(a);
+            } else {
+                fragment.appendChild(document.createTextNode(match[0]));
+            }
+            lastIndex = match.index + match[0].length;
         }
-
-        while (i < lines.length) {
-            const line = lines[i];
-            const trimmed = line.trim();
-
-            // code block
-            if (trimmed.startsWith('```')) {
-                const lang = trimmed.slice(3).trim();
-                i++;
-                const codeLines: string[] = [];
-                while (i < lines.length && !lines[i].trim().startsWith('```')) {
-                    codeLines.push(lines[i]);
-                    i++;
-                }
-                const code = escapeHtml(codeLines.join('\n'));
-                out.push(`<pre><code>${code}</code></pre>`);
-                i++; // skip closing ```
-                continue;
-            }
-
-            // headings
-            if (/^#{1,3}\s/.test(trimmed)) {
-                const level = trimmed.match(/^#+/)![0].length;
-                const hText = renderInlineMd(trimmed.replace(/^#+\s*/, ''));
-                const fs = level === 1 ? '1.1' : level === 2 ? '1.05' : '1';
-                out.push('<h' + level + ' style="font-size:' + fs + 'em;font-weight:700;margin:0.5em 0 0.25em">' + hText + '</h' + level + '>');
-                i++;
-                continue;
-            }
-
-            // unordered list
-            if (/^[-*+]\s/.test(trimmed)) {
-                out.push('<ul>');
-                while (i < lines.length && /^[-*+]\s/.test(lines[i].trim())) {
-                    out.push(`<li>${renderInlineMd(lines[i].trim().replace(/^[-*+]\s*/, ''))}</li>`);
-                    i++;
-                }
-                out.push('</ul>');
-                continue;
-            }
-
-            // ordered list
-            if (/^\d+\.\s/.test(trimmed)) {
-                out.push('<ol>');
-                while (i < lines.length && /^\d+\.\s/.test(lines[i].trim())) {
-                    out.push(`<li>${renderInlineMd(lines[i].trim().replace(/^\d+\.\s*/, ''))}</li>`);
-                    i++;
-                }
-                out.push('</ol>');
-                continue;
-            }
-
-            // horizontal rule
-            if (/^---+\s*$/.test(trimmed)) {
-                out.push('<hr style="border:none;border-top:1px solid var(--line-color);margin:0.5em 0">');
-                i++;
-                continue;
-            }
-
-            // blank line = paragraph break
-            if (trimmed === '') {
-                i++;
-                continue;
-            }
-
-            // regular line – collect paragraph
-            const paraLines: string[] = [];
-            while (i < lines.length) {
-                const l = lines[i].trim();
-                if (l === '' || /^#{1,3}\s/.test(l) || /^[-*+]\s/.test(l) || /^\d+\.\s/.test(l) || l.startsWith('```') || /^---+\s*$/.test(l)) {
-                    break;
-                }
-                paraLines.push(lines[i]);
-                i++;
-            }
-            if (paraLines.length) {
-                const joined = paraLines.join(' ').replace(/  +/g, ' ').trim();
-                if (joined) {
-                    out.push(`<p>${renderInlineMd(joined)}</p>`);
-                }
-            }
+        if (lastIndex < text.length) {
+            fragment.appendChild(document.createTextNode(text.slice(lastIndex)));
         }
-
-        return out.join('\n');
+        // Only replace if we actually added citation links
+        if (fragment.childNodes.length > 1 || (fragment.firstChild && fragment.firstChild.nodeType === 1)) {
+            bubble.innerHTML = '';
+            bubble.appendChild(fragment);
+        }
     }
-
-    function getArticleHeadings(): { slug: string; text: string }[] {
 
     async function sendMessage(text: string) {
         if (!text.trim() || isStreaming) return;
@@ -1079,8 +987,8 @@ window.onresize = () => {
                                 aiBubble = createAiBubble();
                             }
                             if (aiBubble) {
+                                aiBubble.textContent += content;
                                 fullReply += content;
-                                aiBubble.innerHTML = renderInlineMd(fullReply);
                                 scrollChatToBottom();
                             }
                         }
@@ -1097,9 +1005,9 @@ window.onresize = () => {
 
         if (aiBubble) {
             console.log('[AI Chat] stream complete, chars:', fullReply.length);
-            // Re-render full markdown with citations
-            aiBubble.innerHTML = renderFullMd(fullReply);
             finishAiBubble(aiBubble);
+            // Render citations in the response
+            renderCitations(aiBubble, fullReply);
         }
         if (fullReply) {
             chatHistory.push({ role: 'assistant', content: fullReply });
