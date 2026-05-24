@@ -191,7 +191,7 @@ const jsonLd = {
     </div>
 
     <!-- Mobile FAB Group (TOC + AI chat + progress + back-to-top) -->
-    {headings.length > 0 && <div id="mobile-toc-fab" class="lg:!hidden fixed bottom-6 right-4 z-[59] flex flex-col items-center gap-2 transition-all duration-300" style="display:none;">
+    {headings.length > 0 && <div id="mobile-toc-fab" class="fixed bottom-6 right-4 z-[59] flex flex-col items-center gap-2 transition-all duration-300" style="display:none;">
         <button id="mobile-back-to-top"
           class="w-10 h-10 rounded-full bg-[var(--card-bg)] shadow-md flex items-center justify-center
                  transition-all duration-300 active:scale-90 hover:shadow-lg opacity-0 translate-y-2 pointer-events-none"
@@ -242,8 +242,8 @@ const jsonLd = {
 
     <!-- AI Chat Panel + Backdrop -->
     {headings.length > 0 && <>
-        <div id="ai-chat-backdrop" class="lg:hidden fixed inset-0 bg-black/40 z-[60] hidden transition-opacity duration-300 opacity-0"></div>
-        <div id="ai-chat-panel" class="lg:hidden fixed bottom-4 left-4 right-4 z-[61] rounded-2xl bg-[var(--page-bg)] shadow-2xl transition-all duration-300 ease-out flex flex-col" style="transform: translateY(calc(100% + 32px)); opacity: 0; max-height: 75vh;">
+        <div id="ai-chat-backdrop" class="fixed inset-0 bg-black/40 z-[60] hidden transition-opacity duration-300 opacity-0"></div>
+        <div id="ai-chat-panel" class="fixed bottom-4 left-4 right-4 z-[61] rounded-2xl bg-[var(--page-bg)] shadow-2xl transition-all duration-300 ease-out flex flex-col" style="transform: translateY(calc(100% + 32px)); opacity: 0; max-height: 75vh;">
             <div class="flex items-center justify-between px-4 py-3 border-b border-[var(--line-color)] shrink-0">
                 <span class="text-sm font-bold text-[var(--deep-text)]">AI 问答</span>
                 <button id="ai-chat-close" class="w-8 h-8 rounded-lg flex items-center justify-center text-[var(--btn-content)] hover:bg-[var(--btn-regular-bg-hover)] transition" aria-label="关闭">

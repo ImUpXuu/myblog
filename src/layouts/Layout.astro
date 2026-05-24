@@ -728,7 +728,7 @@ window.onresize = () => {
 
 // AI Chat interactions
 (function() {
-    const WORKER_URL = 'https://myblog-ai-chat.upxuu.workers.dev';
+    const WORKER_URL = 'https://blogapi.upxuu.com/chat';
 
     let chatBtn: HTMLElement | null = null;
     let chatPanel: HTMLElement | null = null;
@@ -839,6 +839,7 @@ window.onresize = () => {
         let fullReply = '';
 
         try {
+            console.log('[AI Chat] POST to', WORKER_URL, { articleUrl: window.location.href, messagesCount: chatHistory.length });
             const resp = await fetch(WORKER_URL, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -848,13 +849,20 @@ window.onresize = () => {
                 }),
             });
 
+            console.log('[AI Chat] response status:', resp.status);
+
             if (!resp.ok) {
+                const errText = await resp.text();
+                console.error('[AI Chat] error response:', resp.status, errText);
                 removeAiLoading();
-                addMessage('ai', '出错啦，请稍后重试');
+                addMessage('ai', `出错啦 (${resp.status})，请稍后重试`);
                 isStreaming = false;
                 if (chatSend) chatSend.style.opacity = '1';
                 return;
             }
+
+            const contentType = resp.headers.get('content-type') || '';
+            console.log('[AI Chat] content-type:', contentType);
 
             const reader = resp.body?.getReader();
             if (!reader) {
@@ -906,6 +914,7 @@ window.onresize = () => {
         }
 
         if (aiBubble) {
+            console.log('[AI Chat] stream complete, chars:', fullReply.length);
             finishAiBubble(aiBubble);
         }
         if (fullReply) {
