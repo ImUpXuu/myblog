@@ -193,6 +193,16 @@ class MobileTableOfContents extends HTMLElement {
 				if (targetId) {
 					const children = document.getElementById(targetId);
 					if (children && (children.style.maxHeight === "0px" || !children.style.maxHeight)) {
+						// collapse others first
+						const allChildren = this.querySelectorAll<HTMLElement>(".toc-children");
+						for (const other of allChildren) {
+							if (other !== children && other.style.maxHeight !== "0px" && other.style.maxHeight) {
+								other.style.maxHeight = "0px";
+								const otherBtn = other.previousElementSibling as HTMLElement | null;
+								const otherChevron = otherBtn?.querySelector(".toc-chevron") as HTMLElement | null;
+								if (otherChevron) otherChevron.style.transform = "rotate(0deg)";
+							}
+						}
 						const content = children.firstElementChild as HTMLElement | null;
 						if (content) {
 							children.style.maxHeight = `${content.scrollHeight}px`;
@@ -295,6 +305,16 @@ class MobileTableOfContents extends HTMLElement {
 			children.style.maxHeight = "0px";
 			if (chevron) chevron.style.transform = "rotate(0deg)";
 		} else {
+			// collapse all other expanded sections
+			const allChildren = this.querySelectorAll<HTMLElement>(".toc-children");
+			for (const other of allChildren) {
+				if (other !== children && other.style.maxHeight !== "0px" && other.style.maxHeight) {
+					other.style.maxHeight = "0px";
+					const otherBtn = other.previousElementSibling as HTMLElement | null;
+					const otherChevron = otherBtn?.querySelector(".toc-chevron") as HTMLElement | null;
+					if (otherChevron) otherChevron.style.transform = "rotate(0deg)";
+				}
+			}
 			children.style.maxHeight = `${content.scrollHeight}px`;
 			if (chevron) chevron.style.transform = "rotate(180deg)";
 		}
