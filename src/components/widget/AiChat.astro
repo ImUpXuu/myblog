@@ -1,0 +1,91 @@
+<div id="ai-chat-inner" class="flex flex-col h-full">
+	<div id="ai-chat-messages" class="flex-1 overflow-y-auto hide-scrollbar px-4 py-3 space-y-3">
+		<div class="text-center text-xs text-30 py-4">
+			可以问文章相关的问题，AI 会参考文章内容回答
+		</div>
+	</div>
+	<div class="border-t border-[var(--line-color)] p-3">
+		<div class="flex gap-2">
+			<textarea
+				id="ai-chat-input"
+				rows="1"
+				class="flex-1 resize-none rounded-xl border border-[var(--line-color)] bg-[var(--card-bg)] px-3 py-2 text-sm text-[var(--deep-text)] placeholder:text-30 outline-none transition focus:border-[var(--primary)]"
+				placeholder="输入问题..."
+				style="min-height:40px;max-height:120px"
+			></textarea>
+			<button
+				id="ai-chat-send"
+				class="w-10 h-10 shrink-0 rounded-xl bg-[var(--primary)] text-white flex items-center justify-center transition active:scale-90 hover:opacity-90"
+				aria-label="发送"
+			>
+				<svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+					<path stroke-linecap="round" stroke-linejoin="round" d="M5 12h14M12 5l7 7-7 7" />
+				</svg>
+			</button>
+		</div>
+	</div>
+</div>
+
+<style is:global>
+#ai-chat-messages .msg-user,
+#ai-chat-messages .msg-ai {
+	display: flex;
+	flex-direction: column;
+	max-width: 85%;
+	animation: msg-in 0.25s ease-out;
+}
+#ai-chat-messages .msg-user {
+	margin-left: auto;
+	align-items: flex-end;
+}
+#ai-chat-messages .msg-ai {
+	margin-right: auto;
+	align-items: flex-start;
+}
+#ai-chat-messages .msg-bubble {
+	padding: 0.625rem 0.875rem;
+	border-radius: 1rem;
+	font-size: 0.8125rem;
+	line-height: 1.5;
+	word-break: break-word;
+}
+#ai-chat-messages .msg-user .msg-bubble {
+	background: var(--primary);
+	color: #fff;
+	border-bottom-right-radius: 0.25rem;
+}
+#ai-chat-messages .msg-ai .msg-bubble {
+	background: var(--toc-bg);
+	color: var(--deep-text);
+	border-bottom-left-radius: 0.25rem;
+}
+@keyframes msg-in {
+	from { opacity: 0; transform: translateY(8px); }
+	to { opacity: 1; transform: translateY(0); }
+}
+.ai-typing::after {
+	content: "|";
+	animation: blink 1s step-end infinite;
+}
+@keyframes blink {
+	50% { opacity: 0; }
+}
+.ai-loading {
+	display: flex;
+	gap: 4px;
+	padding: 0.625rem 0.875rem;
+}
+.ai-loading span {
+	width: 6px;
+	height: 6px;
+	border-radius: 50%;
+	background: var(--btn-content);
+	animation: bounce 1.4s infinite ease-in-out both;
+}
+.ai-loading span:nth-child(1) { animation-delay: -0.32s; }
+.ai-loading span:nth-child(2) { animation-delay: -0.16s; }
+@keyframes bounce {
+	0%, 80%, 100% { transform: scale(0); }
+	40% { transform: scale(1); }
+}
+</style>

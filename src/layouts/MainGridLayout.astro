@@ -8,6 +8,7 @@ import type { MarkdownHeading } from "astro";
 import { Icon } from "astro-icon/components";
 import ImageWrapper from "../components/misc/ImageWrapper.astro";
 import TOC from "../components/widget/TOC.astro";
+import AiChat from "../components/widget/AiChat.astro";
 import { siteConfig } from "../config";
 import {
 	BANNER_HEIGHT,
@@ -93,6 +94,43 @@ const mainPanelTop = siteConfig.banner.enable
                 </div>
                 <!-- Mobile TOC: panel outside #content-wrapper to avoid fixed positioning being clipped by parent transform -->
                 <div id="mobile-toc-slot"></div>
+                <!-- AI Chat slot -->
+                <div id="ai-chat-slot">
+                    {headings.length === 0 && <>
+                        <div id="ai-chat-backdrop" class="lg:hidden fixed inset-0 bg-black/40 z-[60] hidden transition-opacity duration-300 opacity-0"></div>
+                        <button id="ai-chat-btn"
+                          class="lg:!hidden fixed bottom-14 right-4 z-[59] w-14 h-14 rounded-2xl bg-[var(--card-bg)]
+                                 shadow-lg flex items-center justify-center transition-all duration-300
+                                 active:scale-90 hover:shadow-xl"
+                          aria-label="AI 问答"
+                        >
+                            <svg class="w-6 h-6 text-[var(--primary)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                            </svg>
+                        </button>
+                        <button id="mobile-back-to-top"
+                          class="lg:!hidden fixed bottom-6 right-4 z-[59] w-10 h-10 rounded-full bg-[var(--card-bg)] shadow-md flex items-center justify-center
+                                 transition-all duration-300 active:scale-90 hover:shadow-lg opacity-0 translate-y-2 pointer-events-none"
+                          aria-label="回到顶部"
+                        >
+                            <svg class="w-5 h-5 text-[var(--primary)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M5 15l7-7 7 7" />
+                            </svg>
+                        </button>
+                        <span id="mobile-reading-progress" class="lg:!hidden fixed bottom-2 right-4 z-[59] text-[10px] text-[var(--primary)] font-medium tabular-nums">0%</span>
+                        <div id="ai-chat-panel" class="lg:hidden fixed bottom-4 left-4 right-4 z-[61] rounded-2xl bg-[var(--page-bg)] shadow-2xl transition-all duration-300 ease-out flex flex-col" style="transform: translateY(calc(100% + 32px)); opacity: 0; max-height: 75vh;">
+                            <div class="flex items-center justify-between px-4 py-3 border-b border-[var(--line-color)] shrink-0">
+                                <span class="text-sm font-bold text-[var(--deep-text)]">AI 问答</span>
+                                <button id="ai-chat-close" class="w-8 h-8 rounded-lg flex items-center justify-center text-[var(--btn-content)] hover:bg-[var(--btn-regular-bg-hover)] transition" aria-label="关闭">
+                                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                                    </svg>
+                                </button>
+                            </div>
+                            <AiChat></AiChat>
+                        </div>
+                    </>}
+                </div>
             </main>
 
             <div class="footer col-span-2 onload-animation">

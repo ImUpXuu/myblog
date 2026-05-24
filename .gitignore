@@ -32,3 +32,6 @@ yarn.lock
 .deepseek/
 
 opencode.json
+
+# cloudflare worker (contains API keys)
+workers/ai-chat/

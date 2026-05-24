@@ -17,6 +17,7 @@ import { profileConfig, siteConfig } from "../../config";
 import { formatDateToYYYYMMDD } from "../../utils/date-utils";
 import Waline from "../../components/Waline.astro";
 import MobileToc from "../../components/widget/MobileToc.astro";
+import AiChat from "../../components/widget/AiChat.astro";
 
 export async function getStaticPaths() {
 	const blogEntries = await getSortedPosts();
@@ -189,7 +190,7 @@ const jsonLd = {
         </a>
     </div>
 
-    <!-- Mobile FAB Group (TOC + progress + back-to-top) -->
+    <!-- Mobile FAB Group (TOC + AI chat + progress + back-to-top) -->
     {headings.length > 0 && <div id="mobile-toc-fab" class="lg:!hidden fixed bottom-6 right-4 z-[59] flex flex-col items-center gap-2 transition-all duration-300" style="display:none;">
         <button id="mobile-back-to-top"
           class="w-10 h-10 rounded-full bg-[var(--card-bg)] shadow-md flex items-center justify-center
@@ -207,6 +208,15 @@ const jsonLd = {
         >
             <svg class="w-6 h-6 text-[var(--primary)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h7" />
+            </svg>
+        </button>
+        <button id="ai-chat-btn"
+          class="w-12 h-12 rounded-2xl bg-[var(--card-bg)] shadow-md flex items-center justify-center
+                 transition-all duration-300 active:scale-90 hover:shadow-lg"
+          aria-label="AI 问答"
+        >
+            <svg class="w-6 h-6 text-[var(--primary)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
             </svg>
         </button>
         <span id="mobile-reading-progress" class="text-[10px] text-[var(--primary)] font-medium tabular-nums">0%</span>
@@ -227,6 +237,22 @@ const jsonLd = {
             <div id="mobile-toc" class="overflow-y-auto hide-scrollbar max-h-[calc(60vh_-_3.5rem)]">
                 <MobileToc headings={headings}></MobileToc>
             </div>
+        </div>
+    </>}
+
+    <!-- AI Chat Panel + Backdrop -->
+    {headings.length > 0 && <>
+        <div id="ai-chat-backdrop" class="lg:hidden fixed inset-0 bg-black/40 z-[60] hidden transition-opacity duration-300 opacity-0"></div>
+        <div id="ai-chat-panel" class="lg:hidden fixed bottom-4 left-4 right-4 z-[61] rounded-2xl bg-[var(--page-bg)] shadow-2xl transition-all duration-300 ease-out flex flex-col" style="transform: translateY(calc(100% + 32px)); opacity: 0; max-height: 75vh;">
+            <div class="flex items-center justify-between px-4 py-3 border-b border-[var(--line-color)] shrink-0">
+                <span class="text-sm font-bold text-[var(--deep-text)]">AI 问答</span>
+                <button id="ai-chat-close" class="w-8 h-8 rounded-lg flex items-center justify-center text-[var(--btn-content)] hover:bg-[var(--btn-regular-bg-hover)] transition" aria-label="关闭">
+                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+            <AiChat></AiChat>
         </div>
     </>}
 

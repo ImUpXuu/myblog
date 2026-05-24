@@ -726,6 +726,265 @@ window.onresize = () => {
     }
 })();
 
+// AI Chat interactions
+(function() {
+    const WORKER_URL = 'https://myblog-ai-chat.upxuu.workers.dev';
+
+    let chatBtn: HTMLElement | null = null;
+    let chatPanel: HTMLElement | null = null;
+    let chatBackdrop: HTMLElement | null = null;
+    let chatClose: HTMLElement | null = null;
+    let chatInput: HTMLTextAreaElement | null = null;
+    let chatSend: HTMLElement | null = null;
+    let chatMessages: HTMLElement | null = null;
+    let isChatOpen = false;
+    let isStreaming = false;
+    let chatHistory: Array<{ role: string; content: string }> = [];
+
+    function openAiChat() {
+        if (!chatPanel || !chatBackdrop) return;
+        isChatOpen = true;
+        chatPanel.style.transform = 'translateY(0)';
+        chatPanel.style.opacity = '1';
+        chatBackdrop.classList.remove('hidden');
+        setTimeout(() => { chatBackdrop!.style.opacity = '1'; }, 10);
+        setTimeout(() => {
+            chatInput?.focus();
+            scrollChatToBottom();
+        }, 350);
+    }
+
+    function closeAiChat() {
+        if (!chatPanel || !chatBackdrop) return;
+        isChatOpen = false;
+        chatPanel.style.transform = 'translateY(calc(100% + 32px))';
+        chatPanel.style.opacity = '0';
+        chatBackdrop.style.opacity = '0';
+        setTimeout(() => { chatBackdrop!.classList.add('hidden'); }, 300);
+        chatHistory = [];
+        if (chatMessages) {
+            chatMessages.innerHTML = '<div class="text-center text-xs text-30 py-4">可以问文章相关的问题，AI 会参考文章内容回答</div>';
+        }
+    }
+
+    function scrollChatToBottom() {
+        if (!chatMessages) return;
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+
+    function addMessage(role: string, content: string) {
+        if (!chatMessages) return;
+        const div = document.createElement('div');
+        div.className = role === 'user' ? 'msg-user' : 'msg-ai';
+        div.innerHTML = `<div class="msg-bubble">${escapeHtml(content)}</div>`;
+        chatMessages.appendChild(div);
+        scrollChatToBottom();
+    }
+
+    function addAiLoading() {
+        if (!chatMessages) return;
+        const div = document.createElement('div');
+        div.className = 'msg-ai';
+        div.id = 'ai-loading-indicator';
+        div.innerHTML = '<div class="msg-bubble ai-loading"><span></span><span></span><span></span></div>';
+        chatMessages.appendChild(div);
+        scrollChatToBottom();
+    }
+
+    function removeAiLoading() {
+        const el = document.getElementById('ai-loading-indicator');
+        if (el) el.remove();
+    }
+
+    function createAiBubble(): HTMLElement | null {
+        if (!chatMessages) return null;
+        removeAiLoading();
+        const div = document.createElement('div');
+        div.className = 'msg-ai';
+        const bubble = document.createElement('div');
+        bubble.className = 'msg-bubble ai-typing';
+        div.appendChild(bubble);
+        chatMessages.appendChild(div);
+        return bubble;
+    }
+
+    function finishAiBubble(bubble: HTMLElement) {
+        bubble.classList.remove('ai-typing');
+    }
+
+    function escapeHtml(text: string): string {
+        const el = document.createElement('div');
+        el.textContent = text;
+        return el.innerHTML;
+    }
+
+    async function sendMessage(text: string) {
+        if (!text.trim() || isStreaming) return;
+
+        // add user message
+        addMessage('user', text.trim());
+        chatHistory.push({ role: 'user', content: text.trim() });
+
+        if (chatInput) chatInput.value = '';
+        if (chatInput) {
+            chatInput.style.height = 'auto';
+        }
+
+        // loading
+        addAiLoading();
+        isStreaming = true;
+        if (chatSend) chatSend.style.opacity = '0.5';
+
+        let aiBubble: HTMLElement | null = null;
+        let fullReply = '';
+
+        try {
+            const resp = await fetch(WORKER_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    articleUrl: window.location.href,
+                    messages: chatHistory,
+                }),
+            });
+
+            if (!resp.ok) {
+                removeAiLoading();
+                addMessage('ai', '出错啦，请稍后重试');
+                isStreaming = false;
+                if (chatSend) chatSend.style.opacity = '1';
+                return;
+            }
+
+            const reader = resp.body?.getReader();
+            if (!reader) {
+                removeAiLoading();
+                addMessage('ai', '无法读取响应流');
+                isStreaming = false;
+                if (chatSend) chatSend.style.opacity = '1';
+                return;
+            }
+
+            const decoder = new TextDecoder();
+            let buffer = '';
+
+            while (true) {
+                const { done, value } = await reader.read();
+                if (done) break;
+
+                buffer += decoder.decode(value, { stream: true });
+                const lines = buffer.split('\n');
+                buffer = lines.pop() || '';
+
+                for (const line of lines) {
+                    if (!line.startsWith('data: ')) continue;
+                    const data = line.slice(6).trim();
+                    if (data === '[DONE]') continue;
+
+                    try {
+                        const json = JSON.parse(data);
+                        const content = json.choices?.[0]?.delta?.content;
+                        if (content) {
+                            if (!aiBubble) {
+                                aiBubble = createAiBubble();
+                            }
+                            if (aiBubble) {
+                                aiBubble.textContent += content;
+                                fullReply += content;
+                                scrollChatToBottom();
+                            }
+                        }
+                    } catch {}
+                }
+            }
+        } catch (e) {
+            removeAiLoading();
+            addMessage('ai', '网络错误，请检查连接后重试');
+            isStreaming = false;
+            if (chatSend) chatSend.style.opacity = '1';
+            return;
+        }
+
+        if (aiBubble) {
+            finishAiBubble(aiBubble);
+        }
+        if (fullReply) {
+            chatHistory.push({ role: 'assistant', content: fullReply });
+        }
+        removeAiLoading();
+        isStreaming = false;
+        if (chatSend) chatSend.style.opacity = '1';
+        scrollChatToBottom();
+    }
+
+    function setupAiChat() {
+        chatBtn = document.getElementById('ai-chat-btn');
+        chatPanel = document.getElementById('ai-chat-panel');
+        chatBackdrop = document.getElementById('ai-chat-backdrop');
+        chatClose = document.getElementById('ai-chat-close');
+        chatInput = document.getElementById('ai-chat-input') as HTMLTextAreaElement | null;
+        chatSend = document.getElementById('ai-chat-send');
+        chatMessages = document.getElementById('ai-chat-messages');
+
+        // Relocate chat elements on post pages (from [...slug].astro → #ai-chat-slot)
+        const hasChat = !!chatPanel;
+        if (hasChat) {
+            const slot = document.getElementById('ai-chat-slot');
+            if (slot && chatPanel && chatPanel.parentElement !== slot) {
+                if (chatBackdrop && chatBackdrop.parentElement !== slot) {
+                    slot.insertBefore(chatBackdrop, slot.firstChild);
+                }
+                slot.appendChild(chatPanel);
+            }
+        }
+
+        if (!chatBtn || !chatPanel || !chatBackdrop) return;
+
+        chatBtn.onclick = (e) => {
+            e.stopPropagation();
+            if (isChatOpen) {
+                closeAiChat();
+            } else {
+                openAiChat();
+            }
+        };
+
+        chatClose!.onclick = closeAiChat;
+        chatBackdrop!.onclick = closeAiChat;
+
+        if (chatSend) {
+            chatSend.onclick = () => {
+                if (chatInput) sendMessage(chatInput.value);
+            };
+        }
+
+        if (chatInput) {
+            chatInput.onkeydown = (e) => {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    sendMessage(chatInput.value);
+                }
+            };
+            chatInput.oninput = () => {
+                chatInput!.style.height = 'auto';
+                chatInput!.style.height = `${Math.min(chatInput!.scrollHeight, 120)}px`;
+            };
+        }
+    }
+
+    window.addEventListener('popstate', closeAiChat);
+
+    setupAiChat();
+
+    if (window.swup) {
+        window.swup.hooks.on('page:view', setupAiChat);
+    } else {
+        document.addEventListener('swup:enable', () => {
+            window.swup!.hooks.on('page:view', setupAiChat);
+        });
+    }
+})();
+
 </script>
 
 <script>
