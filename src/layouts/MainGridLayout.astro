@@ -7,7 +7,6 @@ import WelcomeToast from "@components/WelcomeToast.astro";
 import type { MarkdownHeading } from "astro";
 import { Icon } from "astro-icon/components";
 import ImageWrapper from "../components/misc/ImageWrapper.astro";
-import MobileToc from "../components/widget/MobileToc.astro";
 import TOC from "../components/widget/TOC.astro";
 import { siteConfig } from "../config";
 import {
@@ -92,30 +91,9 @@ const mainPanelTop = siteConfig.banner.enable
                     <!-- make id different from windows.swup global property -->
                     <slot></slot>
                 </div>
+                <!-- Mobile TOC: panel outside #content-wrapper to avoid fixed positioning being clipped by parent transform -->
+                <div id="mobile-toc-slot"></div>
             </main>
-
-            {headings.length > 0 && <>
-                <div id="mobile-toc-backdrop" class="lg:hidden fixed inset-0 bg-black/40 z-[60] hidden transition-opacity duration-300 opacity-0"></div>
-                <button id="mobile-toc-btn"
-                  class="lg:!hidden fixed bottom-24 right-4 z-[59] w-12 h-12 rounded-2xl bg-[var(--card-bg)]
-                         shadow-lg flex items-center justify-center transition-all duration-300
-                         active:scale-90 hover:shadow-xl"
-                  aria-label="目录" style="display:none;"
-                >
-                    <Icon name="material-symbols:toc-rounded" class="text-[1.25rem] text-[var(--primary)]" />
-                </button>
-                <div id="mobile-toc-panel" class="lg:hidden fixed bottom-0 left-0 right-0 z-[61] rounded-t-2xl bg-[var(--page-bg)] shadow-2xl transition-transform duration-300 ease-out max-h-[70vh] overflow-hidden" style="transform: translateY(100%)">
-                    <div class="flex items-center justify-between px-4 py-3 border-b border-[var(--line-color)]">
-                        <span class="text-sm font-bold text-[var(--deep-text)]">目录</span>
-                        <button id="mobile-toc-close" class="w-8 h-8 rounded-lg flex items-center justify-center text-[var(--btn-content)] hover:bg-[var(--btn-regular-bg-hover)] transition" aria-label="关闭">
-                            <Icon name="material-symbols:close-rounded" class="text-xl"></Icon>
-                        </button>
-                    </div>
-                    <div id="mobile-toc" class="overflow-y-auto hide-scrollbar max-h-[calc(70vh_-_3.5rem)]">
-                        <MobileToc headings={headings}></MobileToc>
-                    </div>
-                </div>
-            </>}
 
             <div class="footer col-span-2 onload-animation">
                 <Footer></Footer>

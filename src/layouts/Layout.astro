@@ -627,6 +627,15 @@ window.onresize = () => {
 
         const hasToc = !!tocPanel;
 
+        if (hasToc) {
+            const slot = document.getElementById('mobile-toc-slot');
+            if (slot && tocPanel && tocPanel.parentElement !== slot) {
+                if (tocBackdrop) slot.insertBefore(tocBackdrop, slot.firstChild);
+                slot.appendChild(tocPanel);
+                if (tocBtn) slot.appendChild(tocBtn);
+            }
+        }
+
         if (tocBtn) {
             tocBtn.style.display = hasToc ? 'flex' : 'none';
         }
