@@ -833,8 +833,7 @@ window.onresize = () => {
         const heading = headings[num - 1];
         if (!heading) return `[${num}]`;
         const slug = escapeHtml(heading.slug);
-        const label = escapeHtml(heading.text);
-        return `<a href="#${slug}" class="cite-link">${label}<span class="cite-arrow">↗</span></a>`;
+        return `<a href="#${slug}" class="cite-link">${num}<span class="cite-arrow">↗</span></a>`;
     }
 
     // ─── inline markdown for streaming ───
@@ -844,7 +843,7 @@ window.onresize = () => {
         const cites: string[] = [];
         h = h.replace(/\[(\d+)\]/g, (_, n) => {
             cites.push(citeLinkHtml(parseInt(n, 10)));
-            return `%%CITE${cites.length - 1}%%`;
+            return `\x00CITE${cites.length - 1}\x00`;
         });
         h = escapeHtml(h);
         // inline code
@@ -858,7 +857,7 @@ window.onresize = () => {
         // newlines
         h = h.replace(/\n/g, '<br>');
         // restore citations
-        h = h.replace(/%%CITE(\d+)%%/g, (_, i) => cites[parseInt(i, 10)] || '');
+        h = h.replace(/\x00CITE(\d+)\x00/g, (_, i) => cites[parseInt(i, 10)] || '');
         return h;
     }
 
