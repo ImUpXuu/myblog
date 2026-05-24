@@ -896,7 +896,8 @@ window.onresize = () => {
             if (/^#{1,3}\s/.test(trimmed)) {
                 const level = trimmed.match(/^#+/)![0].length;
                 const hText = renderInlineMd(trimmed.replace(/^#+\s*/, ''));
-                out.push(`<h${level} style="font-size:${level === 1 ? '1.1' : level === 2 ? '1.05' : '1'}em;font-weight:700;margin:0.5em 0 0.25em">${hText}</h${level}>`);
+                const fs = level === 1 ? '1.1' : level === 2 ? '1.05' : '1';
+                out.push('<h' + level + ' style="font-size:' + fs + 'em;font-weight:700;margin:0.5em 0 0.25em">' + hText + '</h' + level + '>');
                 i++;
                 continue;
             }
