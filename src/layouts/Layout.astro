@@ -767,6 +767,14 @@ window.onresize = () => {
                 div.appendChild(bubble);
                 chatMessages.appendChild(div);
                 renderJsonResponse(bubble, msg.content);
+                if (msg.tokens !== undefined || msg.elapsed) {
+                    const statsDiv = document.createElement('div');
+                    statsDiv.className = 'ai-stats';
+                    const t = msg.tokens !== undefined ? msg.tokens : '?';
+                    const e = msg.elapsed || '?';
+                    statsDiv.textContent = `${t} tokens · ${e}s`;
+                    div.appendChild(statsDiv);
+                }
             }
         }
     }
@@ -959,10 +967,12 @@ window.onresize = () => {
         isStreaming = true;
         if (chatSend) chatSend.style.opacity = '0.5';
 
+        const chatStartTime = Date.now();
         let aiBubble: HTMLElement | null = null;
         let fullReply = '';
         let thinkingEl: HTMLElement | null = null;
         let hasContent = false;
+        let usage: { completion_tokens?: number } | null = null;
 
         try {
             console.log('[AI Chat] POST to', WORKER_URL, { articleUrl: window.location.href, messagesCount: chatHistory.length });
@@ -1017,6 +1027,10 @@ window.onresize = () => {
 
                     try {
                         const json = JSON.parse(data);
+                        if (json.usage) {
+                            usage = json.usage;
+                            continue;
+                        }
                         const delta = json.choices?.[0]?.delta;
                         const reasoning = delta?.reasoning_content;
                         const content = delta?.content;
@@ -1086,7 +1100,15 @@ window.onresize = () => {
             renderJsonResponse(aiBubble, fullReply);
         }
         if (fullReply) {
-            chatHistory.push({ role: 'assistant', content: fullReply });
+            const elapsed = ((Date.now() - chatStartTime) / 1000).toFixed(1);
+            const tokens = usage?.completion_tokens;
+            if (aiBubble) {
+                const statsDiv = document.createElement('div');
+                statsDiv.className = 'ai-stats';
+                statsDiv.textContent = `${tokens || '?'} tokens · ${elapsed}s`;
+                aiBubble.after(statsDiv);
+            }
+            chatHistory.push({ role: 'assistant', content: fullReply, tokens, elapsed });
             saveChatHistory();
         }
         removeAiLoading();

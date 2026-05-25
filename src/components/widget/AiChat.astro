@@ -30,6 +30,7 @@
 /* ─── messages container ─── */
 #ai-chat-messages {
 	scroll-behavior: smooth;
+	overflow-x: hidden;
 }
 
 /* ─── message wrapper ─── */
@@ -56,6 +57,8 @@
 	font-size: 0.9375rem;
 	line-height: 1.6;
 	word-break: break-word;
+	overflow-wrap: break-word;
+	overflow: hidden;
 	white-space: pre-wrap;
 	border: 1px solid var(--line-color);
 }
@@ -248,5 +251,16 @@
 	margin-left: 0.25rem;
 	vertical-align: middle;
 	opacity: 0.8;
+}
+
+/* ─── chat stats ─── */
+.ai-stats {
+	font-size: 0.6875rem;
+	color: var(--btn-content);
+	opacity: 0.7;
+	margin-top: 0.25rem;
+	padding-left: 0.25rem;
+	font-family: ui-monospace, monospace;
+	letter-spacing: 0.02em;
 }
 </style>
