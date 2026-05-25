@@ -206,4 +206,47 @@
 	margin-left: 0.125rem;
 	display: inline-block;
 }
+
+/* ─── question tags (shared with summary) ─── */
+.summary-questions-section {
+	margin-top: 0.75rem;
+	padding-top: 0.75rem;
+	border-top: 1px solid var(--line-color);
+}
+.summary-qs-title {
+	font-size: 0.8125rem;
+	font-weight: 600;
+	color: var(--primary);
+	margin-bottom: 0.5rem;
+}
+.q-tag {
+	display: inline-block;
+	padding: 0.3rem 0.7rem;
+	margin: 0.2rem;
+	font-size: 0.8125rem;
+	border-radius: 999px;
+	border: 1px solid var(--line-color);
+	background: var(--toc-bg);
+	color: var(--deep-text);
+	cursor: pointer;
+	transition: all 0.15s;
+	white-space: nowrap;
+}
+.q-tag:hover {
+	border-color: var(--primary);
+	color: var(--primary);
+	background: var(--card-bg);
+}
+.q-tag-ai {
+	border-style: dashed;
+}
+.ai-badge {
+	display: inline-block;
+	font-size: 0.625rem;
+	font-weight: 700;
+	color: var(--primary);
+	margin-left: 0.25rem;
+	vertical-align: middle;
+	opacity: 0.8;
+}
 </style>

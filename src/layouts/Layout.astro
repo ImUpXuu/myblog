@@ -871,20 +871,40 @@ window.onresize = () => {
 
     function renderJsonResponse(bubble: HTMLElement, text: string) {
         const headings = getArticleHeadings();
-        let data: { p: string; r: number[] }[];
+        let data: { p?: string; r?: number[]; q?: string[] }[];
         try {
             data = JSON.parse(text);
             if (!Array.isArray(data)) throw new Error('not array');
         } catch {
-            // fallback: show raw text
-            if (headings.length) {
-                bubble.textContent = text;
-            }
+            bubble.textContent = text;
             return;
         }
 
         const fragment = document.createDocumentFragment();
         for (const item of data) {
+            if (item.q) {
+                const qDiv = document.createElement('div');
+                qDiv.className = 'summary-questions-section';
+                const title = document.createElement('div');
+                title.className = 'summary-qs-title';
+                title.textContent = '继续提问';
+                qDiv.appendChild(title);
+                for (const q of item.q) {
+                    const btn = document.createElement('button');
+                    btn.className = 'q-tag q-tag-ai';
+                    btn.setAttribute('data-q', q);
+                    btn.innerHTML = escapeHtml(q) + ' <span class="ai-badge">AI</span>';
+                    btn.onclick = () => {
+                        if ((window as any).openAiChatWithQuestion) {
+                            (window as any).openAiChatWithQuestion(q);
+                        }
+                    };
+                    qDiv.appendChild(btn);
+                }
+                fragment.appendChild(qDiv);
+                continue;
+            }
+
             const p = document.createElement('p');
             p.style.margin = '0.4em 0';
             p.innerHTML = renderInlineMd(item.p || '');
@@ -1070,6 +1090,14 @@ window.onresize = () => {
         if (chatSend) chatSend.style.opacity = '1';
         scrollChatToBottom();
     }
+
+    (window as any).openAiChatWithQuestion = (question: string) => {
+        openAiChat();
+        setTimeout(() => {
+            if (chatInput) chatInput.value = question;
+            sendMessage(question);
+        }, 400);
+    };
 
     function resetChatState() {
         chatHistory = [];

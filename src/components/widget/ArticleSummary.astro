@@ -8,28 +8,75 @@
 		<span class="w-2.5 h-2.5 rounded-full bg-green-400/80"></span>
 		<span class="text-[10px] text-[var(--btn-content)] ml-2 font-mono">XUUAI · 文章摘要</span>
 	</div>
-	<div class="px-4 py-3 text-sm leading-relaxed" style="background: #1e1e1e; color: #c0c0c0;">
-		<div id="summary-loading" class="flex items-center gap-1 h-4">
-			<span class="inline-block w-1.5 h-4 bg-white/20 animate-pulse rounded-sm" style="animation-delay:0s"></span>
-			<span class="inline-block w-1.5 h-4 bg-white/20 animate-pulse rounded-sm" style="animation-delay:0.15s"></span>
-			<span class="inline-block w-1.5 h-4 bg-white/20 animate-pulse rounded-sm" style="animation-delay:0.3s"></span>
-			<span class="font-mono text-xs opacity-50 ml-2">正在概括...</span>
+	<div class="px-4 py-4 text-base leading-relaxed bg-[var(--card-bg)] text-[var(--deep-text)]">
+		<div id="summary-loading" class="flex items-center gap-1 h-5">
+			<span class="inline-block w-1.5 h-4 bg-[var(--btn-content)]/20 animate-pulse rounded-sm" style="animation-delay:0s"></span>
+			<span class="inline-block w-1.5 h-4 bg-[var(--btn-content)]/20 animate-pulse rounded-sm" style="animation-delay:0.15s"></span>
+			<span class="inline-block w-1.5 h-4 bg-[var(--btn-content)]/20 animate-pulse rounded-sm" style="animation-delay:0.3s"></span>
+			<span class="font-mono text-sm opacity-50 ml-2">正在概括...</span>
 		</div>
 		<div id="summary-box" class="hidden">
 			<div id="summary-thinking-head" class="flex items-center gap-2 mb-1 cursor-pointer select-none" onclick="this.parentElement.querySelector('.thinking-wrap').classList.toggle('collapsed')">
-				<span class="text-[10px] uppercase tracking-wider opacity-50 font-mono">Thinking</span>
-				<span class="collapse-arrow inline-block text-[8px] opacity-50 font-mono transition-transform duration-300">▾</span>
+				<span class="text-xs uppercase tracking-wider opacity-50 font-mono">Thinking</span>
+				<span class="collapse-arrow inline-block text-[10px] opacity-50 font-mono transition-transform duration-300">▾</span>
 			</div>
 			<div class="thinking-wrap max-h-[300px] overflow-hidden transition-all duration-600 ease-in-out">
-				<div class="thinking-text font-mono text-[11px] opacity-55 leading-relaxed whitespace-pre-wrap border-l-2 border-white/10 pl-3 min-h-[1em]"></div>
+				<div class="thinking-text font-mono text-xs opacity-60 leading-relaxed whitespace-pre-wrap border-l-2 border-[var(--line-color)] pl-3 min-h-[1em]"></div>
 			</div>
-			<div id="summary-result" class="hidden text-sm leading-relaxed"></div>
+			<div id="summary-result" class="hidden text-base leading-relaxed space-y-3"></div>
+			<div id="summary-questions" class="hidden"></div>
 		</div>
 	</div>
 </div>
 
 <style is:global>
 .thinking-wrap.collapsed { max-height: 0 !important; }
+
+.summary-p { margin: 0.6em 0; }
+.summary-p:first-child { margin-top: 0; }
+.summary-p:last-child { margin-bottom: 0; }
+
+.summary-questions-section {
+	margin-top: 1rem;
+	padding-top: 0.75rem;
+	border-top: 1px solid var(--line-color);
+}
+.summary-qs-title {
+	font-size: 0.875rem;
+	font-weight: 600;
+	color: var(--primary);
+	margin-bottom: 0.5rem;
+}
+.q-tag {
+	display: inline-block;
+	padding: 0.3rem 0.7rem;
+	margin: 0.25rem;
+	font-size: 0.8125rem;
+	border-radius: 999px;
+	border: 1px solid var(--line-color);
+	background: var(--toc-bg);
+	color: var(--deep-text);
+	cursor: pointer;
+	transition: all 0.15s;
+	white-space: nowrap;
+}
+.q-tag:hover {
+	border-color: var(--primary);
+	color: var(--primary);
+	background: var(--card-bg);
+}
+.q-tag-ai {
+	border-style: dashed;
+}
+.ai-badge {
+	display: inline-block;
+	font-size: 0.625rem;
+	font-weight: 700;
+	color: var(--primary);
+	margin-left: 0.25rem;
+	vertical-align: middle;
+	opacity: 0.8;
+}
 </style>
 
 <script>
@@ -43,14 +90,59 @@
 		const box = document.getElementById('summary-box');
 		const thinkingText = document.querySelector('.thinking-text') as HTMLElement;
 		const resultEl = document.getElementById('summary-result');
-		if (!loadingEl || !box || !thinkingText || !resultEl) return;
+		const questionsEl = document.getElementById('summary-questions');
+		if (!loadingEl || !box || !thinkingText || !resultEl || !questionsEl) return;
+
+		function renderSummary(fullText: string) {
+			let data: any[];
+			try { data = JSON.parse(fullText); } catch {
+				resultEl.textContent = fullText;
+				resultEl.classList.remove('hidden');
+				return;
+			}
+
+			const paragraphs = data.filter((d: any) => 'p' in d);
+			const aiQuestions = (data.find((d: any) => 'q' in d)?.q as string[]) || [];
+
+			let html = '';
+			for (const item of paragraphs) {
+				const esc = (item.p || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+				html += `<p class="summary-p">${esc}</p>`;
+			}
+			resultEl.innerHTML = html;
+			resultEl.classList.remove('hidden');
+
+			// default + AI questions
+			const defaultQs = ['详细概括本文内容', '概括文章特点'];
+			let qHtml = '<div class="summary-questions-section">';
+			qHtml += '<div class="summary-qs-title">继续问AI</div>';
+			for (const q of defaultQs) {
+				const eq = q.replace(/&/g, '&amp;').replace(/'/g, '&#39;');
+				qHtml += `<button class="q-tag" data-q="${eq}">${eq}</button>`;
+			}
+			for (const q of aiQuestions) {
+				const eq = q.replace(/&/g, '&amp;').replace(/'/g, '&#39;');
+				qHtml += `<button class="q-tag q-tag-ai" data-q="${eq}">${eq} <span class="ai-badge">AI</span></button>`;
+			}
+			qHtml += '</div>';
+			questionsEl.innerHTML = qHtml;
+			questionsEl.classList.remove('hidden');
+
+			questionsEl.querySelectorAll('.q-tag').forEach(btn => {
+				btn.addEventListener('click', () => {
+					const q = (btn as HTMLElement).getAttribute('data-q') || '';
+					if (q && (window as any).openAiChatWithQuestion) {
+						(window as any).openAiChatWithQuestion(q);
+					}
+				});
+			});
+		}
 
 		const cached = sessionStorage.getItem(cacheKey);
 		if (cached) {
 			loadingEl.classList.add('hidden');
 			box.classList.remove('hidden');
-			resultEl.textContent = cached;
-			resultEl.classList.remove('hidden');
+			renderSummary(cached);
 			return;
 		}
 
@@ -96,19 +188,20 @@
 									thinkingText.parentElement!.classList.add('collapsed');
 									loadingEl.classList.add('hidden');
 									box.classList.remove('hidden');
-									resultEl.classList.remove('hidden');
 								}
 								full += d.content;
-								resultEl.textContent = full;
 							}
 						} catch {}
 					}
 				}
-				if (full) sessionStorage.setItem(cacheKey, full);
+				if (full) {
+					sessionStorage.setItem(cacheKey, full);
+					renderSummary(full);
+				}
 			} catch {
 				loadingEl.classList.add('hidden');
 				box.classList.remove('hidden');
-				resultEl.innerHTML = '<span class="opacity-50 font-mono text-xs">⚠ 摘要生成失败</span>';
+				resultEl.innerHTML = '<span class="opacity-50 font-mono text-sm">⚠ 摘要生成失败</span>';
 				resultEl.classList.remove('hidden');
 			}
 		})();
