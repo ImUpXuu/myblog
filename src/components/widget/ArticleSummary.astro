@@ -206,9 +206,11 @@
 									thinkingText.parentElement!.classList.add('collapsed');
 									loadingEl.classList.add('hidden');
 									box.classList.remove('hidden');
+									resultEl.classList.remove('hidden');
 									scrollIntoView();
 								}
 								full += d.content;
+								resultEl.textContent = full;
 							}
 						} catch {}
 					}
