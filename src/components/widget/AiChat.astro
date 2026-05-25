@@ -59,8 +59,17 @@
 	line-height: 1.6;
 	word-break: break-all;
 	overflow-wrap: break-word;
-	white-space: pre-wrap;
 	border: 1px solid var(--line-color);
+}
+#ai-chat-messages .msg-bubble.ai-typing {
+	white-space: pre-wrap;
+}
+#ai-chat-messages .msg-bubble p,
+#ai-chat-messages .msg-bubble li,
+#ai-chat-messages .msg-bubble .summary-questions-section {
+	max-width: 100%;
+	overflow-wrap: break-word;
+	word-break: break-all;
 }
 #ai-chat-messages .msg-user .msg-bubble {
 	background: var(--primary);
@@ -97,6 +106,8 @@
 	border-radius: 3px;
 	font-size: 0.85em;
 	font-family: ui-monospace, monospace;
+	word-break: break-all;
+	white-space: pre-wrap;
 }
 .dark #ai-chat-messages .msg-bubble code {
 	background: rgba(255,255,255,0.12);
@@ -199,7 +210,6 @@
 	font-weight: 600;
 	text-decoration: none;
 	transition: opacity 0.15s;
-	white-space: nowrap;
 }
 .cite-link:hover {
 	opacity: 0.75;
