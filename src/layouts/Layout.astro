@@ -774,8 +774,10 @@ window.onresize = () => {
     function openAiChat() {
         if (!chatPanel || !chatBackdrop) return;
         isChatOpen = true;
-        loadChatHistory();
-        renderChatHistory();
+        if (!isStreaming) {
+            loadChatHistory();
+            renderChatHistory();
+        }
         chatPanel.style.transform = 'translateY(0)';
         chatPanel.style.opacity = '1';
         chatBackdrop.classList.remove('hidden');
