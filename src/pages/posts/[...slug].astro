@@ -254,17 +254,5 @@ const jsonLd = {
         </div>
     </>}
 
+    <div id="article-headings-data" aria-hidden="true" style="display:none">{headings.map(h => JSON.stringify({ slug: h.slug, text: h.text })).join('|')}</div>
 </MainGridLayout>
-
-<script>
-// 页面加载时获取统计数据
-if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', () => {
-        setTimeout(fetchPageStats, 100);
-    });
-} else {
-    setTimeout(fetchPageStats, 100);
-}
-</script>
-
-<div id="article-headings-data" aria-hidden="true" style="display:none">{headings.map(h => JSON.stringify({ slug: h.slug, text: h.text })).join('|')}</div>
