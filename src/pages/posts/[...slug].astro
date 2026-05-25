@@ -18,6 +18,7 @@ import { formatDateToYYYYMMDD } from "../../utils/date-utils";
 import Waline from "../../components/Waline.astro";
 import MobileToc from "../../components/widget/MobileToc.astro";
 import AiChat from "../../components/widget/AiChat.astro";
+import ArticleSummary from "../../components/widget/ArticleSummary.astro";
 
 export async function getStaticPaths() {
 	const blogEntries = await getSortedPosts();
@@ -145,6 +146,8 @@ const jsonLd = {
                 ></PostMetadata>
                 {!entry.data.image && <div class="border-[var(--line-divider)] border-dashed border-b-[1px] mb-5"></div>}
             </div>
+
+            <ArticleSummary />
 
             <!-- always show cover as long as it has one -->
 
