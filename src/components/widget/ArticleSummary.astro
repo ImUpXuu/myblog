@@ -20,7 +20,7 @@
 				<span class="text-xs uppercase tracking-wider opacity-50 font-mono">Thinking</span>
 				<span class="collapse-arrow inline-block text-[10px] opacity-50 font-mono transition-transform duration-300">▾</span>
 			</div>
-			<div class="thinking-wrap max-h-[300px] overflow-hidden transition-all duration-600 ease-in-out">
+			<div class="thinking-wrap max-h-[300px] overflow-y-auto transition-all duration-600 ease-in-out">
 				<div class="thinking-text font-mono text-xs opacity-60 leading-relaxed whitespace-pre-wrap border-l-2 border-[var(--line-color)] pl-3 min-h-[1em]"></div>
 			</div>
 			<div id="summary-result" class="hidden text-base leading-relaxed space-y-3"></div>
@@ -89,9 +89,17 @@
 		const loadingEl = document.getElementById('summary-loading');
 		const box = document.getElementById('summary-box');
 		const thinkingText = document.querySelector('.thinking-text') as HTMLElement;
+		const thinkingWrap = thinkingText?.parentElement as HTMLElement | null;
 		const resultEl = document.getElementById('summary-result');
 		const questionsEl = document.getElementById('summary-questions');
-		if (!loadingEl || !box || !thinkingText || !resultEl || !questionsEl) return;
+		if (!loadingEl || !box || !thinkingText || !thinkingWrap || !resultEl || !questionsEl) return;
+
+		function scrollIntoView() {
+			const rect = box.getBoundingClientRect();
+			if (rect.bottom > window.innerHeight) {
+				box.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+			}
+		}
 
 		function renderSummary(fullText: string) {
 			// Strip markdown fences + surrounding text, extract JSON array
@@ -117,6 +125,7 @@
 			}
 			resultEl.innerHTML = html;
 			resultEl.classList.remove('hidden');
+			requestAnimationFrame(scrollIntoView);
 
 			// default + AI questions
 			const defaultQs = ['详细概括本文内容', '概括文章特点'];
@@ -133,6 +142,7 @@
 			qHtml += '</div>';
 			questionsEl.innerHTML = qHtml;
 			questionsEl.classList.remove('hidden');
+			requestAnimationFrame(scrollIntoView);
 
 			questionsEl.querySelectorAll('.q-tag').forEach(btn => {
 				btn.addEventListener('click', () => {
@@ -187,6 +197,8 @@
 							if (d?.reasoning_content && !hasContent) {
 								if (box.classList.contains('hidden')) box.classList.remove('hidden');
 								thinkingText.textContent += d.reasoning_content;
+								thinkingWrap.scrollTop = thinkingWrap.scrollHeight;
+								scrollIntoView();
 							}
 							if (d?.content) {
 								if (!hasContent) {
@@ -194,6 +206,7 @@
 									thinkingText.parentElement!.classList.add('collapsed');
 									loadingEl.classList.add('hidden');
 									box.classList.remove('hidden');
+									scrollIntoView();
 								}
 								full += d.content;
 							}
