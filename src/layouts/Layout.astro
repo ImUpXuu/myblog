@@ -797,7 +797,9 @@ window.onresize = () => {
 
     function scrollChatToBottom() {
         if (!chatMessages) return;
-        chatMessages.scrollTop = chatMessages.scrollHeight;
+        requestAnimationFrame(() => {
+            chatMessages!.scrollTop = chatMessages!.scrollHeight;
+        });
     }
 
     function addMessage(role: string, content: string) {

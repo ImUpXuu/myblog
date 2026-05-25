@@ -84,7 +84,7 @@
 		const m = window.location.pathname.match(/\/posts\/(.+?)\/?$/);
 		if (!m) return;
 		const slug = m[1];
-		const cacheKey = `xuai-summary-${slug}`;
+		const cacheKey = `xuai-summary-v2-${slug}`;
 
 		const loadingEl = document.getElementById('summary-loading');
 		const box = document.getElementById('summary-box');
@@ -94,8 +94,14 @@
 		if (!loadingEl || !box || !thinkingText || !resultEl || !questionsEl) return;
 
 		function renderSummary(fullText: string) {
+			// Strip markdown fences + surrounding text, extract JSON array
+			let clean = fullText.replace(/```(?:json)?\s*/gi, '').replace(/\s*```/g, '');
+			const startB = clean.indexOf('[');
+			const endB = clean.lastIndexOf(']');
+			if (startB !== -1 && endB > startB) clean = clean.slice(startB, endB + 1);
+
 			let data: any[];
-			try { data = JSON.parse(fullText); } catch {
+			try { data = JSON.parse(clean); } catch {
 				resultEl.textContent = fullText;
 				resultEl.classList.remove('hidden');
 				return;
