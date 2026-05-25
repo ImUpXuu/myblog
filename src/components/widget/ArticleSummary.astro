@@ -9,7 +9,12 @@
 		<span class="text-[10px] text-[var(--btn-content)] ml-2 font-mono">XUUAI · 文章摘要</span>
 	</div>
 	<div class="px-4 py-3 text-sm leading-relaxed" style="background: #1e1e1e; color: #c0c0c0;">
-		<div id="summary-empty" class="font-mono text-xs opacity-50">点击下方按钮，AI 为你概括这篇文章...</div>
+		<div id="summary-loading" class="flex items-center gap-1 h-4">
+			<span class="inline-block w-1.5 h-4 bg-white/20 animate-pulse rounded-sm" style="animation-delay:0s"></span>
+			<span class="inline-block w-1.5 h-4 bg-white/20 animate-pulse rounded-sm" style="animation-delay:0.15s"></span>
+			<span class="inline-block w-1.5 h-4 bg-white/20 animate-pulse rounded-sm" style="animation-delay:0.3s"></span>
+			<span class="font-mono text-xs opacity-50 ml-2">正在概括...</span>
+		</div>
 		<div id="summary-box" class="hidden">
 			<div id="summary-thinking-head" class="flex items-center gap-2 mb-1 cursor-pointer select-none" onclick="this.parentElement.querySelector('.thinking-wrap').classList.toggle('collapsed')">
 				<span class="text-[10px] uppercase tracking-wider opacity-50 font-mono">Thinking</span>
@@ -20,112 +25,92 @@
 			</div>
 			<div id="summary-result" class="hidden text-sm leading-relaxed"></div>
 		</div>
-		<button id="summary-btn" class="mt-1 text-[11px] font-mono text-[var(--primary)] hover:opacity-80 transition">▶ 生成 AI 摘要</button>
 	</div>
 </div>
 
 <style is:global>
 .thinking-wrap.collapsed { max-height: 0 !important; }
-.thinking-wrap.collapsed + #summary-result { margin-top: 0.25rem; }
 </style>
 
 <script>
-	const WORKER_URL = 'https://blogapi.upxuu.com/summarize';
-
 	(function() {
-		const slug = (() => {
-			const m = window.location.pathname.match(/\/posts\/(.+?)\/?$/);
-			return m ? m[1] : '';
-		})();
+		const m = window.location.pathname.match(/\/posts\/(.+?)\/?$/);
+		if (!m) return;
+		const slug = m[1];
 		const cacheKey = `xuai-summary-${slug}`;
-		const cached = sessionStorage.getItem(cacheKey);
 
-		const btn = document.getElementById('summary-btn');
-		const emptyEl = document.getElementById('summary-empty');
+		const loadingEl = document.getElementById('summary-loading');
 		const box = document.getElementById('summary-box');
-		const thinkingHead = document.getElementById('summary-thinking-head');
 		const thinkingText = document.querySelector('.thinking-text') as HTMLElement;
 		const resultEl = document.getElementById('summary-result');
+		if (!loadingEl || !box || !thinkingText || !resultEl) return;
 
-		if (!btn || !box || !thinkingText || !resultEl) return;
-
+		const cached = sessionStorage.getItem(cacheKey);
 		if (cached) {
-			btn.style.display = 'none';
-			emptyEl.classList.add('hidden');
+			loadingEl.classList.add('hidden');
 			box.classList.remove('hidden');
 			resultEl.textContent = cached;
 			resultEl.classList.remove('hidden');
-			thinkingHead.style.display = 'none';
 			return;
 		}
 
-		btn.onclick = async () => {
-			btn.style.display = 'none';
-			emptyEl.classList.add('hidden');
-			box.classList.remove('hidden');
-
-			let fullContent = '';
+		(async function() {
+			let full = '';
 			let hasContent = false;
 
 			try {
-				const resp = await fetch(WORKER_URL, {
+				const resp = await fetch('https://blogapi.upxuu.com/summarize', {
 					method: 'POST',
 					headers: { 'Content-Type': 'application/json' },
 					body: JSON.stringify({ articleUrl: window.location.href }),
 				});
-
-				if (!resp.ok) {
-					resultEl.innerHTML = '<span class="opacity-50 font-mono text-xs">⚠ 摘要生成失败</span>';
-					resultEl.classList.remove('hidden');
-					return;
-				}
+				if (!resp.ok) throw new Error('http ' + resp.status);
 
 				const reader = resp.body?.getReader();
-				if (!reader) throw new Error('No reader');
+				if (!reader) throw new Error('no reader');
 
 				const decoder = new TextDecoder();
-				let buffer = '';
+				let buf = '';
 
 				while (true) {
 					const { done, value } = await reader.read();
 					if (done) break;
 
-					buffer += decoder.decode(value, { stream: true });
-					const lines = buffer.split('\n');
-					buffer = lines.pop() || '';
+					buf += decoder.decode(value, { stream: true });
+					const lines = buf.split('\n');
+					buf = lines.pop() || '';
 
 					for (const line of lines) {
 						if (!line.startsWith('data: ')) continue;
 						const data = line.slice(6).trim();
 						if (data === '[DONE]') continue;
-
 						try {
-							const delta = JSON.parse(data).choices?.[0]?.delta;
-							if (delta?.reasoning_content && !hasContent) {
-								thinkingText.textContent += delta.reasoning_content;
+							const d = JSON.parse(data).choices?.[0]?.delta;
+							if (d?.reasoning_content && !hasContent) {
+								if (box.classList.contains('hidden')) box.classList.remove('hidden');
+								thinkingText.textContent += d.reasoning_content;
 							}
-							if (delta?.content) {
+							if (d?.content) {
 								if (!hasContent) {
 									hasContent = true;
-									// Collapse thinking
-									const wrap = thinkingText.parentElement!;
-									wrap.classList.add('collapsed');
+									thinkingText.parentElement!.classList.add('collapsed');
+									loadingEl.classList.add('hidden');
+									box.classList.remove('hidden');
+									resultEl.classList.remove('hidden');
 								}
-								fullContent += delta.content;
-								resultEl.textContent = fullContent;
-								resultEl.classList.remove('hidden');
+								full += d.content;
+								resultEl.textContent = full;
 							}
 						} catch {}
 					}
 				}
-
-				if (fullContent) {
-					sessionStorage.setItem(cacheKey, fullContent);
-				}
+				if (full) sessionStorage.setItem(cacheKey, full);
 			} catch {
-				resultEl.innerHTML = '<span class="opacity-50 font-mono text-xs">⚠ 网络错误</span>';
+				loadingEl.classList.add('hidden');
+				box.classList.remove('hidden');
+				resultEl.innerHTML = '<span class="opacity-50 font-mono text-xs">⚠ 摘要生成失败</span>';
 				resultEl.classList.remove('hidden');
 			}
-		};
+		})();
 	})();
 </script>
