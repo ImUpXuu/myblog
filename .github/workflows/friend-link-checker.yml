@@ -40,7 +40,15 @@ jobs:
             const name = extract('网站名称');
             const desc = extract('网站描述');
             const url = extract('网站链接').replace(/^`|`$/g, '').trim();
-            const avatar = extract('网站头像 URL').replace(/^`|`$/g, '').trim();
+            let avatar = extract('网站头像 URL').replace(/^`|`$/g, '').trim();
+
+            // 自动获取 favicon 作为头像兜底
+            if (!avatar) {
+                try {
+                    const domain = new URL(url).hostname;
+                    avatar = `https://www.google.com/s2/favicons?domain=${domain}&sz=128`;
+                } catch {}
+            }
 
             if (!url) {
               await github.rest.issues.createComment({
