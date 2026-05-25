@@ -2,11 +2,12 @@
 ---
 
 <div class="card-base rounded-lg overflow-hidden border border-[var(--line-color)] mb-5">
-	<div class="flex items-center gap-1.5 px-3 py-2 border-b border-[var(--line-color)] bg-[var(--toc-bg)]">
+	<div class="flex items-center gap-1.5 px-3 py-2.5 border-b border-[var(--line-color)] bg-[var(--toc-bg)]">
 		<span class="w-2.5 h-2.5 rounded-full bg-red-400/80"></span>
 		<span class="w-2.5 h-2.5 rounded-full bg-yellow-400/80"></span>
 		<span class="w-2.5 h-2.5 rounded-full bg-green-400/80"></span>
-		<span class="text-[10px] text-[var(--btn-content)] ml-2 font-mono">XUUAI · 文章摘要</span>
+		<span class="text-sm font-semibold text-[var(--deep-text)] ml-2">AI概括本文内容</span>
+		<span id="summary-stats" class="hidden text-[10px] text-[var(--btn-content)] ml-auto font-mono tabular-nums"></span>
 	</div>
 	<div class="px-4 py-4 text-base leading-relaxed bg-[var(--card-bg)] text-[var(--deep-text)]">
 		<div id="summary-loading" class="flex items-center gap-1 h-5">
@@ -84,7 +85,7 @@
 		const m = window.location.pathname.match(/\/posts\/(.+?)\/?$/);
 		if (!m) return;
 		const slug = m[1];
-		const cacheKey = `xuai-summary-v2-${slug}`;
+		const cacheKey = `xuai-summary-v3-${slug}`;
 
 		const loadingEl = document.getElementById('summary-loading');
 		const box = document.getElementById('summary-box');
@@ -92,7 +93,10 @@
 		const thinkingWrap = thinkingText?.parentElement as HTMLElement | null;
 		const resultEl = document.getElementById('summary-result');
 		const questionsEl = document.getElementById('summary-questions');
-		if (!loadingEl || !box || !thinkingText || !thinkingWrap || !resultEl || !questionsEl) return;
+		const statsEl = document.getElementById('summary-stats');
+		if (!loadingEl || !box || !thinkingText || !thinkingWrap || !resultEl || !questionsEl || !statsEl) return;
+
+		const startTime = Date.now();
 
 		function scrollIntoView() {
 			const rect = box.getBoundingClientRect();
@@ -101,9 +105,30 @@
 			}
 		}
 
-		function renderSummary(fullText: string) {
-			// Strip markdown fences + surrounding text, extract JSON array
-			let clean = fullText.replace(/```(?:json)?\s*/gi, '').replace(/\s*```/g, '');
+		function renderSummary(fullText: string, usageTokens?: number) {
+			// Strip markdown fences
+			let clean = fullText.replace(/```(?:json)?\s*/gi, '').replace(/\s*```/g, '').trim();
+
+			// Fallback: extract q object if it's outside the array
+			let externalQ: string[] = [];
+			const afterArray = clean.slice(clean.lastIndexOf(']') + 1);
+			const qOuter = afterArray.match(/\{"q":\s*\[/);
+			if (qOuter) {
+				const qStart = afterArray.indexOf('{');
+				let depth = 0, qEnd = -1;
+				for (let i = qStart; i < afterArray.length; i++) {
+					if (afterArray[i] === '{') depth++;
+					if (afterArray[i] === '}') { depth--; if (depth === 0) { qEnd = i + 1; break; } }
+				}
+				if (qStart !== -1 && qEnd > qStart) {
+					try {
+						const qObj = JSON.parse(afterArray.slice(qStart, qEnd));
+						if (Array.isArray(qObj.q)) externalQ = qObj.q;
+					} catch {}
+				}
+			}
+
+			// Extract JSON array from [ to ]
 			const startB = clean.indexOf('[');
 			const endB = clean.lastIndexOf(']');
 			if (startB !== -1 && endB > startB) clean = clean.slice(startB, endB + 1);
@@ -116,7 +141,7 @@
 			}
 
 			const paragraphs = data.filter((d: any) => 'p' in d);
-			const aiQuestions = (data.find((d: any) => 'q' in d)?.q as string[]) || [];
+			const aiQuestions = externalQ.length ? externalQ : ((data.find((d: any) => 'q' in d)?.q as string[]) || []);
 
 			let html = '';
 			for (const item of paragraphs) {
@@ -152,6 +177,12 @@
 					}
 				});
 			});
+
+			// Stats
+			const elapsed = ((Date.now() - startTime) / 1000).toFixed(1);
+			const tokens = usageTokens || Math.round(fullText.length / 3);
+			statsEl.textContent = `${tokens} tokens · ${elapsed}s`;
+			statsEl.classList.remove('hidden');
 		}
 
 		const cached = sessionStorage.getItem(cacheKey);
@@ -165,6 +196,7 @@
 		(async function() {
 			let full = '';
 			let hasContent = false;
+			let usage: { completion_tokens?: number } | null = null;
 
 			try {
 				const resp = await fetch('https://blogapi.upxuu.com/summarize', {
@@ -193,7 +225,12 @@
 						const data = line.slice(6).trim();
 						if (data === '[DONE]') continue;
 						try {
-							const d = JSON.parse(data).choices?.[0]?.delta;
+							const parsed = JSON.parse(data);
+							if (parsed.usage) {
+								usage = parsed.usage;
+								continue;
+							}
+							const d = parsed.choices?.[0]?.delta;
 							if (d?.reasoning_content && !hasContent) {
 								if (box.classList.contains('hidden')) box.classList.remove('hidden');
 								thinkingText.textContent += d.reasoning_content;
@@ -217,7 +254,7 @@
 				}
 				if (full) {
 					sessionStorage.setItem(cacheKey, full);
-					renderSummary(full);
+					renderSummary(full, usage?.completion_tokens);
 				}
 			} catch {
 				loadingEl.classList.add('hidden');
