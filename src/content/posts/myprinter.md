@@ -1,6 +1,6 @@
 ---
 title: 十年，我的打印机为我吐出了3.9w张纸
-published: 2026-05-26 22:15
+published: 2026-05-26 22:15:00
 description: '今天打印机驱动出了点问题 在打开设置时 偶然看到了2013年的驱动日期...'
 image: 'https://edit.upxuu.com/img/2026/5/26/1779805033601_337.png'
 tags: []
