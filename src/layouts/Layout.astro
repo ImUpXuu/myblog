@@ -990,11 +990,8 @@ window.onresize = () => {
             console.log('[AI Chat] response status:', resp.status);
 
             if (!resp.ok) {
-                const errText = await resp.text();
-                console.error('[AI Chat] error response:', resp.status, errText);
                 removeAiLoading();
-                const msg = resp.status === 429 ? '你的请求速率过快，请稍后重试' : `出错啦 (${resp.status})，请稍后重试`;
-                addMessage('ai', msg);
+                addMessage('ai', '你的请求速率过快，请稍后重试');
                 isStreaming = false;
                 if (chatSend) chatSend.style.opacity = '1';
                 return;
@@ -1094,7 +1091,7 @@ window.onresize = () => {
             }
         } catch (e) {
             removeAiLoading();
-            addMessage('ai', '网络错误，请检查连接后重试');
+            addMessage('ai', '你的请求速率过快，请稍后重试');
             isStreaming = false;
             if (chatSend) chatSend.style.opacity = '1';
             return;

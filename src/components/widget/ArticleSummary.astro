@@ -206,14 +206,13 @@
 					headers: { 'Content-Type': 'application/json' },
 					body: JSON.stringify({ articleUrl: window.location.href }),
 				});
-				if (resp.status === 429) {
+				if (!resp.ok) {
 					loadingEl.classList.add('hidden');
 					box.classList.remove('hidden');
 					resultEl.innerHTML = '<span class="opacity-70 font-mono text-sm">⚠ 你的请求速率过快，请稍后重试</span>';
 					resultEl.classList.remove('hidden');
 					return;
 				}
-				if (!resp.ok) throw new Error('http ' + resp.status);
 
 				const reader = resp.body?.getReader();
 				if (!reader) throw new Error('no reader');
@@ -271,7 +270,7 @@
 			} catch {
 				loadingEl.classList.add('hidden');
 				box.classList.remove('hidden');
-				resultEl.innerHTML = '<span class="opacity-50 font-mono text-sm">⚠ 摘要生成失败</span>';
+				resultEl.innerHTML = '<span class="opacity-70 font-mono text-sm">⚠ 你的请求速率过快，请稍后重试</span>';
 				resultEl.classList.remove('hidden');
 			}
 		})();
