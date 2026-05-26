@@ -1,0 +1,944 @@
+
+import {
+	OverlayScrollbars,
+	// ScrollbarsHidingPlugin,
+	// SizeObserverPlugin,
+	// ClickScrollPlugin
+} from 'overlayscrollbars';
+import {getHue, getStoredTheme, setHue, setTheme} from "../utils/setting-utils";
+import {pathsEqual, url} from "../utils/url-utils";
+import {
+	BANNER_HEIGHT,
+	BANNER_HEIGHT_HOME,
+	BANNER_HEIGHT_EXTEND,
+	MAIN_PANEL_OVERLAPS_BANNER_HEIGHT
+} from "../constants/constants";
+import { siteConfig } from '../config';
+
+/* Preload fonts */
+// (async function() {
+// 	try {
+// 		await Promise.all([
+// 			document.fonts.load("400 1em Roboto"),
+// 			document.fonts.load("700 1em Roboto"),
+// 		]);
+// 		document.body.classList.remove("hidden");
+// 	} catch (error) {
+// 		console.log("Failed to load fonts:", error);
+// 	}
+// })();
+
+/* TODO This is a temporary solution for style flicker issue when the transition is activated */
+/* issue link: https://github.com/withastro/astro/issues/8711, the solution get from here too */
+/* update: fixed in Astro 3.2.4 */
+/*
+function disableAnimation() {
+	const css = document.createElement('style')
+	css.appendChild(
+		document.createTextNode(
+			`*{
+              -webkit-transition:none!important;
+              -moz-transition:none!important;
+              -o-transition:none!important;
+              -ms-transition:none!important;
+              transition:none!important
+              }`
+		)
+	)
+	document.head.appendChild(css)
+
+	return () => {
+		// Force restyle
+		;(() => window.getComputedStyle(document.body))()
+
+		// Wait for next tick before removing
+		setTimeout(() => {
+			document.head.removeChild(css)
+		}, 1)
+	}
+}
+*/
+
+const bannerEnabled = !!document.getElementById('banner-wrapper')
+
+function setClickOutsideToClose(panel: string, ignores: string[]) {
+	document.addEventListener("click", event => {
+		let panelDom = document.getElementById(panel);
+		let tDom = event.target;
+		if (!(tDom instanceof Node)) return;		// Ensure the event target is an HTML Node
+		for (let ig of ignores) {
+			let ie = document.getElementById(ig)
+			if (ie == tDom || (ie?.contains(tDom))) {
+				return;
+			}
+		}
+		panelDom!.classList.add("float-panel-closed");
+	});
+}
+setClickOutsideToClose("display-setting", ["display-setting", "display-settings-switch"])
+setClickOutsideToClose("nav-menu-panel", ["nav-menu-panel", "nav-menu-switch"])
+setClickOutsideToClose("search-panel", ["search-panel", "search-bar", "search-switch"])
+
+
+function loadTheme() {
+	const theme = getStoredTheme()
+	setTheme(theme)
+}
+
+function loadHue() {
+	setHue(getHue())
+}
+
+function initCustomScrollbar() {
+	const bodyElement = document.querySelector('body');
+	if (!bodyElement) return;
+	OverlayScrollbars(
+		// docs say that a initialization to the body element would affect native functionality like window.scrollTo
+		// but just leave it here for now
+		{
+			target: bodyElement,
+			cancel: {
+				nativeScrollbarsOverlaid: true,    // don't initialize the overlay scrollbar if there is a native one
+			}
+		}, {
+		scrollbars: {
+			theme: 'scrollbar-base scrollbar-auto py-1',
+			autoHide: 'move',
+			autoHideDelay: 500,
+			autoHideSuspend: false,
+		},
+	});
+
+	const katexElements = document.querySelectorAll('.katex-display') as NodeListOf<HTMLElement>;
+
+	const katexObserverOptions = {
+		root: null,
+		rootMargin: '100px',
+		threshold: 0.1
+	};
+
+	const processKatexElement = (element: HTMLElement) => {
+		if (!element.parentNode) return;
+		if (element.hasAttribute('data-scrollbar-initialized')) return;
+
+		const container = document.createElement('div');
+		container.className = 'katex-display-container';
+		container.setAttribute('aria-label', 'scrollable container for formulas');
+
+		element.parentNode.insertBefore(container, element);
+		container.appendChild(element);
+
+		OverlayScrollbars(container, {
+			scrollbars: {
+				theme: 'scrollbar-base scrollbar-auto',
+				autoHide: 'leave',
+				autoHideDelay: 500,
+				autoHideSuspend: false
+			}
+		});
+
+		element.setAttribute('data-scrollbar-initialized', 'true');
+	};
+
+	const katexObserver = new IntersectionObserver((entries, observer) => {
+		entries.forEach(entry => {
+			if (entry.isIntersecting) {
+			processKatexElement(entry.target as HTMLElement);
+			observer.unobserve(entry.target);
+			}
+		});
+	}, katexObserverOptions);
+
+	katexElements.forEach(element => {
+		katexObserver.observe(element);
+	});
+}
+
+function showBanner() {
+	if (!siteConfig.banner.enable) return;
+
+	const banner = document.getElementById('banner');
+	if (!banner) {
+		console.error('Banner element not found');
+		return;
+	}
+
+	banner.classList.remove('opacity-0', 'scale-105');
+}
+
+function init() {
+	// disableAnimation()()		// TODO
+	loadTheme();
+	loadHue();
+	initCustomScrollbar();
+	showBanner();
+}
+
+/* Load settings when entering the site */
+init();
+
+function animateNumber(el, target) {
+    const duration = 800;
+    const start = 0;
+    const startTime = performance.now();
+
+    function update(currentTime) {
+        const elapsed = currentTime - startTime;
+        const progress = Math.min(elapsed / duration, 1);
+        const eased = 1 - Math.pow(1 - progress, 3);
+        const current = Math.round(start + (target - start) * eased);
+        el.textContent = current.toLocaleString('zh-CN');
+        if (progress < 1) {
+            requestAnimationFrame(update);
+        }
+    }
+    requestAnimationFrame(update);
+}
+
+function fetchPageStats() {
+    const pageUrl = window.location.pathname;
+    const pathWithSlash = pageUrl.endsWith('/') ? pageUrl : pageUrl + '/';
+    const apiUrl = `https://upxuu.com/statsapi/alltime?path=${encodeURIComponent(pathWithSlash)}`;
+
+    const viewsEl = document.getElementById('post-views') || document.querySelector('.post-views');
+
+    if (!viewsEl) return;
+
+    viewsEl.innerHTML = '<svg class="animate-spin h-4 w-4 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>';
+
+    fetch(apiUrl)
+        .then(res => res.ok ? res.json() : null)
+        .then(data => {
+            if (!data || !data.pageviews) {
+                viewsEl.textContent = '0';
+                return;
+            }
+            animateNumber(viewsEl, data.pageviews);
+        })
+        .catch(() => {
+            viewsEl.textContent = '-';
+        });
+}
+
+(window as any).fetchPageStats = fetchPageStats;
+
+const setup = () => {
+	// TODO: temp solution to change the height of the banner
+/*
+	window.swup.hooks.on('animation:out:start', () => {
+		const path = window.location.pathname
+		const body = document.querySelector('body')
+		if (path[path.length - 1] === '/' && !body.classList.contains('is-home')) {
+			body.classList.add('is-home')
+		} else if (path[path.length - 1] !== '/' && body.classList.contains('is-home')) {
+			body.classList.remove('is-home')
+		}
+	})
+*/
+	window.swup.hooks.on('link:click', () => {
+		// Remove the delay for the first time page load
+		document.documentElement.style.setProperty('--content-delay', '0ms')
+
+		// prevent elements from overlapping the navbar
+		if (!bannerEnabled) {
+			return
+		}
+		let threshold = window.innerHeight * (BANNER_HEIGHT / 100) - 72 - 16
+		let navbar = document.getElementById('navbar-wrapper')
+		if (!navbar || !document.body.classList.contains('lg:is-home')) {
+			return
+		}
+		if (document.body.scrollTop >= threshold || document.documentElement.scrollTop >= threshold) {
+			navbar.classList.add('navbar-hidden')
+		}
+	})
+	window.swup.hooks.on('content:replace', initCustomScrollbar)
+	window.swup.hooks.on('visit:start', (visit: {to: {url: string}}) => {
+		// change banner height immediately when a link is clicked
+		const bodyElement = document.querySelector('body')
+		if (pathsEqual(visit.to.url, url('/'))) {
+			bodyElement!.classList.add('lg:is-home');
+		} else {
+			bodyElement!.classList.remove('lg:is-home');
+		}
+
+		// increase the page height during page transition to prevent the scrolling animation from jumping
+		const heightExtend = document.getElementById('page-height-extend')
+		if (heightExtend) {
+			heightExtend.classList.remove('hidden')
+		}
+
+		// Hide the TOC while scrolling back to top
+		let toc = document.getElementById('toc-wrapper');
+		if (toc) {
+			toc.classList.add('toc-not-ready')
+		}
+	});
+	window.swup.hooks.on('page:view', () => {
+		// hide the temp high element when the transition is done
+		const heightExtend = document.getElementById('page-height-extend')
+		if (heightExtend) {
+			heightExtend.classList.remove('hidden')
+		}
+		
+		// 根据当前页面路径调用对应的统计函数
+		const currentPath = window.location.pathname;
+		if (currentPath === '/' || currentPath === '') {
+			// 首页：调用 fetchHomepageStats
+			if (typeof (window as any).fetchHomepageStats === 'function') {
+				(window as any).fetchHomepageStats();
+			}
+		} else {
+			// 其他页面：调用 fetchPageStats
+			fetchPageStats();
+		}
+	});
+	window.swup.hooks.on('visit:end', (_visit: {to: {url: string}}) => {
+		setTimeout(() => {
+			const heightExtend = document.getElementById('page-height-extend')
+			if (heightExtend) {
+				heightExtend.classList.add('hidden')
+			}
+
+            // Just make the transition looks better
+            const toc = document.getElementById('toc-wrapper');
+            if (toc) {
+                toc.classList.remove('toc-not-ready')
+            }
+        }, 200)
+	});
+}
+if (window?.swup?.hooks) {
+	setup()
+} else {
+	document.addEventListener('swup:enable', setup)
+}
+
+let backToTopBtn = document.getElementById('back-to-top-btn');
+let toc = document.getElementById('toc-wrapper');
+let navbar = document.getElementById('navbar-wrapper')
+function scrollFunction() {
+	let bannerHeight = window.innerHeight * (BANNER_HEIGHT / 100)
+
+	if (backToTopBtn) {
+		if (document.body.scrollTop > bannerHeight || document.documentElement.scrollTop > bannerHeight) {
+			backToTopBtn.classList.remove('hide')
+		} else {
+			backToTopBtn.classList.add('hide')
+		}
+	}
+
+	if (bannerEnabled && toc) {
+		if (document.body.scrollTop > bannerHeight || document.documentElement.scrollTop > bannerHeight) {
+			toc.classList.remove('toc-hide')
+		} else {
+			toc.classList.add('toc-hide')
+		}
+	}
+
+	if (!bannerEnabled) return
+	if (navbar) {
+		const NAVBAR_HEIGHT = 72
+		const MAIN_PANEL_EXCESS_HEIGHT = MAIN_PANEL_OVERLAPS_BANNER_HEIGHT * 16			// The height the main panel overlaps the banner
+
+		let bannerHeight = BANNER_HEIGHT
+		if (document.body.classList.contains('lg:is-home') && window.innerWidth >= 1024) {
+			bannerHeight = BANNER_HEIGHT_HOME
+		}
+		let threshold = window.innerHeight * (bannerHeight / 100) - NAVBAR_HEIGHT - MAIN_PANEL_EXCESS_HEIGHT - 16
+		if (document.body.scrollTop >= threshold || document.documentElement.scrollTop >= threshold) {
+			navbar.classList.add('navbar-hidden')
+		} else {
+			navbar.classList.remove('navbar-hidden')
+		}
+	}
+}
+window.onscroll = scrollFunction
+
+window.onresize = () => {
+	// calculate the --banner-height-extend, which needs to be a multiple of 4 to avoid blurry text
+	let offset = Math.floor(window.innerHeight * (BANNER_HEIGHT_EXTEND / 100));
+	offset = offset - offset % 4;
+	document.documentElement.style.setProperty('--banner-height-extend', `${offset}px`);
+}
+
+// Mobile TOC interactions
+(function() {
+    let tocBtn: HTMLElement | null = null;
+    let tocFab: HTMLElement | null = null;
+    let tocPanel: HTMLElement | null = null;
+    let tocBackdrop: HTMLElement | null = null;
+    let tocClose: HTMLElement | null = null;
+    let backToTopBtn: HTMLElement | null = null;
+    let progressEl: HTMLElement | null = null;
+    let isTocOpen = false;
+
+    function openToc() {
+        if (!tocPanel || !tocBackdrop) return;
+        isTocOpen = true;
+        tocPanel.style.transform = 'translateY(0)';
+        tocPanel.style.opacity = '1';
+        tocBackdrop.classList.remove('hidden');
+        setTimeout(() => { tocBackdrop!.style.opacity = '1'; }, 10);
+    }
+
+    function closeToc() {
+        if (!tocPanel || !tocBackdrop) return;
+        isTocOpen = false;
+        tocPanel.style.transform = 'translateY(calc(100% + 32px))';
+        tocPanel.style.opacity = '0';
+        tocBackdrop.style.opacity = '0';
+        setTimeout(() => { tocBackdrop!.classList.add('hidden'); }, 300);
+    }
+
+    function updateProgress() {
+        if (!progressEl) return;
+        const scrollTop = window.scrollY;
+        const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+        const pct = docHeight > 0 ? Math.round((scrollTop / docHeight) * 100) : 0;
+        progressEl.textContent = `${pct}%`;
+    }
+
+    function updateBackToTop() {
+        if (!backToTopBtn) return;
+        if (window.scrollY > 400) {
+            backToTopBtn.style.opacity = '1';
+            backToTopBtn.style.transform = 'translateY(0)';
+            backToTopBtn.style.pointerEvents = 'auto';
+        } else {
+            backToTopBtn.style.opacity = '0';
+            backToTopBtn.style.transform = 'translateY(8px)';
+            backToTopBtn.style.pointerEvents = 'none';
+        }
+    }
+
+    function onScroll() {
+        updateProgress();
+        updateBackToTop();
+    }
+
+    function scrollToTop() {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function setupMobileToc() {
+        tocFab = document.getElementById('mobile-toc-fab');
+        tocBtn = document.getElementById('mobile-toc-btn');
+        tocPanel = document.getElementById('mobile-toc-panel');
+        tocBackdrop = document.getElementById('mobile-toc-backdrop');
+        tocClose = document.getElementById('mobile-toc-close');
+        backToTopBtn = document.getElementById('mobile-back-to-top');
+        progressEl = document.getElementById('mobile-reading-progress');
+
+        const hasToc = !!tocPanel;
+
+        if (hasToc) {
+            const slot = document.getElementById('mobile-toc-slot');
+            if (slot && tocPanel && tocPanel.parentElement !== slot) {
+                if (tocBackdrop) slot.insertBefore(tocBackdrop, slot.firstChild);
+                slot.appendChild(tocPanel);
+                if (tocFab) slot.appendChild(tocFab);
+            }
+        }
+
+        if (tocFab) {
+            tocFab.style.display = hasToc ? 'flex' : 'none';
+        }
+
+        if (backToTopBtn) {
+            backToTopBtn.onclick = (e) => {
+                e.stopPropagation();
+                scrollToTop();
+            };
+        }
+
+        if (!tocBtn || !tocPanel || !tocBackdrop) return;
+
+        tocBtn.onclick = (e) => {
+            e.stopPropagation();
+            if (isTocOpen) {
+                closeToc();
+            } else {
+                openToc();
+            }
+        };
+
+        tocClose!.onclick = closeToc;
+        tocBackdrop!.onclick = closeToc;
+
+        tocPanel!.onclick = (e) => {
+            if ((e.target as HTMLElement).closest('a[href^="#"]')) {
+                setTimeout(closeToc, 150);
+            }
+        };
+
+        updateProgress();
+        updateBackToTop();
+    }
+
+    window.addEventListener('popstate', closeToc);
+    window.addEventListener('scroll', onScroll, { passive: true });
+
+    setupMobileToc();
+
+    if (window.swup) {
+        window.swup.hooks.on('page:view', setupMobileToc);
+    } else {
+        document.addEventListener('swup:enable', () => {
+            window.swup!.hooks.on('page:view', setupMobileToc);
+        });
+    }
+})();
+
+// AI Chat interactions
+(function() {
+    const WORKER_URL = 'https://blogapi.upxuu.com/chat';
+
+    let chatBtn: HTMLElement | null = null;
+    let chatPanel: HTMLElement | null = null;
+    let chatBackdrop: HTMLElement | null = null;
+    let chatClose: HTMLElement | null = null;
+    let chatInput: HTMLTextAreaElement | null = null;
+    let chatSend: HTMLElement | null = null;
+    let chatMessages: HTMLElement | null = null;
+    let isChatOpen = false;
+    let isStreaming = false;
+    let chatHistory: Array<{ role: string; content: string }> = [];
+
+    function openAiChat() {
+        if (!chatPanel || !chatBackdrop) return;
+        isChatOpen = true;
+        chatPanel.style.transform = 'translateY(0)';
+        chatPanel.style.opacity = '1';
+        chatBackdrop.classList.remove('hidden');
+        setTimeout(() => { chatBackdrop!.style.opacity = '1'; }, 10);
+        setTimeout(() => {
+            chatInput?.focus();
+            scrollChatToBottom();
+        }, 350);
+    }
+
+    function closeAiChat() {
+        if (!chatPanel || !chatBackdrop) return;
+        isChatOpen = false;
+        chatPanel.style.transform = 'translateY(calc(100% + 32px))';
+        chatPanel.style.opacity = '0';
+        chatBackdrop.style.opacity = '0';
+        setTimeout(() => { chatBackdrop!.classList.add('hidden'); }, 300);
+        chatHistory = [];
+        if (chatMessages) {
+            chatMessages.innerHTML = '<div class="text-center text-xs text-30 py-4">可以问文章相关的问题，XUUAI 会参考文章内容回答</div>';
+        }
+    }
+
+    function scrollChatToBottom() {
+        if (!chatMessages) return;
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+
+    function addMessage(role: string, content: string) {
+        if (!chatMessages) return;
+        const div = document.createElement('div');
+        div.className = role === 'user' ? 'msg-user' : 'msg-ai';
+        div.innerHTML = `<div class="msg-bubble">${escapeHtml(content)}</div>`;
+        chatMessages.appendChild(div);
+        scrollChatToBottom();
+    }
+
+    function addAiLoading() {
+        if (!chatMessages) return;
+        const div = document.createElement('div');
+        div.className = 'msg-ai';
+        div.id = 'ai-loading-indicator';
+        div.innerHTML = '<div class="msg-bubble ai-loading"><span></span><span></span><span></span></div>';
+        chatMessages.appendChild(div);
+        scrollChatToBottom();
+    }
+
+    function removeAiLoading() {
+        const el = document.getElementById('ai-loading-indicator');
+        if (el) el.remove();
+    }
+
+    function createAiBubble(): HTMLElement | null {
+        if (!chatMessages) return null;
+        removeAiLoading();
+        const div = document.createElement('div');
+        div.className = 'msg-ai';
+        const bubble = document.createElement('div');
+        bubble.className = 'msg-bubble ai-typing';
+        div.appendChild(bubble);
+        chatMessages.appendChild(div);
+        return bubble;
+    }
+
+    function finishAiBubble(bubble: HTMLElement) {
+        bubble.classList.remove('ai-typing');
+    }
+
+    function escapeHtml(text: string): string {
+        const el = document.createElement('div');
+        el.textContent = text;
+        return el.innerHTML;
+    }
+
+    function getArticleHeadings(): { slug: string; text: string }[] {
+        const el = document.getElementById('article-headings-data');
+        if (!el || !el.textContent) return [];
+        try {
+            return el.textContent.split('|').filter(Boolean).map(s => JSON.parse(s));
+        } catch {
+            return [];
+        }
+    }
+
+    function citeLinkHtml(num: number): string {
+        const headings = getArticleHeadings();
+        const heading = headings[num - 1];
+        if (!heading) return `[${num}]`;
+        const slug = escapeHtml(heading.slug);
+        return `<a href="#${slug}" class="cite-link">${num}<span class="cite-arrow">↗</span></a>`;
+    }
+
+    // ─── inline markdown for streaming ───
+    function renderInlineMd(text: string): string {
+        let h = text;
+        // citations [n] – convert to placeholder first to protect from escaping
+        const cites: string[] = [];
+        h = h.replace(/\[(\d+)\]/g, (_, n) => {
+            cites.push(citeLinkHtml(parseInt(n, 10)));
+            return `\x00CITE${cites.length - 1}\x00`;
+        });
+        h = escapeHtml(h);
+        // inline code
+        h = h.replace(/`([^`]+)`/g, '<code>$1</code>');
+        // bold
+        h = h.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+        // italic
+        h = h.replace(/\*([^*]+)\*/g, '<em>$1</em>');
+        // links
+        h = h.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener">$1</a>');
+        // newlines
+        h = h.replace(/\n/g, '<br>');
+        // restore citations
+        h = h.replace(/\x00CITE(\d+)\x00/g, (_, i) => cites[parseInt(i, 10)] || '');
+        return h;
+    }
+
+    // ─── full markdown for final render ───
+    function renderFullMd(text: string): string {
+        const lines = text.split('\n');
+        const out: string[] = [];
+        let i = 0;
+
+        function flushParagraph(buf: string[]) {
+            if (buf.length === 0) return;
+            const para = buf.join('\n').trim();
+            if (!para) return;
+            out.push(`<p>${renderInlineMd(para)}</p>`);
+        }
+
+        while (i < lines.length) {
+            const line = lines[i];
+            const trimmed = line.trim();
+
+            // code block
+            if (trimmed.startsWith('```')) {
+                const lang = trimmed.slice(3).trim();
+                i++;
+                const codeLines: string[] = [];
+                while (i < lines.length && !lines[i].trim().startsWith('```')) {
+                    codeLines.push(lines[i]);
+                    i++;
+                }
+                const code = escapeHtml(codeLines.join('\n'));
+                out.push(`<pre><code>${code}</code></pre>`);
+                i++; // skip closing ```
+                continue;
+            }
+
+            // headings
+            if (/^#{1,3}\s/.test(trimmed)) {
+                const level = trimmed.match(/^#+/)![0].length;
+                const hText = renderInlineMd(trimmed.replace(/^#+\s*/, ''));
+                out.push(`<h${level} style="font-size:${level === 1 ? '1.1' : level === 2 ? '1.05' : '1'}em;font-weight:700;margin:0.5em 0 0.25em">${hText}</h${level}>`);
+                i++;
+                continue;
+            }
+
+            // unordered list
+            if (/^[-*+]\s/.test(trimmed)) {
+                out.push('<ul>');
+                while (i < lines.length && /^[-*+]\s/.test(lines[i].trim())) {
+                    out.push(`<li>${renderInlineMd(lines[i].trim().replace(/^[-*+]\s*/, ''))}</li>`);
+                    i++;
+                }
+                out.push('</ul>');
+                continue;
+            }
+
+            // ordered list
+            if (/^\d+\.\s/.test(trimmed)) {
+                out.push('<ol>');
+                while (i < lines.length && /^\d+\.\s/.test(lines[i].trim())) {
+                    out.push(`<li>${renderInlineMd(lines[i].trim().replace(/^\d+\.\s*/, ''))}</li>`);
+                    i++;
+                }
+                out.push('</ol>');
+                continue;
+            }
+
+            // horizontal rule
+            if (/^---+\s*$/.test(trimmed)) {
+                out.push('<hr style="border:none;border-top:1px solid var(--line-color);margin:0.5em 0">');
+                i++;
+                continue;
+            }
+
+            // blank line = paragraph break
+            if (trimmed === '') {
+                i++;
+                continue;
+            }
+
+            // regular line – collect paragraph
+            const paraLines: string[] = [];
+            while (i < lines.length) {
+                const l = lines[i].trim();
+                if (l === '' || /^#{1,3}\s/.test(l) || /^[-*+]\s/.test(l) || /^\d+\.\s/.test(l) || l.startsWith('```') || /^---+\s*$/.test(l)) {
+                    break;
+                }
+                paraLines.push(lines[i]);
+                i++;
+            }
+            if (paraLines.length) {
+                const joined = paraLines.join(' ').replace(/  +/g, ' ').trim();
+                if (joined) {
+                    out.push(`<p>${renderInlineMd(joined)}</p>`);
+                }
+            }
+        }
+
+        return out.join('\n');
+    }
+
+    function getArticleHeadings(): { slug: string; text: string }[] {
+
+    async function sendMessage(text: string) {
+        if (!text.trim() || isStreaming) return;
+
+        // add user message
+        addMessage('user', text.trim());
+        chatHistory.push({ role: 'user', content: text.trim() });
+
+        if (chatInput) chatInput.value = '';
+        if (chatInput) {
+            chatInput.style.height = 'auto';
+        }
+
+        // loading
+        addAiLoading();
+        isStreaming = true;
+        if (chatSend) chatSend.style.opacity = '0.5';
+
+        let aiBubble: HTMLElement | null = null;
+        let fullReply = '';
+        let thinkingEl: HTMLElement | null = null;
+        let hasContent = false;
+
+        try {
+            console.log('[AI Chat] POST to', WORKER_URL, { articleUrl: window.location.href, messagesCount: chatHistory.length });
+            const resp = await fetch(WORKER_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    articleUrl: window.location.href,
+                    messages: chatHistory,
+                }),
+            });
+
+            console.log('[AI Chat] response status:', resp.status);
+
+            if (!resp.ok) {
+                const errText = await resp.text();
+                console.error('[AI Chat] error response:', resp.status, errText);
+                removeAiLoading();
+                addMessage('ai', `出错啦 (${resp.status})，请稍后重试`);
+                isStreaming = false;
+                if (chatSend) chatSend.style.opacity = '1';
+                return;
+            }
+
+            const contentType = resp.headers.get('content-type') || '';
+            console.log('[AI Chat] content-type:', contentType);
+
+            const reader = resp.body?.getReader();
+            if (!reader) {
+                removeAiLoading();
+                addMessage('ai', '无法读取响应流');
+                isStreaming = false;
+                if (chatSend) chatSend.style.opacity = '1';
+                return;
+            }
+
+            const decoder = new TextDecoder();
+            let buffer = '';
+
+            while (true) {
+                const { done, value } = await reader.read();
+                if (done) break;
+
+                buffer += decoder.decode(value, { stream: true });
+                const lines = buffer.split('\n');
+                buffer = lines.pop() || '';
+
+                for (const line of lines) {
+                    if (!line.startsWith('data: ')) continue;
+                    const data = line.slice(6).trim();
+                    if (data === '[DONE]') continue;
+
+                    try {
+                        const json = JSON.parse(data);
+                        const delta = json.choices?.[0]?.delta;
+                        const reasoning = delta?.reasoning_content;
+                        const content = delta?.content;
+
+                        // reasoning content - show in thinking block
+                        if (reasoning && !hasContent) {
+                            if (!thinkingEl) {
+                                thinkingEl = document.createElement('div');
+                                thinkingEl.className = 'ai-thinking';
+                                const label = document.createElement('div');
+                                label.className = 'ai-thinking-label';
+                                label.textContent = 'Thinking...';
+                                thinkingEl.appendChild(label);
+                                const textEl = document.createElement('div');
+                                textEl.className = 'ai-thinking-text';
+                                thinkingEl.appendChild(textEl);
+                                if (!aiBubble) {
+                                    aiBubble = createAiBubble();
+                                }
+                                if (aiBubble) {
+                                    aiBubble.before(thinkingEl);
+                                }
+                            }
+                            const textEl = thinkingEl.querySelector('.ai-thinking-text');
+                            if (textEl) {
+                                textEl.textContent += reasoning;
+                            }
+                        }
+
+                        // actual content
+                        if (content) {
+                            if (!hasContent && thinkingEl) {
+                                // first content after thinking - add separator
+                                const hr = document.createElement('hr');
+                                hr.className = 'ai-thinking-hr';
+                                if (aiBubble) {
+                                    aiBubble.before(hr);
+                                }
+                                hasContent = true;
+                            }
+                            if (!aiBubble) {
+                                aiBubble = createAiBubble();
+                            }
+                            if (aiBubble) {
+                                fullReply += content;
+                                aiBubble.innerHTML = renderInlineMd(fullReply);
+                                scrollChatToBottom();
+                            }
+                        }
+                    } catch {}
+                }
+            }
+        } catch (e) {
+            removeAiLoading();
+            addMessage('ai', '网络错误，请检查连接后重试');
+            isStreaming = false;
+            if (chatSend) chatSend.style.opacity = '1';
+            return;
+        }
+
+        if (aiBubble) {
+            console.log('[AI Chat] stream complete, chars:', fullReply.length);
+            // Re-render full markdown with citations
+            aiBubble.innerHTML = renderFullMd(fullReply);
+            finishAiBubble(aiBubble);
+        }
+        if (fullReply) {
+            chatHistory.push({ role: 'assistant', content: fullReply });
+        }
+        removeAiLoading();
+        isStreaming = false;
+        if (chatSend) chatSend.style.opacity = '1';
+        scrollChatToBottom();
+    }
+
+    function setupAiChat() {
+        chatBtn = document.getElementById('ai-chat-btn');
+        chatPanel = document.getElementById('ai-chat-panel');
+        chatBackdrop = document.getElementById('ai-chat-backdrop');
+        chatClose = document.getElementById('ai-chat-close');
+        chatInput = document.getElementById('ai-chat-input') as HTMLTextAreaElement | null;
+        chatSend = document.getElementById('ai-chat-send');
+        chatMessages = document.getElementById('ai-chat-messages');
+
+        // Relocate chat elements on post pages (from [...slug].astro → #ai-chat-slot)
+        const hasChat = !!chatPanel;
+        if (hasChat) {
+            const slot = document.getElementById('ai-chat-slot');
+            if (slot && chatPanel && chatPanel.parentElement !== slot) {
+                if (chatBackdrop && chatBackdrop.parentElement !== slot) {
+                    slot.insertBefore(chatBackdrop, slot.firstChild);
+                }
+                slot.appendChild(chatPanel);
+            }
+        }
+
+        if (!chatBtn || !chatPanel || !chatBackdrop) return;
+
+        chatBtn.onclick = (e) => {
+            e.stopPropagation();
+            if (isChatOpen) {
+                closeAiChat();
+            } else {
+                openAiChat();
+            }
+        };
+
+        chatClose!.onclick = closeAiChat;
+        chatBackdrop!.onclick = closeAiChat;
+
+        if (chatSend) {
+            chatSend.onclick = () => {
+                if (chatInput) sendMessage(chatInput.value);
+            };
+        }
+
+        if (chatInput) {
+            chatInput.onkeydown = (e) => {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    sendMessage(chatInput.value);
+                }
+            };
+            chatInput.oninput = () => {
+                chatInput!.style.height = 'auto';
+                chatInput!.style.height = `${Math.min(chatInput!.scrollHeight, 120)}px`;
+            };
+        }
+    }
+
+    window.addEventListener('popstate', closeAiChat);
+
+    setupAiChat();
+
+    if (window.swup) {
+        window.swup.hooks.on('page:view', setupAiChat);
+    } else {
+        document.addEventListener('swup:enable', () => {
+            window.swup!.hooks.on('page:view', setupAiChat);
+        });
+    }
+})();
+
