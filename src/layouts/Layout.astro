@@ -767,12 +767,13 @@ window.onresize = () => {
                 div.appendChild(bubble);
                 chatMessages.appendChild(div);
                 renderJsonResponse(bubble, msg.content);
-                if (msg.tokens !== undefined || msg.elapsed) {
+                if (msg.tokens !== undefined || msg.elapsed || msg.model) {
                     const statsDiv = document.createElement('div');
                     statsDiv.className = 'ai-stats';
                     const t = msg.tokens !== undefined ? msg.tokens : '?';
                     const e = msg.elapsed || '?';
-                    statsDiv.textContent = `${t} tokens · ${e}s`;
+                    const mdl = msg.model ? msg.model.split('/').pop() : '';
+                    statsDiv.textContent = mdl ? `${mdl} · ${t} tokens · ${e}s` : `${t} tokens · ${e}s`;
                     div.appendChild(statsDiv);
                 }
             }
@@ -973,6 +974,7 @@ window.onresize = () => {
         let thinkingEl: HTMLElement | null = null;
         let hasContent = false;
         let usage: { completion_tokens?: number } | null = null;
+        let modelName = '';
 
         try {
             console.log('[AI Chat] POST to', WORKER_URL, { articleUrl: window.location.href, messagesCount: chatHistory.length });
@@ -991,7 +993,8 @@ window.onresize = () => {
                 const errText = await resp.text();
                 console.error('[AI Chat] error response:', resp.status, errText);
                 removeAiLoading();
-                addMessage('ai', `出错啦 (${resp.status})，请稍后重试`);
+                const msg = resp.status === 429 ? '你的请求速率过快，请稍后重试' : `出错啦 (${resp.status})，请稍后重试`;
+                addMessage('ai', msg);
                 isStreaming = false;
                 if (chatSend) chatSend.style.opacity = '1';
                 return;
@@ -1027,6 +1030,9 @@ window.onresize = () => {
 
                     try {
                         const json = JSON.parse(data);
+                        if (!modelName && json.model) {
+                            modelName = json.model;
+                        }
                         if (json.usage) {
                             usage = json.usage;
                             continue;
@@ -1105,10 +1111,11 @@ window.onresize = () => {
             if (aiBubble) {
                 const statsDiv = document.createElement('div');
                 statsDiv.className = 'ai-stats';
-                statsDiv.textContent = `${tokens || '?'} tokens · ${elapsed}s`;
+                const mdl = modelName.split('/').pop() || '';
+                statsDiv.textContent = `${mdl} · ${tokens || '?'} tokens · ${elapsed}s`;
                 aiBubble.after(statsDiv);
             }
-            chatHistory.push({ role: 'assistant', content: fullReply, tokens, elapsed });
+            chatHistory.push({ role: 'assistant', content: fullReply, tokens, elapsed, model: modelName });
             saveChatHistory();
         }
         removeAiLoading();

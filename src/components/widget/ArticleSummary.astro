@@ -105,7 +105,7 @@
 			}
 		}
 
-		function renderSummary(fullText: string, usageTokens?: number) {
+		function renderSummary(fullText: string, usageTokens?: number, modelName?: string) {
 			// Strip markdown fences
 			let clean = fullText.replace(/```(?:json)?\s*/gi, '').replace(/\s*```/g, '').trim();
 
@@ -181,7 +181,8 @@
 			// Stats
 			const elapsed = ((Date.now() - startTime) / 1000).toFixed(1);
 			const tokens = usageTokens || Math.round(fullText.length / 3);
-			statsEl.textContent = `${tokens} tokens · ${elapsed}s`;
+			const mdl = modelName ? modelName.split('/').pop() + ' · ' : '';
+			statsEl.textContent = `${mdl}${tokens} tokens · ${elapsed}s`;
 			statsEl.classList.remove('hidden');
 		}
 
@@ -197,6 +198,7 @@
 			let full = '';
 			let hasContent = false;
 			let usage: { completion_tokens?: number } | null = null;
+			let modelName = '';
 
 			try {
 				const resp = await fetch('https://blogapi.upxuu.com/summarize', {
@@ -204,6 +206,13 @@
 					headers: { 'Content-Type': 'application/json' },
 					body: JSON.stringify({ articleUrl: window.location.href }),
 				});
+				if (resp.status === 429) {
+					loadingEl.classList.add('hidden');
+					box.classList.remove('hidden');
+					resultEl.innerHTML = '<span class="opacity-70 font-mono text-sm">⚠ 你的请求速率过快，请稍后重试</span>';
+					resultEl.classList.remove('hidden');
+					return;
+				}
 				if (!resp.ok) throw new Error('http ' + resp.status);
 
 				const reader = resp.body?.getReader();
@@ -226,6 +235,9 @@
 						if (data === '[DONE]') continue;
 						try {
 							const parsed = JSON.parse(data);
+							if (!modelName && parsed.model) {
+								modelName = parsed.model;
+							}
 							if (parsed.usage) {
 								usage = parsed.usage;
 								continue;
@@ -254,7 +266,7 @@
 				}
 				if (full) {
 					sessionStorage.setItem(cacheKey, full);
-					renderSummary(full, usage?.completion_tokens);
+					renderSummary(full, usage?.completion_tokens, modelName);
 				}
 			} catch {
 				loadingEl.classList.add('hidden');
