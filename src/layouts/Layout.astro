@@ -730,13 +730,11 @@ window.onresize = () => {
 (function() {
     const WORKER_BASE = 'https://blogapi.upxuu.com';
     const CHAT_MODELS = [
-        { id: 'qwen', name: 'Qwen 3.5', url: `${WORKER_BASE}/chat` },
-        { id: 'gptoss', name: 'GPT-OSS', url: `${WORKER_BASE}/chat2` },
+        { id: 'gptoss', name: 'GPT-OSS', url: `${WORKER_BASE}/chat` },
         { id: 'deepseek', name: 'DeepSeek R1', url: `${WORKER_BASE}/chat3` },
     ];
     const SUMMARY_MODELS = [
-        { id: 'qwen', name: 'Qwen 3.5', url: `${WORKER_BASE}/summarize` },
-        { id: 'gptoss', name: 'GPT-OSS', url: `${WORKER_BASE}/summarize2` },
+        { id: 'gptoss', name: 'GPT-OSS', url: `${WORKER_BASE}/summarize` },
         { id: 'deepseek', name: 'DeepSeek R1', url: `${WORKER_BASE}/summarize3` },
     ];
     let chatModelIdx = 0;
