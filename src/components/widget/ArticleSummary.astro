@@ -360,7 +360,6 @@
 							const parsed = JSON.parse(data);
 							if (parsed.usage) {
 								usage = parsed.usage;
-								continue;
 							}
 							const d = parsed.choices?.[0]?.delta;
 							if (d?.reasoning_content && !hasContent) {

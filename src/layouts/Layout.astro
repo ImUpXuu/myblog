@@ -1063,7 +1063,6 @@ window.onresize = () => {
                         }
                         if (json.usage) {
                             usage = json.usage;
-                            continue;
                         }
                         const delta = json.choices?.[0]?.delta;
                         const reasoning = delta?.reasoning_content;
