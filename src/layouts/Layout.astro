@@ -731,11 +731,13 @@ window.onresize = () => {
     const WORKER_BASE = 'https://blogapi.upxuu.com';
     const CHAT_MODELS = [
         { id: 'gptoss', name: 'GPT-OSS', url: `${WORKER_BASE}/chat` },
-        { id: 'deepseek', name: 'DeepSeek R1', url: `${WORKER_BASE}/chat3` },
+        { id: 'deepseek', name: 'DeepSeek R1', url: `${WORKER_BASE}/chat2` },
+        { id: 'qwen', name: 'Qwen 3.5', url: `${WORKER_BASE}/chat3` },
     ];
     const SUMMARY_MODELS = [
         { id: 'gptoss', name: 'GPT-OSS', url: `${WORKER_BASE}/summarize` },
-        { id: 'deepseek', name: 'DeepSeek R1', url: `${WORKER_BASE}/summarize3` },
+        { id: 'deepseek', name: 'DeepSeek R1', url: `${WORKER_BASE}/summarize2` },
+        { id: 'qwen', name: 'Qwen 3.5', url: `${WORKER_BASE}/summarize3` },
     ];
     let chatModelIdx = 0;
     let summaryModelIdx = 0;
@@ -1173,39 +1175,40 @@ window.onresize = () => {
         if (chatSend) chatSend.style.opacity = '1';
     }
 
-    function renderChatModelSelector() {
-        const el = document.getElementById('ai-chat-model-selector');
+    function renderDropdown(elId: string, models: typeof CHAT_MODELS, getIdx: () => number, setIdx: (i: number) => void) {
+        const el = document.getElementById(elId);
         if (!el) return;
         el.innerHTML = '';
-        for (let i = 0; i < CHAT_MODELS.length; i++) {
-            const btn = document.createElement('button');
-            btn.className = `model-pill ${i === chatModelIdx ? 'active' : ''}`;
-            btn.textContent = CHAT_MODELS[i].name;
-            btn.onclick = () => {
-                chatModelIdx = i;
-                localStorage.setItem('xuai-chat-model', String(i));
-                renderChatModelSelector();
+        const current = models[getIdx()];
+        const toggle = document.createElement('button');
+        toggle.className = 'model-dropdown-toggle';
+        toggle.textContent = current.name + ' ▾';
+        const menu = document.createElement('div');
+        menu.className = 'model-dropdown-menu hidden';
+        for (let i = 0; i < models.length; i++) {
+            if (i === getIdx()) continue;
+            const item = document.createElement('button');
+            item.textContent = models[i].name;
+            item.onclick = () => {
+                setIdx(i);
+                localStorage.setItem(elId === 'ai-chat-model-selector' ? 'xuai-chat-model' : 'xuai-summary-model', String(i));
+                renderDropdown(elId, models, getIdx, setIdx);
             };
-            el.appendChild(btn);
+            menu.appendChild(item);
         }
+        toggle.onclick = (e) => {
+            e.stopPropagation();
+            const isOpening = menu.classList.contains('hidden');
+            menu.classList.toggle('hidden');
+            if (isOpening) {
+                setTimeout(() => document.addEventListener('click', () => menu.classList.add('hidden'), { once: true }));
+            }
+        };
+        el.appendChild(toggle);
+        el.appendChild(menu);
     }
-
-    function renderSummaryModelSelector() {
-        const el = document.getElementById('summary-model-selector');
-        if (!el) return;
-        el.innerHTML = '';
-        for (let i = 0; i < SUMMARY_MODELS.length; i++) {
-            const btn = document.createElement('button');
-            btn.className = `model-pill ${i === summaryModelIdx ? 'active' : ''}`;
-            btn.textContent = SUMMARY_MODELS[i].name;
-            btn.onclick = () => {
-                summaryModelIdx = i;
-                localStorage.setItem('xuai-summary-model', String(i));
-                renderSummaryModelSelector();
-            };
-            el.appendChild(btn);
-        }
-    }
+    function renderChatModelSelector() { renderDropdown('ai-chat-model-selector', CHAT_MODELS, () => chatModelIdx, (i) => { chatModelIdx = i; }); }
+    function renderSummaryModelSelector() { renderDropdown('summary-model-selector', SUMMARY_MODELS, () => summaryModelIdx, (i) => { summaryModelIdx = i; }); }
 
     function setupAiChat() {
         resetChatState();
