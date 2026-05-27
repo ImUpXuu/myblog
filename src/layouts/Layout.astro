@@ -728,7 +728,21 @@ window.onresize = () => {
 
 // AI Chat interactions
 (function() {
-    const WORKER_URL = 'https://blogapi.upxuu.com/chat';
+    const WORKER_BASE = 'https://blogapi.upxuu.com';
+    const CHAT_MODELS = [
+        { id: 'qwen', name: 'Qwen 3.5', url: `${WORKER_BASE}/chat` },
+        { id: 'gptoss', name: 'GPT-OSS', url: `${WORKER_BASE}/chat2` },
+        { id: 'deepseek', name: 'DeepSeek R1', url: `${WORKER_BASE}/chat3` },
+    ];
+    const SUMMARY_MODELS = [
+        { id: 'qwen', name: 'Qwen 3.5', url: `${WORKER_BASE}/summarize` },
+        { id: 'gptoss', name: 'GPT-OSS', url: `${WORKER_BASE}/summarize2` },
+        { id: 'deepseek', name: 'DeepSeek R1', url: `${WORKER_BASE}/summarize3` },
+    ];
+    let chatModelIdx = 0;
+    let summaryModelIdx = 0;
+
+    function chatModelUrl() { return CHAT_MODELS[chatModelIdx].url; }
 
     let chatBtn: HTMLElement | null = null;
     let chatPanel: HTMLElement | null = null;
@@ -742,7 +756,8 @@ window.onresize = () => {
     let chatHistory: Array<{ role: string; content: string }> = [];
 
     function chatStorageKey(): string {
-        return 'xuai-chat-' + window.location.pathname.replace(/[^a-z0-9]/gi, '_');
+        const m = window.location.pathname.match(/\/posts\/(.+?)\/?$/);
+        return m ? `xuai-chat-${m[1]}` : 'xuai-chat-nopost';
     }
     function loadChatHistory() {
         try {
@@ -900,7 +915,7 @@ window.onresize = () => {
                 qDiv.className = 'summary-questions-section';
                 const title = document.createElement('div');
                 title.className = 'summary-qs-title';
-                title.textContent = '继续提问';
+                title.textContent = '点击词条继续问AI';
                 qDiv.appendChild(title);
                 for (const q of item.q) {
                     const btn = document.createElement('button');
@@ -977,15 +992,31 @@ window.onresize = () => {
         let modelName = '';
 
         try {
-            console.log('[AI Chat] POST to', WORKER_URL, { articleUrl: window.location.href, messagesCount: chatHistory.length });
-            const resp = await fetch(WORKER_URL, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    articleUrl: window.location.href,
-                    messages: chatHistory,
-                }),
-            });
+            async function tryModel(startIdx: number): Promise<Response | null> {
+                for (let i = startIdx; i < CHAT_MODELS.length; i++) {
+                    try {
+                        const r = await fetch(CHAT_MODELS[i].url, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                articleUrl: window.location.href,
+                                messages: chatHistory,
+                            }),
+                        });
+                        if (r.ok) { chatModelIdx = i; localStorage.setItem('xuai-chat-model', String(i)); return r; }
+                    } catch {}
+                }
+                return null;
+            }
+            let resp = await tryModel(chatModelIdx);
+            if (!resp) resp = await tryModel(0);
+            if (!resp) {
+                removeAiLoading();
+                addMessage('ai', '你的请求速率过快，请稍后重试');
+                isStreaming = false;
+                if (chatSend) chatSend.style.opacity = '1';
+                return;
+            }
 
             console.log('[AI Chat] response status:', resp.status);
 
@@ -1144,6 +1175,40 @@ window.onresize = () => {
         if (chatSend) chatSend.style.opacity = '1';
     }
 
+    function renderChatModelSelector() {
+        const el = document.getElementById('ai-chat-model-selector');
+        if (!el) return;
+        el.innerHTML = '';
+        for (let i = 0; i < CHAT_MODELS.length; i++) {
+            const btn = document.createElement('button');
+            btn.className = `model-pill ${i === chatModelIdx ? 'active' : ''}`;
+            btn.textContent = CHAT_MODELS[i].name;
+            btn.onclick = () => {
+                chatModelIdx = i;
+                localStorage.setItem('xuai-chat-model', String(i));
+                renderChatModelSelector();
+            };
+            el.appendChild(btn);
+        }
+    }
+
+    function renderSummaryModelSelector() {
+        const el = document.getElementById('summary-model-selector');
+        if (!el) return;
+        el.innerHTML = '';
+        for (let i = 0; i < SUMMARY_MODELS.length; i++) {
+            const btn = document.createElement('button');
+            btn.className = `model-pill ${i === summaryModelIdx ? 'active' : ''}`;
+            btn.textContent = SUMMARY_MODELS[i].name;
+            btn.onclick = () => {
+                summaryModelIdx = i;
+                localStorage.setItem('xuai-summary-model', String(i));
+                renderSummaryModelSelector();
+            };
+            el.appendChild(btn);
+        }
+    }
+
     function setupAiChat() {
         resetChatState();
         chatBtn = document.getElementById('ai-chat-btn');
@@ -1198,6 +1263,13 @@ window.onresize = () => {
                 chatInput!.style.height = `${Math.min(chatInput!.scrollHeight, 120)}px`;
             };
         }
+
+        try {
+            const saved = localStorage.getItem('xuai-chat-model');
+            if (saved) chatModelIdx = parseInt(saved, 10);
+            if (!CHAT_MODELS[chatModelIdx]) chatModelIdx = 0;
+        } catch { chatModelIdx = 0; }
+        renderChatModelSelector();
     }
 
     window.addEventListener('popstate', closeAiChat);
