@@ -1,5 +1,17 @@
 [
   {
+    "title": "关于本站更改版权许可协议的声明",
+    "slug": "about-license-change",
+    "description": "本站即日起将博客文章的版权许可协议由 CC BY-NC-SA 4.0 变更为 CC BY-NC-ND 4.0（附加授权条件），2026年5月28日前已完成的转载仍适用原协议。",
+    "category": "",
+    "tags": [
+      "公告"
+    ],
+    "wordCount": 39,
+    "published": "2026-05-28T00:00:00.000Z",
+    "updated": null
+  },
+  {
     "title": "十年，我的打印机为我吐出了3.9w张纸",
     "slug": "myprinter",
     "description": "今天打印机驱动出了点问题 在打开设置时 偶然看到了2013年的驱动日期...",
