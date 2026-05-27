@@ -1,43 +1,15 @@
 ---
-import { Icon } from "astro-icon/components";
-import { licenseConfig, profileConfig } from "../../config";
-import I18nKey from "../../i18n/i18nKey";
-import { i18n } from "../../i18n/translation";
-import { formatDateToYYYYMMDD } from "../../utils/date-utils";
-
-interface Props {
-	title: string;
-	slug: string;
-	pubDate: Date;
-	class: string;
-}
-
-const { title, pubDate } = Astro.props;
 const className = Astro.props.class;
-const profileConf = profileConfig;
-const licenseConf = licenseConfig;
 const postUrl = decodeURIComponent(Astro.url.toString());
 ---
-<div class={`relative transition overflow-hidden bg-[var(--license-block-bg)] py-5 px-6 ${className}`}>
-    <div class="transition font-bold text-black/75 dark:text-white/75">
-        {title}
+<div class={`relative transition overflow-hidden bg-[var(--license-block-bg)] py-5 px-6 text-sm leading-relaxed ${className}`}>
+    <div class="font-bold text-black/75 dark:text-white/75 mb-1">
+        版权与转载声明
     </div>
-    <a href={postUrl} class="link text-[var(--primary)]">
-        {postUrl}
-    </a>
-    <div class="flex gap-6 mt-2">
-        <div>
-            <div class="transition text-black/30 dark:text-white/30 text-sm">{i18n(I18nKey.author)}</div>
-            <div class="transition text-black/75 dark:text-white/75 line-clamp-2">{profileConf.name}</div>
-        </div>
-        <div>
-            <div class="transition text-black/30 dark:text-white/30 text-sm">{i18n(I18nKey.publishedAt)}</div>
-            <div class="transition text-black/75 dark:text-white/75 line-clamp-2">{formatDateToYYYYMMDD(pubDate)}</div>
-        </div>
-        <div>
-            <div class="transition text-black/30 dark:text-white/30 text-sm">{i18n(I18nKey.license)}</div>
-            <a href={licenseConf.url} target="_blank" class="link text-[var(--primary)] line-clamp-2">{licenseConf.name}</a>
-        </div>
+    <div class="text-black/70 dark:text-white/70 space-y-1">
+        <p>本文采用 <a href="https://creativecommons.org/licenses/by-nc-nd/4.0/" target="_blank" class="text-[var(--primary)] hover:underline">CC BY-NC-ND 4.0</a> 协议 + 附加授权条件。</p>
+        <p><strong>禁止商用：</strong>严禁用于任何变现、引流、赚取平台激励等行为。</p>
+        <p><strong>禁止改编：</strong>禁止洗稿、翻译、节选等任何形式的二次创作。</p>
+        <p><strong>唯一转载方式：</strong>无论商业还是非商业目的，任何形式的转载都必须先发邮件至 <a href="mailto:me@upxuu.com" class="text-[var(--primary)] hover:underline">me@upxuu.com</a> 申请，并获得明确书面许可。未经邮件授权即转载，即构成侵权。</p>
     </div>
-    <Icon name="fa6-brands:creative-commons" class="transition text-[15rem] absolute pointer-events-none right-6 top-1/2 -translate-y-1/2 text-black/5 dark:text-white/5"></Icon>
 </div>
