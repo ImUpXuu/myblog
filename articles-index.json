@@ -1,5 +1,20 @@
 [
   {
+    "title": "给博客装了个AI脑子 —— XUUAI 实现方案全记录",
+    "slug": "xuai-implementation",
+    "description": "从 Cloudflare Worker 到前端 SSE 流式渲染，从三个模型端点到 Swup SPA 兼容，完整记录本博客 AI 问答 + 文章概括功能的实现过程与踩坑经历。",
+    "category": "技术",
+    "tags": [
+      "AI",
+      "博客",
+      "Cloudflare Workers",
+      "折腾"
+    ],
+    "wordCount": 1734,
+    "published": "2026-05-30T22:00:00.000Z",
+    "updated": null
+  },
+  {
     "title": "关于本站更改版权许可协议的声明",
     "slug": "about-license-change",
     "description": "本站即日起将博客文章的版权许可协议由 CC BY-NC-SA 4.0 变更为 CC BY-NC-ND 4.0（附加授权条件），2026年5月28日前已完成的转载仍适用原协议。",
