@@ -181,6 +181,7 @@
 		if (!loadingEl || !box || !thinkingText || !thinkingWrap || !resultEl || !questionsEl || !statsEl) return;
 
 		let startTime = Date.now();
+		let firstTokenTime = 0;
 
 		function renderSummaryModelSelector() {
 			const el = document.getElementById('summary-model-selector');
@@ -332,7 +333,13 @@
 			const elapsed = ((Date.now() - startTime) / 1000).toFixed(1);
 			const tokens = usageTokens || Math.round(fullText.length / 3);
 			const mdl = modelName ? modelName + ' · ' : '';
-			statsEl.textContent = `${mdl}${tokens} tokens · ${elapsed}s`;
+			if (firstTokenTime && elapsed > 0) {
+				const delay = ((firstTokenTime - startTime) / 1000).toFixed(1);
+				const tps = Math.round(tokens / +elapsed);
+				statsEl.textContent = `${mdl}${delay}s延迟 · ${tps} t/s · ${tokens} tokens`;
+			} else {
+				statsEl.textContent = `${mdl}${tokens} tokens · ${elapsed}s`;
+			}
 			statsEl.classList.remove('hidden');
 		}
 
@@ -434,6 +441,7 @@
 							if (d?.content) {
 								if (!hasContent) {
 									hasContent = true;
+									firstTokenTime = Date.now();
 									thinkingText.parentElement!.classList.add('collapsed');
 									loadingEl.classList.add('hidden');
 									box.classList.remove('hidden');
