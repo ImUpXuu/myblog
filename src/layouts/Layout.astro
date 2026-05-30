@@ -670,8 +670,9 @@ window.onresize = () => {
 
         if (hasToc) {
             const slot = document.getElementById('mobile-toc-slot');
-            if (slot && tocPanel && tocPanel.parentElement !== slot) {
-                if (tocBackdrop) slot.insertBefore(tocBackdrop, slot.firstChild);
+            if (slot && tocPanel) {
+                while (slot.firstChild) slot.removeChild(slot.firstChild);
+                if (tocBackdrop) slot.appendChild(tocBackdrop);
                 slot.appendChild(tocPanel);
                 if (tocFab) slot.appendChild(tocFab);
             }
@@ -1028,9 +1029,6 @@ window.onresize = () => {
                 return;
             }
 
-            const contentType = resp.headers.get('content-type') || '';
-            console.log('[AI Chat] content-type:', contentType);
-
             const reader = resp.body?.getReader();
             if (!reader) {
                 removeAiLoading();
@@ -1128,7 +1126,6 @@ window.onresize = () => {
         }
 
         if (aiBubble) {
-            console.log('[AI Chat] stream complete, chars:', fullReply.length);
             finishAiBubble(aiBubble);
             renderJsonResponse(aiBubble, fullReply);
         }
