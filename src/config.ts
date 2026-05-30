@@ -61,8 +61,8 @@ export const navBarConfig: NavBarConfig = {
 			children: [
 				{
 					name: "画廊",
-					url: "https://edit.upxuu.com/s/g",
-					external: true,
+					url: "/gallery",
+					external: false,
 				},
 				{
 					name: "状态",
