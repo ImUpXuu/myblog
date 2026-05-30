@@ -116,7 +116,7 @@ export const profileConfig: ProfileConfig = {
 export const licenseConfig: LicenseConfig = {
 	enable: true,
 	name: "All Rights Reserved",
-	url: "mailto:me@upxuu.com",
+	url: "https://upxuu.com",
 };
 
 export const expressiveCodeConfig: ExpressiveCodeConfig = {
