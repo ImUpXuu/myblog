@@ -374,11 +374,13 @@
 			for (let i = startIdx; i < SUMMARY_MODELS.length; i++) {
 				resp = await fetchSummary(SUMMARY_MODELS[i].url);
 				if (resp && resp.ok) { usedIdx = i; break; }
+				await new Promise(r => setTimeout(r, 800));
 			}
 			if (!resp || !resp.ok) {
 				for (let i = 0; i < startIdx; i++) {
 					resp = await fetchSummary(SUMMARY_MODELS[i].url);
 					if (resp && resp.ok) { usedIdx = i; break; }
+					await new Promise(r => setTimeout(r, 800));
 				}
 			}
 			if (!resp || !resp.ok) {
