@@ -159,7 +159,7 @@
 </style>
 
 <script>
-	(function() {
+	function setupAiSummary() {
 		const m = window.location.pathname.match(/\/posts\/(.+?)\/?$/);
 		if (!m) return;
 		const slug = m[1];
@@ -203,6 +203,9 @@
 					startTime = Date.now();
 					loadingEl.classList.remove('hidden');
 					box.classList.add('hidden');
+					resultEl.classList.add('hidden');
+					questionsEl.classList.add('hidden');
+					statsEl.classList.add('hidden');
 					retryWithModel(i);
 				};
 				menu.appendChild(item);
@@ -254,10 +257,8 @@
 		}
 
 		function renderSummary(fullText: string, usageTokens?: number, modelName?: string) {
-			// Strip markdown fences
 			let clean = fullText.replace(/```(?:json)?\s*/gi, '').replace(/\s*```/g, '').trim();
 
-			// Fallback: extract q object if it's outside the array
 			let externalQ: string[] = [];
 			const afterArray = clean.slice(clean.lastIndexOf(']') + 1);
 			const qOuter = afterArray.match(/\{"q":\s*\[/);
@@ -276,7 +277,6 @@
 				}
 			}
 
-			// Extract JSON array from [ to ]
 			const startB = clean.indexOf('[');
 			const endB = clean.lastIndexOf(']');
 			if (startB !== -1 && endB > startB) clean = clean.slice(startB, endB + 1);
@@ -310,7 +310,6 @@
 			resultEl.classList.remove('hidden');
 			requestAnimationFrame(scrollIntoView);
 
-			// default + AI questions
 			const defaultQs = ['详细概括本文内容', '概括文章特点'];
 			let qHtml = '<div class="summary-questions-section">';
 			qHtml += '<div class="summary-qs-title">点击词条继续问AI</div>';
@@ -336,7 +335,6 @@
 				});
 			});
 
-			// Stats
 			const elapsed = ((Date.now() - startTime) / 1000).toFixed(1);
 			const tokens = usageTokens || Math.round(fullText.length / 3);
 			const mdl = modelName ? modelName + ' · ' : '';
@@ -455,5 +453,7 @@
 				resultEl.classList.remove('hidden');
 			}
 		}
-	})();
+	}
+
+	setupAiSummary();
 </script>

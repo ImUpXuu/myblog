@@ -1278,9 +1278,15 @@ window.onresize = () => {
 
     if (window.swup) {
         window.swup.hooks.on('page:view', setupAiChat);
+        window.swup.hooks.on('page:view', () => {
+            if ((window as any).setupAiSummary) (window as any).setupAiSummary();
+        });
     } else {
         document.addEventListener('swup:enable', () => {
             window.swup!.hooks.on('page:view', setupAiChat);
+            window.swup!.hooks.on('page:view', () => {
+                if ((window as any).setupAiSummary) (window as any).setupAiSummary();
+            });
         });
     }
 })();
