@@ -340,6 +340,7 @@
 		if (cached) {
 			loadingEl.classList.add('hidden');
 			box.classList.remove('hidden');
+			thinkingWrap.classList.add('collapsed');
 			renderSummary(cached, undefined, SUMMARY_MODELS[summaryModelIdx].name);
 			renderSummaryModelSelector();
 			return;
