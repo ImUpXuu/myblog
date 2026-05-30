@@ -1,6 +1,6 @@
 [
   {
-    "title": "给博客装了个AI脑子 —— XUUAI 实现方案全记录",
+    "title": "为我的博客实现AI功能，让博客\"活起来\"",
     "slug": "xuai-implementation",
     "description": "从 Cloudflare Worker 到前端 SSE 流式渲染，从三个模型端点到 Swup SPA 兼容，完整记录本博客 AI 问答 + 文章概括功能的实现过程与踩坑经历。",
     "category": "技术",
@@ -11,7 +11,7 @@
       "折腾"
     ],
     "wordCount": 1734,
-    "published": "2026-05-30T22:00:00.000Z",
+    "published": "2026-05-30T16:41:00.000Z",
     "updated": null
   },
   {
