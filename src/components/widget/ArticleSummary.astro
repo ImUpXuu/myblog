@@ -128,6 +128,34 @@
 #summary-model-selector {
 	position: relative;
 }
+.cite-link {
+	display: inline-block;
+	font-size: 0.75rem;
+	padding: 0.1rem 0.4rem;
+	border-radius: 4px;
+	border: 1px solid var(--line-color);
+	color: var(--primary);
+	text-decoration: none;
+	margin-left: 0.3em;
+	vertical-align: middle;
+	transition: all 0.15s;
+	line-height: 1.4;
+}
+.cite-link:hover {
+	background: var(--primary);
+	color: white;
+	border-color: var(--primary);
+	text-decoration: none;
+}
+.cite-arrow {
+	font-size: 0.625rem;
+	margin-left: 0.15em;
+	opacity: 0.7;
+}
+.summary-cite {
+	display: inline;
+	margin-left: 0.25em;
+}
 </style>
 
 <script>
@@ -152,7 +180,7 @@
 		const statsEl = document.getElementById('summary-stats');
 		if (!loadingEl || !box || !thinkingText || !thinkingWrap || !resultEl || !questionsEl || !statsEl) return;
 
-		const startTime = Date.now();
+		let startTime = Date.now();
 
 		function renderSummaryModelSelector() {
 			const el = document.getElementById('summary-model-selector');
@@ -172,6 +200,9 @@
 					summaryModelIdx = i;
 					localStorage.setItem('xuai-summary-model', String(i));
 					renderSummaryModelSelector();
+					startTime = Date.now();
+					loadingEl.classList.remove('hidden');
+					box.classList.add('hidden');
 					retryWithModel(i);
 				};
 				menu.appendChild(item);
@@ -200,6 +231,26 @@
 			if (rect.bottom > window.innerHeight) {
 				box.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 			}
+		}
+
+		function getArticleHeadings(): { slug: string; text: string }[] {
+			const el = document.getElementById('article-headings-data');
+			if (!el || !el.textContent) return [];
+			try {
+				return el.textContent.split('|').filter(Boolean).map(s => JSON.parse(s));
+			} catch { return []; }
+		}
+
+		function renderInlineMd(text: string): string {
+			const esc = text
+				.replace(/&/g, '&amp;')
+				.replace(/</g, '&lt;')
+				.replace(/>/g, '&gt;');
+			return esc
+				.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+				.replace(/\*(.+?)\*/g, '<em>$1</em>')
+				.replace(/`(.+?)`/g, '<code>$1</code>')
+				.replace(/\n/g, '<br>');
 		}
 
 		function renderSummary(fullText: string, usageTokens?: number, modelName?: string) {
@@ -240,10 +291,20 @@
 			const paragraphs = data.filter((d: any) => 'p' in d);
 			const aiQuestions = externalQ.length ? externalQ : ((data.find((d: any) => 'q' in d)?.q as string[]) || []);
 
+			const headings = getArticleHeadings();
 			let html = '';
 			for (const item of paragraphs) {
-				const esc = (item.p || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-				html += `<p class="summary-p">${esc}</p>`;
+				const pContent = renderInlineMd(item.p || '');
+				let citeHtml = '';
+				if (item.r && item.r.length && headings.length) {
+					for (const n of item.r) {
+						const h = headings[n - 1];
+						if (h) {
+							citeHtml += `<a class="cite-link" href="#${h.slug}">${h.text}<span class="cite-arrow">↗</span></a> `;
+						}
+					}
+				}
+				html += `<p class="summary-p">${pContent}${citeHtml ? '<span class="summary-cite">' + citeHtml + '</span>' : ''}</p>`;
 			}
 			resultEl.innerHTML = html;
 			resultEl.classList.remove('hidden');
@@ -287,7 +348,7 @@
 		if (cached) {
 			loadingEl.classList.add('hidden');
 			box.classList.remove('hidden');
-			renderSummary(cached);
+			renderSummary(cached, undefined, SUMMARY_MODELS[summaryModelIdx].name);
 			renderSummaryModelSelector();
 			return;
 		}
