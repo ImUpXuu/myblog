@@ -16,6 +16,11 @@ const avatarSrc = profileConfig.avatar?.startsWith("/")
 	: `/${profileConfig.avatar}`;
 const name = profileConfig.name;
 const published = entry.data.published;
+const rawTitle = entry.data.title || "";
+
+// Detect if title is a date-like string (e.g. "2026-05-30", "2026/05/30", "20260530")
+const isDateLike = /^\d{4}[-/]\d{1,2}[-/]\d{1,2}$/.test(rawTitle.trim()) || /^\d{8}$/.test(rawTitle.trim());
+const showTitle = rawTitle && !isDateLike;
 
 // Format date
 const d = new Date(published);
@@ -38,11 +43,9 @@ const c = colors[index % colors.length];
 	class="talk-card talk-card-enter group"
 	style={`--tab: ${c.tab}; --dot: ${c.dot};`}
 >
-	{/* Building-block corner tab */}
 	<div class="talk-tab"></div>
 
 	<div class="talk-inner">
-		{/* Header row */}
 		<div class="flex items-center gap-3">
 			<img
 				src={avatarSrc}
@@ -57,13 +60,14 @@ const c = colors[index % colors.length];
 			<span class="text-xs flex-shrink-0" style="color: #bbb;">{dateStr}</span>
 		</div>
 
-		{/* Content */}
-		<div class="mt-3 pl-[14px] ml-[22px] border-l-2" style="border-color: ${c.tab}40;">
+		<div class="mt-3 pl-[14px] ml-[22px] border-l-2" style={`border-color: ${c.tab}40;`}>
+			{showTitle && (
+				<div class="font-bold text-[17px] mb-2" style="color: #333;">{rawTitle}</div>
+			)}
 			<div class="text-[15px] leading-relaxed [&_p]:my-0 [&_p+p]:mt-2.5 [&_a]:underline [&_code]:bg-[#A0D8F1]/25 [&_code]:px-1.5 [&_code]:py-0.5 [&_code]:rounded-md [&_code]:text-xs [&_code]:text-[#5a9ab5] [&_img]:rounded-xl [&_img]:max-w-full [&_img]:mt-2 [&_img]:cursor-pointer [&_img]:talk-content-img" style="color: #555;">
 				<Content />
 			</div>
 
-			{/* Action bar */}
 			<div class="flex items-center gap-6 mt-4 pt-3 border-t border-[#eee]/60">
 				<button class="talk-action-btn like flex items-center gap-1.5 text-xs font-medium" style="color: #ccc;" title="赞">
 					<svg class="w-[18px] h-[18px]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/></svg>
@@ -101,7 +105,6 @@ const c = colors[index % colors.length];
 		inset 0 0 0 1px rgba(0,0,0,0.02);
 }
 
-/* Building-block corner tab */
 .talk-tab {
 	position: absolute;
 	top: 12px;
@@ -114,7 +117,6 @@ const c = colors[index % colors.length];
 	box-shadow: 0 1px 3px rgba(0,0,0,0.08);
 	z-index: 3;
 }
-/* Small dot after the tab */
 .talk-tab::after {
 	content: '';
 	position: absolute;
