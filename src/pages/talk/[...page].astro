@@ -5,6 +5,7 @@ import TalkCard from "../../components/TalkCard.astro";
 import MainGridLayout from "../../layouts/MainGridLayout.astro";
 import { url } from "../../utils/url-utils";
 import { getTalkPosts } from "../../utils/talk-utils";
+import "../../styles/talk.css";
 
 export const getStaticPaths = (async ({ paginate }) => {
 	const talks = await getTalkPosts();
@@ -13,96 +14,107 @@ export const getStaticPaths = (async ({ paginate }) => {
 
 const { page } = Astro.props;
 
-// Build pagination links relative to /talk/
+// Pagination URLs relative to /talk/
 const TALK_BASE = "/talk";
 const getPageUrl = (p: number) => {
 	if (p === 1) return url(`${TALK_BASE}/`);
 	return url(`${TALK_BASE}/${p}/`);
 };
-
-const HIDDEN = -1;
-const ADJ_DIST = 2;
-const VISIBLE = ADJ_DIST * 2 + 1;
-
-let count = 1;
-let l = page.currentPage;
-let r = page.currentPage;
-while (0 < l - 1 && r + 1 <= page.lastPage && count + 2 <= VISIBLE) {
-	count += 2;
-	l--;
-	r++;
-}
-while (0 < l - 1 && count < VISIBLE) { count++; l--; }
-while (r + 1 <= page.lastPage && count < VISIBLE) { count++; r++; }
-
-let pages: number[] = [];
-if (l > 1) pages.push(1);
-if (l === 3) pages.push(2);
-if (l > 3) pages.push(HIDDEN);
-for (let i = l; i <= r; i++) pages.push(i);
-if (r < page.lastPage - 2) pages.push(HIDDEN);
-if (r === page.lastPage - 2) pages.push(page.lastPage - 1);
-if (r < page.lastPage) pages.push(page.lastPage);
 ---
 
 <MainGridLayout title="说说" description="UpXuu 的碎碎念">
+	<style>
+		/* Override body background for talk page */
+		#main-grid {
+			background: transparent !important;
+		}
+	</style>
+
 	<main id="swup-container" class="transition-swup-fade">
-		<!-- Header -->
-		<div class="mb-8 text-center">
-			<h1 class="text-3xl font-extrabold text-black/90 dark:text-white/90">
-				<span class="bg-[var(--primary)]/10 text-[var(--primary)] px-3 py-1 rounded-xl">说说</span>
-			</h1>
-			<p class="text-sm text-black/40 dark:text-white/40 mt-3">一些碎碎念，记录日常点滴</p>
+		<!-- Top Nav -->
+		<div class="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-[#eee] -mx-[var(--grid-margin)] md:-mx-0">
+			<div class="flex items-center justify-between max-w-lg mx-auto px-4 h-12">
+				<a href="/" class="w-9 h-9 flex items-center justify-center rounded-lg hover:bg-[#f0f0f0] transition -ml-1" aria-label="返回">
+					<svg class="w-5 h-5" style="color: #666;" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
+				</a>
+				<span class="font-bold text-[17px]" style="color: #444;">说说</span>
+				<button class="w-9 h-9 flex items-center justify-center rounded-lg hover:bg-[#f0f0f0] transition -mr-1" aria-label="分享">
+					<svg class="w-5 h-5" style="color: #666;" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"/></svg>
+				</button>
+			</div>
 		</div>
 
 		<!-- Talk list -->
-		<div class="flex flex-col gap-4 max-w-2xl mx-auto">
+		<div class="talk-bg pt-5 pb-8">
+			<div class="flex flex-col gap-4 max-w-lg mx-auto px-3 md:px-0">
+				{
+					page.data.length === 0 ? (
+						<div class="text-center py-24" style="color: #bbb;">
+							<div class="text-5xl mb-4">📝</div>
+							<p class="text-lg font-semibold mb-1">还没有说说</p>
+							<p class="text-sm">先去看看其他内容吧~</p>
+						</div>
+					) : (
+						page.data.map((entry, i) => (
+							<TalkCard entry={entry} index={i} total={page.data.length} />
+						))
+					)
+				}
+			</div>
+
+			<!-- Pagination -->
 			{
-				page.data.length === 0 ? (
-					<div class="text-center py-20 text-black/30 dark:text-white/30">
-						<div class="text-5xl mb-4">📝</div>
-						<p class="text-lg mb-1">还没有说说</p>
-						<p class="text-sm">先去看看其他内容吧~</p>
+				page.lastPage > 1 && (
+					<div class="flex flex-row gap-2.5 justify-center mt-8 pb-4">
+						<a href={page.url.prev ? getPageUrl(page.currentPage - 1) : ""}
+						   aria-label="上一页"
+						   class:list={[
+							   "w-10 h-10 rounded-xl flex items-center justify-center transition font-medium text-sm",
+							   "bg-white border border-[#e0e0e0] shadow-sm",
+							   {"opacity-30 pointer-events-none": !page.url.prev}
+						   ]}
+						   style="color: #666;"
+						>
+							<svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
+						</a>
+						<div class="bg-white border border-[#e0e0e0] flex flex-row rounded-xl items-center shadow-sm overflow-hidden">
+							{Array.from({length: page.lastPage}, (_, i) => i + 1).map(p => {
+								if (p === page.currentPage)
+									return <div class="w-10 h-10 flex items-center justify-center font-bold text-sm text-white" style="background: #A0D8F1;">{p}</div>;
+								return <a href={getPageUrl(p)} aria-label={`第 ${p} 页`}
+									class="w-10 h-10 flex items-center justify-center font-medium text-sm hover:bg-[#f5f5f5] transition"
+									style="color: #888;"
+								>{p}</a>;
+							})}
+						</div>
+						<a href={page.url.next ? getPageUrl(page.currentPage + 1) : ""}
+						   aria-label="下一页"
+						   class:list={[
+							   "w-10 h-10 rounded-xl flex items-center justify-center transition font-medium text-sm",
+							   "bg-white border border-[#e0e0e0] shadow-sm",
+							   {"opacity-30 pointer-events-none": !page.url.next}
+						   ]}
+						   style="color: #666;"
+						>
+							<svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+						</a>
 					</div>
-				) : (
-					page.data.map((entry) => (
-						<TalkCard entry={entry} />
-					))
 				)
 			}
 		</div>
 
-		<!-- Pagination -->
-		{
-			page.lastPage > 1 && (
-				<div class="flex flex-row gap-3 justify-center mt-10">
-					<a href={page.url.prev ? getPageUrl(page.currentPage - 1) : ""}
-					   aria-label="上一页"
-					   class:list={["btn-card overflow-hidden rounded-lg text-[var(--primary)] w-11 h-11",
-						   {"disabled": !page.url.prev}
-					   ]}
-					>
-						<Icon name="material-symbols:chevron-left-rounded" class="text-[1.75rem]"></Icon>
-					</a>
-					<div class="bg-[var(--card-bg)] flex flex-row rounded-lg items-center text-neutral-700 dark:text-neutral-300 font-bold">
-						{pages.map((p) => {
-							if (p === HIDDEN)
-								return <Icon name="material-symbols:more-horiz" class="mx-1"/>;
-							if (p === page.currentPage)
-								return <div class="h-11 w-11 rounded-lg bg-[var(--primary)] flex items-center justify-center font-bold text-white dark:text-black/70">{p}</div>;
-							return <a href={getPageUrl(p)} aria-label={`第 ${p} 页`} class="btn-card w-11 h-11 rounded-lg overflow-hidden active:scale-[0.85]">{p}</a>;
-						})}
-					</div>
-					<a href={page.url.next ? getPageUrl(page.currentPage + 1) : ""}
-					   aria-label="下一页"
-					   class:list={["btn-card overflow-hidden rounded-lg text-[var(--primary)] w-11 h-11",
-						   {"disabled": !page.url.next}
-					   ]}
-					>
-						<Icon name="material-symbols:chevron-right-rounded" class="text-[1.75rem]"></Icon>
-					</a>
-				</div>
-			)
-		}
+		<!-- Image preview overlay (client-side) -->
+		<script>
+			document.addEventListener('click', function(e) {
+				const img = (e.target as HTMLElement).closest('.talk-content-img');
+				if (!img) return;
+				const src = (img as HTMLImageElement).src;
+				const overlay = document.createElement('div');
+				overlay.className = 'talk-overlay';
+				overlay.innerHTML = `<img src="${src}" alt="" />`;
+				overlay.onclick = () => overlay.remove();
+				document.body.appendChild(overlay);
+			});
+		</script>
 	</main>
 </MainGridLayout>
