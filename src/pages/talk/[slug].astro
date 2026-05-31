@@ -1,0 +1,39 @@
+---
+import { getTalkPosts } from "../../utils/talk-utils";
+import MainGridLayout from "../../layouts/MainGridLayout.astro";
+import TalkCard from "../../components/TalkCard.astro";
+import Waline from "../../components/Waline.astro";
+import { profileConfig } from "@/config";
+import "../../styles/talk.css";
+
+export async function getStaticPaths() {
+	const talks = await getTalkPosts();
+	return talks.map((entry) => ({
+		params: { slug: entry.slug.replace("talk/", "") },
+		props: { entry },
+	}));
+}
+
+const { entry } = Astro.props;
+
+const name = profileConfig.name;
+const talkPath = `/talk/${entry.slug.replace("talk/", "")}/`;
+---
+
+<MainGridLayout title={`${name}的说说`} description={entry.data.title}>
+	<main id="swup-container" class="transition-swup-fade">
+		<!-- Back nav -->
+		<a href="/talk/" class="inline-flex items-center gap-1.5 text-sm font-medium mb-5 px-3 py-1.5 rounded-lg hover:bg-black/5 dark:hover:bg-white/5 transition" style="color: #888;">
+			<svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
+			<span>返回说说</span>
+		</a>
+
+		<!-- Single talk card -->
+		<div class="talk-bg rounded-3xl p-4 sm:p-5">
+			<TalkCard entry={entry} index={0} total={1} />
+		</div>
+
+		<!-- Waline comments -->
+		<Waline path={talkPath} />
+	</main>
+</MainGridLayout>

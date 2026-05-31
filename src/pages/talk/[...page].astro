@@ -55,8 +55,10 @@ const getPageUrl = (p: number) => {
 							<p class="text-sm">先去看看其他内容吧~</p>
 						</div>
 					) : (
-						page.data.map((entry, i) => (
-							<TalkCard entry={entry} index={i} total={page.data.length} />
+						page.data.map((entry) => (
+							<a href={`/talk/${entry.slug.replace("talk/", "")}/`} class="block">
+								<TalkCard entry={entry} index={page.data.indexOf(entry)} total={page.data.length} />
+							</a>
 						))
 					)
 				}
