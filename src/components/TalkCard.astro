@@ -1,6 +1,7 @@
 ---
 import type { CollectionEntry } from "astro:content";
 import { profileConfig } from "@/config";
+import MarkdownIt from "markdown-it";
 
 interface Props {
 	entry: CollectionEntry<"posts">;
@@ -52,13 +53,18 @@ const colors = [
 ];
 const c = colors[index % colors.length];
 
-// Extract images from markdown body only
+// Extract images from rendered markdown HTML (robust, handles all edge cases)
+const mdParser = new MarkdownIt();
 const rawBody = entry.body || "";
-const imgRegex = /!\[.*?\]\((.+?)\)/g;
+const renderedHtml = mdParser.render(rawBody);
+const imgRegex = /<img[^>]+src="([^"]+)"/g;
 const images: string[] = [];
 let match: RegExpExecArray | null;
-while ((match = imgRegex.exec(rawBody)) !== null) {
-	images.push(match[1]);
+while ((match = imgRegex.exec(renderedHtml)) !== null) {
+	const src = match[1].trim();
+	if (src && !images.includes(src)) {
+		images.push(src);
+	}
 }
 
 const imgCount = images.length;
