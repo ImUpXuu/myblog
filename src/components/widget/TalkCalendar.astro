@@ -1,0 +1,486 @@
+---
+interface TalkDate {
+	date: string;   // "2026-05-31"
+	slug: string;   // "talk/test-01"
+	title: string;
+}
+
+interface Props {
+	talkDates: TalkDate[];
+}
+
+const { talkDates } = Astro.props;
+
+// Build a set of dates that have talks
+const talkDateSet = new Set(talkDates.map(t => t.date));
+
+// Group talks by date
+const talksByDate: Record<string, TalkDate[]> = {};
+for (const t of talkDates) {
+	if (!talksByDate[t.date]) talksByDate[t.date] = [];
+	talksByDate[t.date].push(t);
+}
+
+// Current date info for initial render
+const now = new Date();
+const currentYear = now.getFullYear();
+const currentMonth = now.getMonth(); // 0-based
+const currentDay = now.getDate();
+const todayStr = `${currentYear}-${String(currentMonth + 1).padStart(2, "0")}-${String(currentDay).padStart(2, "0")}`;
+
+function renderMonth(year: number, month: number) {
+	const firstDay = new Date(year, month, 1);
+	const startDayOfWeek = firstDay.getDay(); // 0=Sun
+	const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+	let html = "";
+	// Day headers
+	const dayNames = ["日", "一", "二", "三", "四", "五", "六"];
+
+	// Empty cells before first day
+	for (let i = 0; i < startDayOfWeek; i++) {
+		html += `<div class="cal-cell empty"></div>`;
+	}
+
+	// Day cells
+	for (let day = 1; day <= daysInMonth; day++) {
+		const dateStr = `${year}-${String(month + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+		const hasTalk = talkDateSet.has(dateStr);
+		const isToday = dateStr === todayStr;
+		const isSelected = false; // handled by JS
+
+		html += `<div class="cal-cell ${isToday ? 'today' : ''} ${hasTalk ? 'has-talk' : ''}" data-date="${dateStr}">
+			<span class="cal-day-num">${day}</span>
+			${hasTalk ? '<span class="cal-dot"></span>' : ''}
+		</div>`;
+	}
+
+	// Fill remaining cells to complete 6 rows
+	const totalCells = startDayOfWeek + daysInMonth;
+	const remainingCells = totalCells <= 35 ? 35 - totalCells : 42 - totalCells;
+	for (let i = 0; i < remainingCells; i++) {
+		html += `<div class="cal-cell empty"></div>`;
+	}
+
+	return html;
+}
+
+const monthNames = ["1月", "2月", "3月", "4月", "5月", "6月", "7月", "8月", "9月", "10月", "11月", "12月"];
+const initialGridHtml = renderMonth(currentYear, currentMonth);
+const initialHeader = `${currentYear}年 ${monthNames[currentMonth]}`;
+
+// Serialize data for client
+const talksJson = JSON.stringify(talkDates);
+const talksByDateJson = JSON.stringify(talksByDate);
+---
+
+<div id="talk-calendar" class="talk-calendar">
+	<!-- Header -->
+	<div class="cal-header">
+		<button id="cal-prev" class="cal-nav-btn" aria-label="上月">
+			<svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
+		</button>
+		<button id="cal-month-label" class="cal-month-label" title="选择月份">
+			{initialHeader}
+		</button>
+		<button id="cal-next" class="cal-nav-btn" aria-label="下月">
+			<svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+		</button>
+	</div>
+
+	<!-- Day headers -->
+	<div class="cal-day-headers">
+		<span>日</span><span>一</span><span>二</span><span>三</span><span>四</span><span>五</span><span>六</span>
+	</div>
+
+	<!-- Grid -->
+	<div id="cal-grid" class="cal-grid">
+		{initialGridHtml}
+	</div>
+
+	<!-- Talks for selected date -->
+	<div id="cal-talks" class="cal-talks">
+		<p class="cal-talks-hint">点击日期查看说说</p>
+	</div>
+</div>
+
+<style>
+.talk-calendar {
+	background: #fff;
+	border-radius: 18px;
+	padding: 16px;
+	box-shadow: 0 2px 8px rgba(0,0,0,0.04), 0 4px 16px rgba(0,0,0,0.03);
+	border: 1.5px solid #eee;
+	background-image: url("data:image/svg+xml,%3Csvg width='80' height='80' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.7' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='80' height='80' filter='url(%23n)' opacity='0.025'/%3E%3C/svg%3E");
+	margin-bottom: 1rem;
+	font-family: -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif;
+}
+
+.cal-header {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	margin-bottom: 12px;
+}
+.cal-nav-btn {
+	width: 32px; height: 32px;
+	border-radius: 8px;
+	border: none;
+	background: #f5f5f5;
+	color: #666;
+	cursor: pointer;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	transition: background 0.15s;
+}
+.cal-nav-btn:hover { background: #e8e8e8; }
+.cal-month-label {
+	font-size: 14px;
+	font-weight: 700;
+	color: #444;
+	border: none;
+	background: none;
+	cursor: pointer;
+	padding: 4px 12px;
+	border-radius: 8px;
+	transition: background 0.15s;
+}
+.cal-month-label:hover { background: #f0f0f0; }
+
+.cal-day-headers {
+	display: grid;
+	grid-template-columns: repeat(7, 1fr);
+	text-align: center;
+	font-size: 11px;
+	color: #aaa;
+	font-weight: 600;
+	margin-bottom: 4px;
+}
+
+.cal-grid {
+	display: grid;
+	grid-template-columns: repeat(7, 1fr);
+	gap: 2px;
+}
+
+.cal-cell {
+	aspect-ratio: 1;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	border-radius: 10px;
+	font-size: 13px;
+	color: #555;
+	cursor: pointer;
+	position: relative;
+	transition: background 0.15s;
+	user-select: none;
+}
+.cal-cell.empty { cursor: default; }
+.cal-cell:not(.empty):hover { background: #f0f7fb; }
+.cal-cell.today { font-weight: 700; color: #333; }
+.cal-cell.today .cal-day-num {
+	background: #A0D8F1;
+	color: #fff;
+	border-radius: 50%;
+	width: 26px; height: 26px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+.cal-cell.selected { background: #A0D8F130; }
+.cal-cell.selected .cal-day-num {
+	background: #A0D8F1;
+	color: #fff;
+	border-radius: 50%;
+	width: 26px; height: 26px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+.cal-dot {
+	width: 5px; height: 5px;
+	background: #A0D8F1;
+	border-radius: 50%;
+	margin-top: 1px;
+}
+
+/* Talks list below calendar */
+.cal-talks {
+	margin-top: 12px;
+	padding-top: 12px;
+	border-top: 1px solid #eee;
+	min-height: 40px;
+}
+.cal-talks-hint {
+	font-size: 12px;
+	color: #ccc;
+	text-align: center;
+	margin: 0;
+}
+.cal-talk-link {
+	display: block;
+	padding: 8px 12px;
+	border-radius: 10px;
+	font-size: 13px;
+	color: #555;
+	text-decoration: none;
+	transition: background 0.15s, color 0.15s;
+	border: 1px solid transparent;
+	margin-bottom: 4px;
+}
+.cal-talk-link:hover {
+	background: #A0D8F110;
+	border-color: #A0D8F130;
+	color: #3a8;
+}
+.cal-talk-date-label {
+	font-size: 12px;
+	font-weight: 700;
+	color: #A0D8F1;
+	margin-bottom: 6px;
+}
+
+/* Month picker dropdown */
+.cal-picker-overlay {
+	position: fixed;
+	inset: 0;
+	background: rgba(0,0,0,0.3);
+	z-index: 9998;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+.cal-picker {
+	background: #fff;
+	border-radius: 18px;
+	padding: 20px;
+	box-shadow: 0 8px 32px rgba(0,0,0,0.15);
+	z-index: 9999;
+	max-width: 320px;
+	width: 90%;
+}
+.cal-picker-years {
+	display: flex;
+	gap: 6px;
+	margin-bottom: 12px;
+	overflow-x: auto;
+	padding-bottom: 4px;
+}
+.cal-picker-year {
+	padding: 6px 14px;
+	border-radius: 8px;
+	border: 1.5px solid #e0e0e0;
+	background: #fff;
+	font-size: 13px;
+	font-weight: 600;
+	color: #555;
+	cursor: pointer;
+	white-space: nowrap;
+	transition: all 0.15s;
+}
+.cal-picker-year.active {
+	background: #A0D8F1;
+	color: #fff;
+	border-color: #A0D8F1;
+}
+.cal-picker-months {
+	display: grid;
+	grid-template-columns: repeat(4, 1fr);
+	gap: 6px;
+}
+.cal-picker-month {
+	padding: 8px 4px;
+	border-radius: 10px;
+	border: 1.5px solid #e0e0e0;
+	background: #fff;
+	font-size: 12px;
+	color: #555;
+	cursor: pointer;
+	transition: all 0.15s;
+	text-align: center;
+}
+.cal-picker-month:hover { border-color: #A0D8F1; background: #f0f7fb; }
+.cal-picker-month.active {
+	background: #A0D8F1;
+	color: #fff;
+	border-color: #A0D8F1;
+}
+.cal-picker-close {
+	display: block;
+	width: 100%;
+	margin-top: 12px;
+	padding: 8px;
+	border-radius: 8px;
+	border: none;
+	background: #f5f5f5;
+	color: #888;
+	font-size: 13px;
+	cursor: pointer;
+	transition: background 0.15s;
+}
+.cal-picker-close:hover { background: #e8e8e8; }
+</style>
+
+<script>
+	(function() {
+		const talks: Array<{date:string;slug:string;title:string}> = JSON.parse('{talksJson}');
+		const talksByDate: Record<string, Array<{date:string;slug:string;title:string}>> = JSON.parse('{talksByDateJson}');
+
+		const now = new Date();
+		let currentYear = now.getFullYear();
+		let currentMonth = now.getMonth(); // 0-based
+		let selectedDate = '';
+
+		const grid = document.getElementById('cal-grid')!;
+		const label = document.getElementById('cal-month-label')!;
+		const talksContainer = document.getElementById('cal-talks')!;
+		const dayHeaders = ["日","一","二","三","四","五","六"];
+		const monthNames = ["1月","2月","3月","4月","5月","6月","7月","8月","9月","10月","11月","12月"];
+		const todayStr = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,"0")}-${String(now.getDate()).padStart(2,"0")}`;
+
+		function daysInMonth(y:number, m:number) { return new Date(y, m+1, 0).getDate(); }
+		function firstDayOfWeek(y:number, m:number) { return new Date(y, m, 1).getDay(); }
+
+		function dateStr(y:number, m:number, d:number) {
+			return `${y}-${String(m+1).padStart(2,"0")}-${String(d).padStart(2,"0")}`;
+		}
+
+		function getTalkSlug(date: string): string {
+			const talks = talksByDate[date];
+			if (talks && talks.length > 0) return talks[0].slug.replace("talk/", "");
+			return "";
+		}
+
+		function renderGrid() {
+			const fdow = firstDayOfWeek(currentYear, currentMonth);
+			const dim = daysInMonth(currentYear, currentMonth);
+			let html = "";
+			for (let i = 0; i < fdow; i++) html += '<div class="cal-cell empty"></div>';
+			for (let d = 1; d <= dim; d++) {
+				const ds = dateStr(currentYear, currentMonth, d);
+				const has = talksByDate[ds] && talksByDate[ds].length > 0;
+				const isToday = ds === todayStr;
+				const isSel = ds === selectedDate;
+				html += `<div class="cal-cell${isToday?' today':''}${has?' has-talk':''}${isSel?' selected':''}" data-date="${ds}">
+					<span class="cal-day-num">${d}</span>
+					${has ? '<span class="cal-dot"></span>' : ''}
+				</div>`;
+			}
+			const total = fdow + dim;
+			const rem = total <= 35 ? 35 - total : 42 - total;
+			for (let i = 0; i < rem; i++) html += '<div class="cal-cell empty"></div>';
+			grid.innerHTML = html;
+
+			// Bind clicks
+			grid.querySelectorAll('.cal-cell:not(.empty)').forEach(cell => {
+				cell.addEventListener('click', function(this: HTMLElement) {
+					const ds = this.dataset.date!;
+					selectedDate = ds === selectedDate ? '' : ds;
+					renderGrid();
+					renderTalks();
+				});
+			});
+		}
+
+		function renderTalks() {
+			if (!selectedDate) {
+				talksContainer.innerHTML = '<p class="cal-talks-hint">点击日期查看说说</p>';
+				return;
+			}
+			const list = talksByDate[selectedDate] || [];
+			if (!list.length) {
+				talksContainer.innerHTML = '<p class="cal-talks-hint">这天没有说说</p>';
+				return;
+			}
+			const [y,m,d] = selectedDate.split('-');
+			let html = `<div class="cal-talk-date-label">${y}年${m}月${d}日</div>`;
+			for (const t of list) {
+				const slug = t.slug.replace("talk/", "");
+				html += `<a href="/talk/${slug}/" class="cal-talk-link">${t.title}</a>`;
+			}
+			talksContainer.innerHTML = html;
+		}
+
+		function updateHeader() {
+			label.textContent = `${currentYear}年 ${monthNames[currentMonth]}`;
+		}
+
+		function changeMonth(delta: number) {
+			currentMonth += delta;
+			if (currentMonth < 0) { currentMonth = 11; currentYear--; }
+			if (currentMonth > 11) { currentMonth = 0; currentYear++; }
+			selectedDate = '';
+			updateHeader();
+			renderGrid();
+			renderTalks();
+		}
+
+		// Picker
+		function showPicker() {
+			const existing = document.querySelector('.cal-picker-overlay');
+			if (existing) { existing.remove(); return; }
+
+			const overlay = document.createElement('div');
+			overlay.className = 'cal-picker-overlay';
+			let pickYear = currentYear;
+
+			function renderPicker() {
+				const years = [];
+				for (let y = pickYear - 5; y <= pickYear + 5; y++) years.push(y);
+				let yHtml = '';
+				for (const y of years) {
+					yHtml += `<button class="cal-picker-year${y === currentYear ? ' active' : ''}">${y}</button>`;
+				}
+				let mHtml = '';
+				for (let m = 0; m < 12; m++) {
+					mHtml += `<button class="cal-picker-month${m === currentMonth && pickYear === currentYear ? ' active' : ''}">${m+1}月</button>`;
+				}
+				overlay.innerHTML = `<div class="cal-picker">
+					<div class="cal-picker-years">${yHtml}</div>
+					<div class="cal-picker-months">${mHtml}</div>
+					<button class="cal-picker-close">关闭</button>
+				</div>`;
+
+				// Bind years
+				overlay.querySelectorAll('.cal-picker-year').forEach(btn => {
+					btn.addEventListener('click', function(this: HTMLElement) {
+						pickYear = parseInt(this.textContent!);
+						renderPicker();
+					});
+				});
+				// Bind months
+				overlay.querySelectorAll('.cal-picker-month').forEach((btn, i) => {
+					btn.addEventListener('click', () => {
+						currentYear = pickYear;
+						currentMonth = i;
+						selectedDate = '';
+						updateHeader();
+						renderGrid();
+						renderTalks();
+						overlay.remove();
+					});
+				});
+				overlay.querySelector('.cal-picker-close')!.addEventListener('click', () => overlay.remove());
+			}
+
+			overlay.addEventListener('click', (e) => { if (e.target === overlay) overlay.remove(); });
+			renderPicker();
+			document.body.appendChild(overlay);
+		}
+
+		// Bind nav
+		document.getElementById('cal-prev')!.addEventListener('click', () => changeMonth(-1));
+		document.getElementById('cal-next')!.addEventListener('click', () => changeMonth(1));
+		label.addEventListener('click', showPicker);
+
+		// Initial state
+		updateHeader();
+
+		// Expose for swup re-init
+		(window as any).__talkCalendarState = { currentYear, currentMonth, selectedDate, get talksByDate() { return talksByDate; }, get todayStr() { return todayStr; }, renderGrid, renderTalks, updateHeader };
+	})();
+</script>

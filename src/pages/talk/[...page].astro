@@ -1,10 +1,11 @@
 ---
 import type { GetStaticPaths } from "astro";
-import { Icon } from "astro-icon/components";
 import TalkCard from "../../components/TalkCard.astro";
+import TalkCalendar from "../../components/widget/TalkCalendar.astro";
 import MainGridLayout from "../../layouts/MainGridLayout.astro";
 import { url } from "../../utils/url-utils";
 import { getTalkPosts } from "../../utils/talk-utils";
+import { formatDateToYYYYMMDD } from "../../utils/date-utils";
 import "../../styles/talk.css";
 
 export const getStaticPaths = (async ({ paginate }) => {
@@ -13,6 +14,14 @@ export const getStaticPaths = (async ({ paginate }) => {
 }) satisfies GetStaticPaths;
 
 const { page } = Astro.props;
+
+// Fetch all talk dates for calendar
+const allTalks = await getTalkPosts();
+const talkDates = allTalks.map(t => ({
+	date: formatDateToYYYYMMDD(t.data.published),
+	slug: t.slug,
+	title: t.data.title,
+}));
 
 // Pagination URLs relative to /talk/
 const TALK_BASE = "/talk";
@@ -24,10 +33,7 @@ const getPageUrl = (p: number) => {
 
 <MainGridLayout title="说说" description="UpXuu 的碎碎念">
 	<style>
-		/* Override body background for talk page */
-		#main-grid {
-			background: transparent !important;
-		}
+		#main-grid { background: transparent !important; }
 	</style>
 
 	<main id="swup-container" class="transition-swup-fade">
@@ -44,24 +50,34 @@ const getPageUrl = (p: number) => {
 			</div>
 		</div>
 
-		<!-- Talk list -->
+		<!-- Talk list area -->
 		<div class="talk-bg pt-5 pb-8">
-			<div class="flex flex-col gap-4 max-w-lg mx-auto px-3 md:px-0">
-				{
-					page.data.length === 0 ? (
-						<div class="text-center py-24" style="color: #bbb;">
-							<div class="text-5xl mb-4">📝</div>
-							<p class="text-lg font-semibold mb-1">还没有说说</p>
-							<p class="text-sm">先去看看其他内容吧~</p>
-						</div>
-					) : (
-						page.data.map((entry) => (
-							<a href={`/talk/${entry.slug.replace("talk/", "")}/`} class="block">
-								<TalkCard entry={entry} index={page.data.indexOf(entry)} total={page.data.length} />
-							</a>
-						))
-					)
-				}
+			<div class="flex flex-col lg:flex-row gap-4 max-w-3xl mx-auto px-3 md:px-0">
+				<!-- Calendar sidebar (desktop) -->
+				<div class="lg:w-72 lg:flex-shrink-0 order-2 lg:order-1">
+					<div class="lg:sticky lg:top-24">
+						<TalkCalendar talkDates={talkDates} />
+					</div>
+				</div>
+
+				<!-- Main talk list -->
+				<div class="flex flex-col gap-4 flex-1 min-w-0 order-1 lg:order-2">
+					{
+						page.data.length === 0 ? (
+							<div class="text-center py-24" style="color: #bbb;">
+								<div class="text-5xl mb-4">📝</div>
+								<p class="text-lg font-semibold mb-1">还没有说说</p>
+								<p class="text-sm">先去看看其他内容吧~</p>
+							</div>
+						) : (
+							page.data.map((entry) => (
+								<a href={`/talk/${entry.slug.replace("talk/", "")}/`} class="block">
+									<TalkCard entry={entry} index={page.data.indexOf(entry)} total={page.data.length} />
+								</a>
+							))
+						)
+					}
+				</div>
 			</div>
 
 			<!-- Pagination -->
@@ -105,7 +121,7 @@ const getPageUrl = (p: number) => {
 			}
 		</div>
 
-		<!-- Image preview overlay (client-side) -->
+		<!-- Image preview overlay -->
 		<script>
 			document.addEventListener('click', function(e) {
 				const img = (e.target as HTMLElement).closest('.talk-content-img');

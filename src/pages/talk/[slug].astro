@@ -2,8 +2,10 @@
 import { getTalkPosts } from "../../utils/talk-utils";
 import MainGridLayout from "../../layouts/MainGridLayout.astro";
 import TalkCard from "../../components/TalkCard.astro";
+import TalkCalendar from "../../components/widget/TalkCalendar.astro";
 import Waline from "../../components/Waline.astro";
 import { profileConfig } from "@/config";
+import { formatDateToYYYYMMDD } from "../../utils/date-utils";
 import "../../styles/talk.css";
 
 export async function getStaticPaths() {
@@ -18,9 +20,20 @@ const { entry } = Astro.props;
 
 const name = profileConfig.name;
 const talkPath = `/talk/${entry.slug.replace("talk/", "")}/`;
+
+// Fetch all talk dates for calendar
+const allTalks = await getTalkPosts();
+const talkDates = allTalks.map(t => ({
+	date: formatDateToYYYYMMDD(t.data.published),
+	slug: t.slug,
+	title: t.data.title,
+}));
 ---
 
 <MainGridLayout title={`${name}的说说`} description={entry.data.title}>
+	<style>
+		#main-grid { background: transparent !important; }
+	</style>
 	<main id="swup-container" class="transition-swup-fade">
 		<!-- Back nav -->
 		<a href="/talk/" class="inline-flex items-center gap-1.5 text-sm font-medium mb-5 px-3 py-1.5 rounded-lg hover:bg-black/5 dark:hover:bg-white/5 transition" style="color: #888;">
@@ -28,9 +41,21 @@ const talkPath = `/talk/${entry.slug.replace("talk/", "")}/`;
 			<span>返回说说</span>
 		</a>
 
-		<!-- Single talk card -->
+		<!-- Content area -->
 		<div class="talk-bg rounded-3xl p-4 sm:p-5">
-			<TalkCard entry={entry} index={0} total={1} />
+			<div class="flex flex-col lg:flex-row gap-4">
+				<!-- Calendar sidebar -->
+				<div class="lg:w-72 lg:flex-shrink-0 order-2 lg:order-1">
+					<div class="lg:sticky lg:top-24">
+						<TalkCalendar talkDates={talkDates} />
+					</div>
+				</div>
+
+				<!-- Main card -->
+				<div class="flex-1 min-w-0 order-1 lg:order-2">
+					<TalkCard entry={entry} index={0} total={1} />
+				</div>
+			</div>
 		</div>
 
 		<!-- Waline comments -->
