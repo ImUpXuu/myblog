@@ -1,11 +1,9 @@
 ---
 import type { GetStaticPaths } from "astro";
 import TalkCard from "../../components/TalkCard.astro";
-import TalkCalendar from "../../components/widget/TalkCalendar.astro";
 import MainGridLayout from "../../layouts/MainGridLayout.astro";
 import { url } from "../../utils/url-utils";
 import { getTalkPosts } from "../../utils/talk-utils";
-import { formatDateToYYYYMMDD } from "../../utils/date-utils";
 import "../../styles/talk.css";
 
 export const getStaticPaths = (async ({ paginate }) => {
@@ -15,15 +13,6 @@ export const getStaticPaths = (async ({ paginate }) => {
 
 const { page } = Astro.props;
 
-// Fetch all talk dates for calendar
-const allTalks = await getTalkPosts();
-const talkDates = allTalks.map(t => ({
-	date: formatDateToYYYYMMDD(t.data.published),
-	slug: t.slug,
-	title: t.data.title,
-}));
-
-// Pagination URLs relative to /talk/
 const TALK_BASE = "/talk";
 const getPageUrl = (p: number) => {
 	if (p === 1) return url(`${TALK_BASE}/`);
@@ -37,7 +26,6 @@ const getPageUrl = (p: number) => {
 	</style>
 
 	<main id="swup-container" class="transition-swup-fade">
-		<!-- Top Nav -->
 		<div class="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-[#eee] -mx-[var(--grid-margin)] md:-mx-0">
 			<div class="flex items-center justify-between max-w-lg mx-auto px-4 h-12">
 				<a href="/" class="w-9 h-9 flex items-center justify-center rounded-lg hover:bg-[#f0f0f0] transition -ml-1" aria-label="返回">
@@ -50,70 +38,43 @@ const getPageUrl = (p: number) => {
 			</div>
 		</div>
 
-		<!-- Talk list area -->
 		<div class="talk-bg pt-5 pb-8">
-			<div class="flex flex-col lg:flex-row gap-4 max-w-3xl mx-auto px-3 md:px-0">
-				<!-- Calendar sidebar (desktop) -->
-				<div class="lg:w-72 lg:flex-shrink-0 order-2 lg:order-1">
-					<div class="lg:sticky lg:top-24">
-						<TalkCalendar talkDates={talkDates} />
-					</div>
-				</div>
-
-				<!-- Main talk list -->
-				<div class="flex flex-col gap-4 flex-1 min-w-0 order-1 lg:order-2">
-					{
-						page.data.length === 0 ? (
-							<div class="text-center py-24" style="color: #bbb;">
-								<div class="text-5xl mb-4">📝</div>
-								<p class="text-lg font-semibold mb-1">还没有说说</p>
-								<p class="text-sm">先去看看其他内容吧~</p>
-							</div>
-						) : (
-							page.data.map((entry) => (
-								<a href={`/talk/${entry.slug.replace("talk/", "")}/`} class="block">
-									<TalkCard entry={entry} index={page.data.indexOf(entry)} total={page.data.length} />
-								</a>
-							))
-						)
-					}
-				</div>
+			<div class="flex flex-col gap-4 max-w-lg mx-auto px-3 md:px-0">
+				{
+					page.data.length === 0 ? (
+						<div class="text-center py-24" style="color: #bbb;">
+							<div class="text-5xl mb-4">📝</div>
+							<p class="text-lg font-semibold mb-1">还没有说说</p>
+							<p class="text-sm">先去看看其他内容吧~</p>
+						</div>
+					) : (
+						page.data.map((entry) => (
+							<a href={`/talk/${entry.slug.replace("talk/", "")}/`} class="block">
+								<TalkCard entry={entry} index={page.data.indexOf(entry)} total={page.data.length} />
+							</a>
+						))
+					)
+				}
 			</div>
 
-			<!-- Pagination -->
 			{
 				page.lastPage > 1 && (
 					<div class="flex flex-row gap-2.5 justify-center mt-8 pb-4">
-						<a href={page.url.prev ? getPageUrl(page.currentPage - 1) : ""}
-						   aria-label="上一页"
-						   class:list={[
-							   "w-10 h-10 rounded-xl flex items-center justify-center transition font-medium text-sm",
-							   "bg-white border border-[#e0e0e0] shadow-sm",
-							   {"opacity-30 pointer-events-none": !page.url.prev}
-						   ]}
-						   style="color: #666;"
-						>
+						<a href={page.url.prev ? getPageUrl(page.currentPage - 1) : ""} aria-label="上一页"
+						   class:list={["w-10 h-10 rounded-xl flex items-center justify-center transition font-medium text-sm bg-white border border-[#e0e0e0] shadow-sm", {"opacity-30 pointer-events-none": !page.url.prev}]}
+						   style="color: #666;">
 							<svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
 						</a>
 						<div class="bg-white border border-[#e0e0e0] flex flex-row rounded-xl items-center shadow-sm overflow-hidden">
 							{Array.from({length: page.lastPage}, (_, i) => i + 1).map(p => {
 								if (p === page.currentPage)
 									return <div class="w-10 h-10 flex items-center justify-center font-bold text-sm text-white" style="background: #A0D8F1;">{p}</div>;
-								return <a href={getPageUrl(p)} aria-label={`第 ${p} 页`}
-									class="w-10 h-10 flex items-center justify-center font-medium text-sm hover:bg-[#f5f5f5] transition"
-									style="color: #888;"
-								>{p}</a>;
+								return <a href={getPageUrl(p)} aria-label={`第 ${p} 页`} class="w-10 h-10 flex items-center justify-center font-medium text-sm hover:bg-[#f5f5f5] transition" style="color: #888;">{p}</a>;
 							})}
 						</div>
-						<a href={page.url.next ? getPageUrl(page.currentPage + 1) : ""}
-						   aria-label="下一页"
-						   class:list={[
-							   "w-10 h-10 rounded-xl flex items-center justify-center transition font-medium text-sm",
-							   "bg-white border border-[#e0e0e0] shadow-sm",
-							   {"opacity-30 pointer-events-none": !page.url.next}
-						   ]}
-						   style="color: #666;"
-						>
+						<a href={page.url.next ? getPageUrl(page.currentPage + 1) : ""} aria-label="下一页"
+						   class:list={["w-10 h-10 rounded-xl flex items-center justify-center transition font-medium text-sm bg-white border border-[#e0e0e0] shadow-sm", {"opacity-30 pointer-events-none": !page.url.next}]}
+						   style="color: #666;">
 							<svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
 						</a>
 					</div>
@@ -121,7 +82,6 @@ const getPageUrl = (p: number) => {
 			}
 		</div>
 
-		<!-- Image preview overlay -->
 		<script>
 			document.addEventListener('click', function(e) {
 				const img = (e.target as HTMLElement).closest('.talk-content-img');
