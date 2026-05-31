@@ -18,16 +18,32 @@ const name = profileConfig.name;
 const published = entry.data.published;
 const rawTitle = entry.data.title || "";
 
-// Detect if title is a date-like string (e.g. "2026-05-30", "2026/05/30", "20260530")
+// Detect if title is a date-like string
 const isDateLike = /^\d{4}[-/]\d{1,2}[-/]\d{1,2}$/.test(rawTitle.trim()) || /^\d{8}$/.test(rawTitle.trim());
 const showTitle = rawTitle && !isDateLike;
 
-// Format date
+// Relative time ("3小时前", "昨天", "5月20日")
 const d = new Date(published);
-const hasTime = d.getHours() !== 0 || d.getMinutes() !== 0 || d.getSeconds() !== 0;
-const dateStr = hasTime
-	? `${d.getMonth() + 1}月${d.getDate()}日 ${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`
-	: `${d.getMonth() + 1}月${d.getDate()}日`;
+const now = new Date();
+const diffMs = now.getTime() - d.getTime();
+const diffMin = Math.floor(diffMs / 60000);
+const diffHr = Math.floor(diffMs / 3600000);
+const diffDay = Math.floor(diffMs / 86400000);
+
+let dateStr: string;
+if (diffMin < 1) {
+	dateStr = "刚刚";
+} else if (diffMin < 60) {
+	dateStr = `${diffMin}分钟前`;
+} else if (diffHr < 24 && d.getDate() === now.getDate()) {
+	dateStr = `${diffHr}小时前`;
+} else if (diffDay === 1 || (diffHr >= 24 && diffHr < 48 && d.getDate() !== now.getDate())) {
+	dateStr = "昨天";
+} else if (diffDay < 7) {
+	dateStr = `${diffDay}天前`;
+} else {
+	dateStr = `${d.getMonth() + 1}月${d.getDate()}日`;
+}
 
 // Alternating accent colors
 const colors = [
@@ -37,6 +53,31 @@ const colors = [
 	{ tab: "#B8C8F0", dot: "#90a8d8" },
 ];
 const c = colors[index % colors.length];
+
+// Extract images from markdown body
+const rawBody = entry.body || "";
+const imgRegex = /!\[.*?\]\((.+?)\)/g;
+const images: string[] = [];
+let match: RegExpExecArray | null;
+while ((match = imgRegex.exec(rawBody)) !== null) {
+	images.push(match[1]);
+}
+
+// Also check frontmatter image
+if (entry.data.image && !images.includes(entry.data.image)) {
+	images.unshift(entry.data.image);
+}
+
+// Determine grid layout
+const imgCount = images.length;
+const displayImages = images.slice(0, 9);
+const overflow = imgCount > 9 ? imgCount - 9 : 0;
+
+function gridClass(count: number): string {
+	if (count === 1) return "grid-cols-1";
+	if (count === 2 || count === 4) return "grid-cols-2";
+	return "grid-cols-3";
+}
 ---
 
 <div
@@ -64,7 +105,24 @@ const c = colors[index % colors.length];
 			{showTitle && (
 				<div class="font-bold text-[17px] mb-2" style="color: #333;">{rawTitle}</div>
 			)}
-			<div class="text-[15px] leading-relaxed [&_p]:my-0 [&_p+p]:mt-2.5 [&_a]:underline [&_code]:bg-[#A0D8F1]/25 [&_code]:px-1.5 [&_code]:py-0.5 [&_code]:rounded-md [&_code]:text-xs [&_code]:text-[#5a9ab5] [&_img]:rounded-xl [&_img]:max-w-full [&_img]:mt-2 [&_img]:cursor-pointer [&_img]:talk-content-img" style="color: #555;">
+
+			{/* Image grid */}
+			{imgCount > 0 && (
+				<div class={`grid ${gridClass(displayImages.length)} gap-1.5 mb-3 rounded-xl overflow-hidden`}>
+					{displayImages.map((src, i) => (
+						<a href={src} data-fancybox={`talk-${entry.slug}`} class="block relative overflow-hidden rounded-lg bg-[#f0f0f0]" style="aspect-ratio: 1;">
+							<img src={src} alt="" loading="lazy" class="w-full h-full object-cover" />
+							{overflow > 0 && i === displayImages.length - 1 && (
+								<div class="absolute inset-0 bg-black/40 flex items-center justify-center">
+									<span class="text-white font-bold text-xl">+{overflow}</span>
+								</div>
+							)}
+						</a>
+					))}
+				</div>
+			)}
+
+			<div class="text-[15px] leading-relaxed [&_p]:my-0 [&_p+p]:mt-2.5 [&_a]:underline [&_code]:bg-[#A0D8F1]/25 [&_code]:px-1.5 [&_code]:py-0.5 [&_code]:rounded-md [&_code]:text-xs [&_code]:text-[#5a9ab5] [&_img]:hidden" style="color: #555;">
 				<Content />
 			</div>
 
