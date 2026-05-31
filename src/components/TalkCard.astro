@@ -1,0 +1,46 @@
+---
+import type { CollectionEntry } from "astro:content";
+import { profileConfig } from "@/config";
+
+interface Props {
+	entry: CollectionEntry<"posts">;
+}
+
+const { entry } = Astro.props;
+const { Content } = await entry.render();
+
+const avatarSrc = profileConfig.avatar?.startsWith("/")
+	? profileConfig.avatar
+	: `/${profileConfig.avatar}`;
+const name = profileConfig.name;
+const published = entry.data.published;
+
+// Format: "5月31日 14:30"
+const d = new Date(published);
+const dateStr = `${d.getMonth() + 1}月${d.getDate()}日 ${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`;
+---
+
+<div class="talk-card flex gap-3 px-4 py-4">
+	<!-- Avatar -->
+	<img
+		src={avatarSrc}
+		alt={name}
+		class="w-10 h-10 rounded-md flex-shrink-0 object-cover"
+		loading="lazy"
+		decoding="async"
+	/>
+
+	<!-- Content -->
+	<div class="flex-1 min-w-0">
+		<div class="flex items-baseline gap-2 mb-1.5">
+			<span class="font-bold text-sm text-[var(--primary)]">{name}</span>
+			<span class="text-xs text-black/35 dark:text-white/35">{dateStr}</span>
+		</div>
+		<div
+			class="text-sm text-black/80 dark:text-white/80 leading-relaxed
+				[&_p]:my-1 [&_a]:text-[var(--primary)] [&_a]:underline [&_img]:rounded-lg [&_img]:max-w-full [&_img]:mt-2 [&_code]:bg-black/5 [&_code]:dark:bg-white/10 [&_code]:px-1 [&_code]:rounded [&_code]:text-xs"
+		>
+			<Content />
+		</div>
+	</div>
+</div>

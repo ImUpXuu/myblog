@@ -55,6 +55,11 @@ export const navBarConfig: NavBarConfig = {
 	links: [
 		LinkPreset.Archive,
 		{
+			name: "说说",
+			url: "/talk",
+			external: false,
+		},
+		{
 			name: "更多",
 			url: "#",
 			external: false,

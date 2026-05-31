@@ -1,0 +1,50 @@
+---
+import type { GetStaticPaths } from "astro";
+import Pagination from "../components/control/Pagination.astro";
+import TalkCard from "../components/TalkCard.astro";
+import MainGridLayout from "../layouts/MainGridLayout.astro";
+import { getTalkPosts } from "../utils/talk-utils";
+
+export const getStaticPaths = (async ({ paginate }) => {
+	const talks = await getTalkPosts();
+	return paginate(talks, { pageSize: 10 });
+}) satisfies GetStaticPaths;
+
+const { page } = Astro.props;
+
+const TALK_PAGE_SIZE = 10;
+const len = page.data.length;
+---
+
+<MainGridLayout title="说说" description="UpXuu 的碎碎念">
+	<main id="swup-container" class="transition-swup-fade">
+		<div class="talk-page-header mb-6">
+			<h1 class="text-2xl font-bold text-black/90 dark:text-white/90">说说</h1>
+			<p class="text-sm text-black/50 dark:text-white/50 mt-1">一些碎碎念，记录日常点滴</p>
+		</div>
+
+		<div class="talk-list rounded-[var(--radius-large)] overflow-hidden bg-[var(--card-bg)]">
+			{
+				page.data.map((entry, i) => (
+					<div>
+						<TalkCard entry={entry} />
+						{i < page.data.length - 1 && (
+							<div class="border-b border-[var(--line-color)] mx-4 last:border-none"></div>
+						)}
+					</div>
+				))
+			}
+		</div>
+
+		{
+			page.data.length === 0 && (
+				<div class="text-center py-16 text-black/40 dark:text-white/40">
+					<p class="text-lg mb-2">还没有说说</p>
+					<p class="text-sm">先去看看其他内容吧~</p>
+				</div>
+			)
+		}
+
+		<Pagination class="mx-auto mt-8" page={page} />
+	</main>
+</MainGridLayout>
