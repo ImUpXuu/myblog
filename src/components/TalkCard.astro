@@ -15,9 +15,9 @@ const avatarSrc = profileConfig.avatar?.startsWith("/")
 const name = profileConfig.name;
 const published = entry.data.published;
 
-// Format: "5月31日 14:30"
+// Format: "5月31日"
 const d = new Date(published);
-const dateStr = `${d.getMonth() + 1}月${d.getDate()}日 ${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`;
+const dateStr = `${d.getMonth() + 1}月${d.getDate()}日`;
 ---
 
 <div class="talk-card flex gap-3 px-4 py-4">
