@@ -1,6 +1,5 @@
 /* ===== Talk Page Styles ===== */
 
-/* Paper texture background */
 .talk-bg {
   background-color: #f0f4f1;
   background-image:
@@ -10,72 +9,7 @@
   background-position: 0 0, 20px 30px;
 }
 
-/* Card paper grain texture */
-.talk-card-inner {
-  background: #fff;
-  background-image: url("data:image/svg+xml,%3Csvg width='100' height='100' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100' height='100' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
-}
-
-/* Bounce-in animation */
-@keyframes talkBounceIn {
-  0% {
-    opacity: 0;
-    transform: translateY(24px) scale(0.95);
-  }
-  60% {
-    opacity: 1;
-    transform: translateY(-4px) scale(1.01);
-  }
-  80% {
-    transform: translateY(2px) scale(0.99);
-  }
-  100% {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
-}
-
-.talk-card-enter {
-  animation: talkBounceIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) both;
-}
-
-/* Stagger card animations */
-.talk-card-enter:nth-child(1) { animation-delay: 0.05s; }
-.talk-card-enter:nth-child(2) { animation-delay: 0.1s; }
-.talk-card-enter:nth-child(3) { animation-delay: 0.15s; }
-.talk-card-enter:nth-child(4) { animation-delay: 0.2s; }
-.talk-card-enter:nth-child(5) { animation-delay: 0.25s; }
-.talk-card-enter:nth-child(6) { animation-delay: 0.3s; }
-.talk-card-enter:nth-child(7) { animation-delay: 0.35s; }
-.talk-card-enter:nth-child(8) { animation-delay: 0.4s; }
-.talk-card-enter:nth-child(9) { animation-delay: 0.45s; }
-.talk-card-enter:nth-child(10) { animation-delay: 0.5s; }
-
-/* Action buttons */
-.talk-action-btn {
-  transition: transform 0.2s ease, color 0.2s ease;
-}
-.talk-action-btn:hover {
-  transform: scale(1.15);
-}
-.talk-action-btn.like:hover {
-  color: #e74c3c;
-}
-.talk-action-btn.comment:hover {
-  color: #A0D8F1;
-}
-.talk-action-btn.share:hover {
-  color: #C3E4A4;
-}
-
 /* Image fullscreen preview */
-.talk-img {
-  cursor: pointer;
-  transition: opacity 0.3s ease, transform 0.3s ease;
-}
-.talk-img:hover {
-  transform: scale(1.02);
-}
 .talk-overlay {
   position: fixed;
   inset: 0;
@@ -84,14 +18,9 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  animation: fadeIn 0.3s ease;
 }
 .talk-overlay img {
   max-width: 95vw;
   max-height: 95vh;
   border-radius: 12px;
-}
-@keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
 }
