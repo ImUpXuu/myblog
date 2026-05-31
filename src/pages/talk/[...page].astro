@@ -1,9 +1,9 @@
 ---
 import type { GetStaticPaths } from "astro";
-import Pagination from "../components/control/Pagination.astro";
-import TalkCard from "../components/TalkCard.astro";
-import MainGridLayout from "../layouts/MainGridLayout.astro";
-import { getTalkPosts } from "../utils/talk-utils";
+import Pagination from "../../components/control/Pagination.astro";
+import TalkCard from "../../components/TalkCard.astro";
+import MainGridLayout from "../../layouts/MainGridLayout.astro";
+import { getTalkPosts } from "../../utils/talk-utils";
 
 export const getStaticPaths = (async ({ paginate }) => {
 	const talks = await getTalkPosts();
