@@ -1,8 +1,9 @@
 ---
 import type { GetStaticPaths } from "astro";
-import Pagination from "../../components/control/Pagination.astro";
+import { Icon } from "astro-icon/components";
 import TalkCard from "../../components/TalkCard.astro";
 import MainGridLayout from "../../layouts/MainGridLayout.astro";
+import { url } from "../../utils/url-utils";
 import { getTalkPosts } from "../../utils/talk-utils";
 
 export const getStaticPaths = (async ({ paginate }) => {
@@ -12,39 +13,96 @@ export const getStaticPaths = (async ({ paginate }) => {
 
 const { page } = Astro.props;
 
-const TALK_PAGE_SIZE = 10;
-const len = page.data.length;
+// Build pagination links relative to /talk/
+const TALK_BASE = "/talk";
+const getPageUrl = (p: number) => {
+	if (p === 1) return url(`${TALK_BASE}/`);
+	return url(`${TALK_BASE}/${p}/`);
+};
+
+const HIDDEN = -1;
+const ADJ_DIST = 2;
+const VISIBLE = ADJ_DIST * 2 + 1;
+
+let count = 1;
+let l = page.currentPage;
+let r = page.currentPage;
+while (0 < l - 1 && r + 1 <= page.lastPage && count + 2 <= VISIBLE) {
+	count += 2;
+	l--;
+	r++;
+}
+while (0 < l - 1 && count < VISIBLE) { count++; l--; }
+while (r + 1 <= page.lastPage && count < VISIBLE) { count++; r++; }
+
+let pages: number[] = [];
+if (l > 1) pages.push(1);
+if (l === 3) pages.push(2);
+if (l > 3) pages.push(HIDDEN);
+for (let i = l; i <= r; i++) pages.push(i);
+if (r < page.lastPage - 2) pages.push(HIDDEN);
+if (r === page.lastPage - 2) pages.push(page.lastPage - 1);
+if (r < page.lastPage) pages.push(page.lastPage);
 ---
 
 <MainGridLayout title="说说" description="UpXuu 的碎碎念">
 	<main id="swup-container" class="transition-swup-fade">
-		<div class="talk-page-header mb-6">
-			<h1 class="text-2xl font-bold text-black/90 dark:text-white/90">说说</h1>
-			<p class="text-sm text-black/50 dark:text-white/50 mt-1">一些碎碎念，记录日常点滴</p>
+		<!-- Header -->
+		<div class="mb-8 text-center">
+			<h1 class="text-3xl font-extrabold text-black/90 dark:text-white/90">
+				<span class="bg-[var(--primary)]/10 text-[var(--primary)] px-3 py-1 rounded-xl">说说</span>
+			</h1>
+			<p class="text-sm text-black/40 dark:text-white/40 mt-3">一些碎碎念，记录日常点滴</p>
 		</div>
 
-		<div class="talk-list rounded-[var(--radius-large)] overflow-hidden bg-[var(--card-bg)]">
+		<!-- Talk list -->
+		<div class="flex flex-col gap-4 max-w-2xl mx-auto">
 			{
-				page.data.map((entry, i) => (
-					<div>
-						<TalkCard entry={entry} />
-						{i < page.data.length - 1 && (
-							<div class="border-b border-[var(--line-color)] mx-4 last:border-none"></div>
-						)}
+				page.data.length === 0 ? (
+					<div class="text-center py-20 text-black/30 dark:text-white/30">
+						<div class="text-5xl mb-4">📝</div>
+						<p class="text-lg mb-1">还没有说说</p>
+						<p class="text-sm">先去看看其他内容吧~</p>
 					</div>
-				))
+				) : (
+					page.data.map((entry) => (
+						<TalkCard entry={entry} />
+					))
+				)
 			}
 		</div>
 
+		<!-- Pagination -->
 		{
-			page.data.length === 0 && (
-				<div class="text-center py-16 text-black/40 dark:text-white/40">
-					<p class="text-lg mb-2">还没有说说</p>
-					<p class="text-sm">先去看看其他内容吧~</p>
+			page.lastPage > 1 && (
+				<div class="flex flex-row gap-3 justify-center mt-10">
+					<a href={page.url.prev ? getPageUrl(page.currentPage - 1) : ""}
+					   aria-label="上一页"
+					   class:list={["btn-card overflow-hidden rounded-lg text-[var(--primary)] w-11 h-11",
+						   {"disabled": !page.url.prev}
+					   ]}
+					>
+						<Icon name="material-symbols:chevron-left-rounded" class="text-[1.75rem]"></Icon>
+					</a>
+					<div class="bg-[var(--card-bg)] flex flex-row rounded-lg items-center text-neutral-700 dark:text-neutral-300 font-bold">
+						{pages.map((p) => {
+							if (p === HIDDEN)
+								return <Icon name="material-symbols:more-horiz" class="mx-1"/>;
+							if (p === page.currentPage)
+								return <div class="h-11 w-11 rounded-lg bg-[var(--primary)] flex items-center justify-center font-bold text-white dark:text-black/70">{p}</div>;
+							return <a href={getPageUrl(p)} aria-label={`第 ${p} 页`} class="btn-card w-11 h-11 rounded-lg overflow-hidden active:scale-[0.85]">{p}</a>;
+						})}
+					</div>
+					<a href={page.url.next ? getPageUrl(page.currentPage + 1) : ""}
+					   aria-label="下一页"
+					   class:list={["btn-card overflow-hidden rounded-lg text-[var(--primary)] w-11 h-11",
+						   {"disabled": !page.url.next}
+					   ]}
+					>
+						<Icon name="material-symbols:chevron-right-rounded" class="text-[1.75rem]"></Icon>
+					</a>
 				</div>
 			)
 		}
-
-		<Pagination class="mx-auto mt-8" page={page} />
 	</main>
 </MainGridLayout>

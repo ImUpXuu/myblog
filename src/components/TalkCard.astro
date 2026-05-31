@@ -15,35 +15,47 @@ const avatarSrc = profileConfig.avatar?.startsWith("/")
 const name = profileConfig.name;
 const published = entry.data.published;
 
-// Format: "5月31日" or "5月31日 14:30" if has time
+// Format: "5月31日" or "5月31日 14:30"
 const d = new Date(published);
 const hasTime = d.getHours() !== 0 || d.getMinutes() !== 0 || d.getSeconds() !== 0;
 const dateStr = hasTime
 	? `${d.getMonth() + 1}月${d.getDate()}日 ${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`
 	: `${d.getMonth() + 1}月${d.getDate()}日`;
+
+// Weekday label
+const weekdays = ["日", "一", "二", "三", "四", "五", "六"];
+const weekdayStr = `周${weekdays[d.getDay()]}`;
 ---
 
-<div class="talk-card flex gap-3 px-4 py-4">
-	<!-- Avatar -->
-	<img
-		src={avatarSrc}
-		alt={name}
-		class="w-10 h-10 rounded-md flex-shrink-0 object-cover"
-		loading="lazy"
-		decoding="async"
-	/>
+<div class="talk-card bg-[var(--card-bg)] rounded-2xl p-5 shadow-sm border border-[var(--line-color)] hover:shadow-md transition-shadow">
+	<!-- Header: avatar + name + time -->
+	<div class="flex items-center gap-3 mb-4">
+		<img
+			src={avatarSrc}
+			alt={name}
+			class="w-11 h-11 rounded-xl flex-shrink-0 object-cover ring-2 ring-[var(--primary)]/20"
+			loading="lazy"
+			decoding="async"
+		/>
+		<div class="flex-1 min-w-0">
+			<div class="flex items-baseline gap-2">
+				<span class="font-bold text-[15px] text-[var(--primary)]">{name}</span>
+				<span class="text-xs text-black/30 dark:text-white/30">{weekdayStr}</span>
+			</div>
+			<span class="text-xs text-black/40 dark:text-white/40">{dateStr}</span>
+		</div>
+		<!-- Left accent dot -->
+		<div class="w-2 h-2 rounded-full bg-[var(--primary)]/40 flex-shrink-0"></div>
+	</div>
 
 	<!-- Content -->
-	<div class="flex-1 min-w-0">
-		<div class="flex items-baseline gap-2 mb-1.5">
-			<span class="font-bold text-sm text-[var(--primary)]">{name}</span>
-			<span class="text-xs text-black/35 dark:text-white/35">{dateStr}</span>
-		</div>
-		<div
-			class="text-sm text-black/80 dark:text-white/80 leading-relaxed
-				[&_p]:my-1 [&_a]:text-[var(--primary)] [&_a]:underline [&_img]:rounded-lg [&_img]:max-w-full [&_img]:mt-2 [&_code]:bg-black/5 [&_code]:dark:bg-white/10 [&_code]:px-1 [&_code]:rounded [&_code]:text-xs"
-		>
-			<Content />
-		</div>
+	<div
+		class="text-[15px] text-black/80 dark:text-white/80 leading-relaxed pl-[52px]
+			[&_p]:my-0 [&_p+p]:mt-2
+			[&_a]:text-[var(--primary)] [&_a]:underline [&_a]:decoration-dashed
+			[&_img]:rounded-xl [&_img]:max-w-full [&_img]:mt-3
+			[&_code]:bg-[var(--primary)]/8 [&_code]:dark:bg-[var(--primary)]/15 [&_code]:px-1.5 [&_code]:py-0.5 [&_code]:rounded-md [&_code]:text-xs [&_code]:text-[var(--primary)]"
+	>
+		<Content />
 	</div>
 </div>
