@@ -18,7 +18,7 @@ function stripInvalidXmlChars(str: string): string {
 export async function GET(context: APIContext) {
 	const talks = await getTalkPosts();
 
-	return rss({
+	const response = await rss({
 		title: `${siteConfig.title} - 说说`,
 		description: "UpXuu 的碎碎念",
 		site: context.site ?? "https://upxuu.com",
@@ -37,4 +37,6 @@ export async function GET(context: APIContext) {
 		}),
 		customData: `<language>${siteConfig.lang}</language>`,
 	});
+	response.headers.set("Access-Control-Allow-Origin", "*");
+	return response;
 }

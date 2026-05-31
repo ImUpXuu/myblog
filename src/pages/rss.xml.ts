@@ -53,11 +53,13 @@ export async function GET(context: APIContext) {
 		(a, b) => new Date(b.pubDate).getTime() - new Date(a.pubDate).getTime(),
 	);
 
-	return rss({
+	const response = await rss({
 		title: siteConfig.title,
 		description: siteConfig.subtitle || "No description",
 		site: context.site ?? "https://fuwari.vercel.app",
 		items: allItems,
 		customData: `<language>${siteConfig.lang}</language>`,
 	});
+	response.headers.set("Access-Control-Allow-Origin", "*");
+	return response;
 }
