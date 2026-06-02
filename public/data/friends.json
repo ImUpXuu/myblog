@@ -325,5 +325,11 @@
     "url": "https://www.imcry.vip",
     "avatar": "https://www.imcry.vip/img/avatar.png",
     "description": "初心如初见，然忆似流年"
+  },
+  {
+    "name": "AJie's Blog",
+    "url": "https://www.promptnet.cn/",
+    "avatar": "https://www.google.com/s2/favicons?domain=www.promptnet.cn&sz=128",
+    "description": "记录 AI 学习与探索之旅"
   }
 ]
