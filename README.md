@@ -1,5 +1,5 @@
-# 🍥 UpXuu's Blog
-
+# 🍥 UpXuu's Blog-OLD
+请注意 本仓库现已废弃 博客已迁移至https://github.com/ImUpXuu/xuhome 友链申请请移步新仓库issues 谢谢🙏
 这是基于 [Fuwari](https://github.com/saicaca/fuwari) 模板构建的个人博客，由 UpXuu 维护和定制。
 
 [**🖥️ 访问我的博客**](https://upxuu.com)
